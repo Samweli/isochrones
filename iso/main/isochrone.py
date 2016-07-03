@@ -21,11 +21,10 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon
+from PyQt4.QtGui import QAction, QIcon, QDialog
 # Initialize Qt resources from file resources.py
-import resources
 # Import the code for the dialog
-from isochrone_dialog import isochronesDialog
+from iso.gui.tools.isochrone_dialog import isochronesDialog
 import os.path
 
 
@@ -82,7 +81,6 @@ class isochrones:
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('isochrones', message)
-
 
     def add_action(
         self,
@@ -167,7 +165,6 @@ class isochrones:
             callback=self.run,
             parent=self.iface.mainWindow())
 
-
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -177,7 +174,6 @@ class isochrones:
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
-
 
     def run(self):
         """Run method that performs all the real work"""
@@ -190,3 +186,53 @@ class isochrones:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             pass
+
+    def isochrone(
+            self,
+            input_network_file,
+            input_catchment_file,
+            progress_dialog=None):
+
+        """Contains main logic on creating isochrone map
+        :param input_network_file: Input network file
+        :type input_network_file: str
+
+        :param input_catchment_file: Input Catchment file.
+        :type input_catchment_file: str
+
+        :param progress_dialog: A progess dialog .
+        :type progress_dialog: QProgressDialog
+
+        :returns temp_output_directory: temporary path of the map
+        :rtype temp_output_directory:str
+        """
+        if progress_dialog:
+            progress_dialog.show()
+
+        # Import files into database, have tables
+
+        # Create nodes from network
+
+        # Create routable network
+
+        # Find nearest nodes from the catchments
+
+        # Calculate drivetime for the nearest nodes
+
+        # Export table as shapefile
+
+        # Run interpolation on the final file (currently use IDW)
+
+        # Calculate contours
+
+        # Style the tin , contour and network
+
+        # Load tin, contour and network as one qgis doc
+
+        temp_output_directory = ''
+
+        if progress_dialog:
+            progress_dialog.done(QDialog.Accepted)
+
+        return temp_output_directory
+

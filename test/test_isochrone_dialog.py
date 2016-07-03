@@ -16,8 +16,7 @@ import unittest
 
 from PyQt4.QtGui import QDialogButtonBox, QDialog
 
-from isochrone_dialog import isochronesDialog
-
+from iso.gui.tools.isochrone_dialog import isochronesDialog
 from utilities import get_qgis_app
 QGIS_APP = get_qgis_app()
 
