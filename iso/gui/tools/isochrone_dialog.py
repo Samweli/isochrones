@@ -25,13 +25,15 @@ import os
 
 from PyQt4 import uic
 
+from qgis.core import QGis
+
 # noinspection PyPackageRequirements
 from PyQt4 import QtGui
 # noinspection PyPackageRequirements
-from PyQt4.QtCore import QSettings, pyqtSignature
+from PyQt4.QtCore import QSettings, pyqtSignature, QFileInfo
 # noinspection PyPackageRequirements
 from PyQt4.QtGui import (
-    QDialog, QFileDialog)
+    QDialog, QFileDialog, QProgressDialog)
 from iso.common.exceptions import (
     ImportDialogError,
     FileMissingError)
@@ -46,15 +48,28 @@ FORM_CLASS = get_ui_class('isochrone_dialog_base.ui')
 
 
 class isochronesDialog(QtGui.QDialog, FORM_CLASS):
-    def __init__(self, parent=None):
+
+    def __init__(self, parent=None, iface=None):
         """Constructor."""
-        super(isochronesDialog, self).__init__(parent)
+        QDialog.__init__(self, parent)
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
         # self.<objectname>, and you can use autoconnect slots - see
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
+        self.parent = parent
+        self.iface = iface
+
         self.setupUi(self)
+
+        # Setting up progress window
+
+        self.progress_dialog = QProgressDialog(self)
+        self.progress_dialog.setAutoClose(False)
+        title = self.tr('Isochrone')
+        self.progress_dialog.setWindowTitle(title)
+
+        self.canvas = iface.mapCanvas()
 
     @pyqtSignature('')  # prevents actions being handled twice
     def on_network_button_clicked(self):
@@ -94,7 +109,6 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
                         exception.message)
 
             self.done(QDialog.Accepted)
-            self.rectangle_map_tool.reset()
 
         except ImportDialogError as exception:
             display_warning_message_box(
@@ -149,9 +163,45 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
 
     def reject(self):
         """Redefinition of the reject() method
-        to remove the rectangle selection tool.
-        It will call the super method.
         """
         super(isochronesDialog, self).reject()
+
+    def load_isochrone_map(self, base_path):
+        """Load the isochrone map in the qgis
+
+        :param base_path: Output path where layers are
+        :type base_path:str
+        """
+
+        if not os.path.exists(base_path):
+            message = self.tr("Error, failed to load the isochrone map")
+            raise FileMissingError(message)
+        else:
+            for layer in os.listdir(base_path):
+                layer_name = QFileInfo(layer).baseName
+
+                if file.endswith(".asc"):
+                    self.iface.addRasterLayer(file, layer_name)
+                    continue
+                elif file.endswith(".shp"):
+                    self.iface.addVectorLayer(file, layer_name, 'ogr')
+                    continue
+                else:
+                    continue
+        canvas_srid = self.canvas.mapRenderer().destinationCrs().srsid()
+        on_the_fly_projection = self.canvas.hasCrsTransformEnabled()
+        if canvas_srid != 4326 and not on_the_fly_projection:
+            if QGis.QGIS_VERSION_INT >= 20400:
+                self.canvas.setCrsTransformEnabled(True)
+            else:
+                display_warning_message_box(
+                    self.iface,
+                    self.tr('Enable \'on the fly\''),
+                    self.tr(
+                        'Your current projection is different than EPSG:4326. '
+                        'You should enable \'on the fly\' to display '
+                        'correctly the isochrone map')
+                    )
+
 
 

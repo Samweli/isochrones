@@ -71,3 +71,26 @@ def isochrone(
             progress_dialog.done(QDialog.Accepted)
 
         return temp_output_directory
+
+
+def resources_path(*args):
+    """Get the path to our resources folder.
+
+    .. versionadded:: 3.0
+
+    Note that in version 3.0 we removed the use of Qt Resource files in
+    favour of directly accessing on-disk resources.
+
+    :param args List of path elements e.g. ['img', 'logos', 'image.png']
+    :type args: list
+
+    :return: Absolute path to the resources folder.
+    :rtype: str
+    """
+    path = os.path.dirname(__file__)
+    path = os.path.abspath(
+        os.path.join(path, os.path.pardir, os.path.pardir, 'resources'))
+    for item in args:
+        path = os.path.abspath(os.path.join(path, item))
+
+    return path

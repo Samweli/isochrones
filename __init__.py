@@ -21,7 +21,18 @@
  ***************************************************************************/
  This script initializes the plugin, making it known to QGIS.
 """
+import os
 import sys
+
+sys.path.append(os.path.dirname(__file__))
+
+sys.path.extend([os.path.abspath(os.path.join(
+    os.path.dirname(__file__), os.path.pardir))])
+
+UTILITY_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), 'iso', 'utilities'))
+if UTILITY_DIR not in sys.path:
+    sys.path.append(UTILITY_DIR)
 
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
@@ -32,7 +43,7 @@ def classFactory(iface):  # pylint: disable=invalid-name
     """
     #
     from iso.main.isochrone import isochrones
-    sys.path.append('/home/samweli/Setups/pycharm-5.0.1/debug-eggs/pycharm-debug.egg')
-    import pydevd
-    pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+    # sys.path.append('/home/samweli/Setups/pycharm-5.0.1/debug-eggs/pycharm-debug.egg')
+    # import pydevd
+    # pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
     return isochrones(iface)

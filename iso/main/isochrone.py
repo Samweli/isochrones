@@ -24,10 +24,12 @@
 
 
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon, QDialog
+from PyQt4.QtGui import QAction, QIcon
 # Initialize Qt resources from file resources.py
 # Import the code for the dialog
 from iso.gui.tools.isochrone_dialog import isochronesDialog
+from iso.utilities.isochrone_utilities import (
+    resources_path)
 import os.path
 
 class isochrones:
@@ -60,7 +62,7 @@ class isochrones:
                 QCoreApplication.installTranslator(self.translator)
 
         # Create the dialog (after translation) and keep reference
-        self.dlg = isochronesDialog()
+        self.dlg = isochronesDialog(self.iface.mainWindow(), self.iface)
 
         # Declare instance attributes
         self.actions = []
@@ -160,12 +162,15 @@ class isochrones:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/isochrones/icon.png'
+        # icon_path = ':/plugins/isochrones/icon.png'
+        icon_path = resources_path('img', 'examples', 'icon.png')
         self.add_action(
             icon_path,
-            text=self.tr(u'Create'),
+            text=self.tr(u'Create isochrone map'),
             callback=self.run,
-            parent=self.iface.mainWindow())
+            parent=self.iface.mainWindow(),
+            status_tip="Create isochrone map",
+            whats_this="Create isochrone map")
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
