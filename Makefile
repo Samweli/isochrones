@@ -38,15 +38,15 @@ LOCALES =
 # translation
 SOURCES = \
 	__init__.py \
-	isochrone.py isochrone_dialog.py
+	iso/main/isochrone.py iso/gui/tools/isochrone_dialog.py
 
 PLUGINNAME = isochrones
 
 PY_FILES = \
 	__init__.py \
-	isochrone.py isochrone_dialog.py
+	iso/main/isochrone.py iso/gui/tools/isochrone_dialog.py
 
-UI_FILES = isochrone_dialog_base.ui
+UI_FILES = iso/gui/ui/isochrone_dialog_base.ui
 
 EXTRAS = metadata.txt icon.png
 
