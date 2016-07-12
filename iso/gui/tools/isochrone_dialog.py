@@ -119,8 +119,6 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
             display_warning_message_box(
                 self, error_dialog_title, exception.message)
 
-            self.progress_dialog.cancel()
-
         finally:
             dialog_title = self.tr("Success")
 
