@@ -71,33 +71,29 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
 
         self.canvas = iface.mapCanvas()
 
-    @pyqtSignature('')  # prevents actions being handled twice
-    def on_network_button_clicked(self):
-        """Show a dialog to choose directory."""
-        # noinspection PyCallByClass,PyTypeChecker
-        self.input_network_file.setText(QFileDialog.getOpenFileName(
-            self, self.tr('Select network file')))
-
-    @pyqtSignature('')  # prevents actions being handled twice
-    def on_catchment_button_clicked(self):
-        """Show a dialog to choose directory."""
-        # noinspection PyCallByClass,PyTypeChecker
-        self.input_catchment_file.setText(QFileDialog.getOpenFileName(
-            self, self.tr('Select catchment file')))
-
     def accept(self):
         """Create an isochrone map and display it in QGIS."""
         error_dialog_title = self.tr("Error")
         try:
             self.save_state()
-            self.require_input_files()
+            self.require_input()
 
-            input_network_file = self.input_network_file.text()
-            input_catchment_file = self.input_catchment_file.text()
+            database_name = self.database.text()
+            host_name = self.host.text()
+            port_number = self.port.text()
+            user_name = self.user_name.text()
+            password = self.password.text()
+            network_table = self.network_table.text()
+            catchment_table = self.catchment_table.text()
 
             output_base_file_path = isochrone(
-                input_network_file,
-                input_catchment_file,
+                database_name,
+                host_name,
+                port_number,
+                user_name,
+                password,
+                network_table,
+                catchment_table,
                 self.progress_dialog)
             try:
                 self.load_isochrone_map(output_base_file_path)
@@ -116,28 +112,33 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
             pass
         except Exception as exception:  # pylint: disable=broad-except
             # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
-            display_warning_message_box(
-                self, error_dialog_title, exception.message)
-
+            pass
         finally:
             dialog_title = self.tr("Success")
 
-    def require_input_files(self):
+    def require_input(self):
         """Ensure input files are entered in dialog exist.
 
         :raises: ImportDialogError - when one or all
         of the input files are empty
         """
-        network_path = self.input_network_file.text()
-        catchment_path = self.input_catchment_file.text()
+        database_name = self.database.text()
+        host_name = self.host.text()
+        port_number = self.port.text()
+        user_name = self.user_name.text()
+        password = self.password.text()
+        network_table = self.network_table.text()
+        catchment_table = self.catchment_table.text()
 
-        if os.path.exists(network_path) and os.path.exists(catchment_path):
+        if database_name and host_name and port_number and \
+                user_name and password and network_table and \
+                catchment_table:
             return
 
         display_warning_message_box(
                     self,
                     self.tr('Error'),
-                    self.tr('Input files can not be empty.'))
+                    self.tr('Input cannot be empty.'))
 
         raise ImportDialogError()
 
@@ -145,19 +146,37 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
         """ Read last state of GUI from configuration file."""
         settings = QSettings()
         try:
-            network_last_path = settings.value('network_file', type=str)
-            catchment_last_path = settings.value('catchment_file', type=str)
+            database_name = settings.value('database', type=str)
+            host_name = settings.value('host', type=str)
+            port_number = settings.value('port', type=str)
+            user_name = settings.value('user_name', type=str)
+            network_table = settings.value('network_table', type=str)
+            catchment_table = settings.value('catchment_table', type=str)
         except TypeError:
-            network_last_path = ''
-            catchment_last_path = ''
-        self.input_network_file.setText(network_last_path)
-        self.input_catchment_file.setText(catchment_last_path)
+            database_name = ''
+            host_name = ''
+            port_number = ''
+            user_name = ''
+            network_table = ''
+            catchment_table = ''
+
+        self.database.setText(database_name)
+        self.host.setText(host_name)
+        self.port.setText(port_number)
+        self.user_name.setText(user_name)
+        self.network_table.setText(network_table)
+        self.catchment_table.setText(catchment_table)
 
     def save_state(self):
         """ Store current state of GUI to configuration file """
         settings = QSettings()
-        settings.setValue('network_file', self.input_network_file.text())
-        settings.setValue('catchment_file', self.input_catchment_file.text())
+
+        settings.setValue('database', self.database.text())
+        settings.setValue('host', self.host.text())
+        settings.setValue('port', self.port.text())
+        settings.setValue('user_name', self.user_name.text())
+        settings.setValue('network_table', self.network_table.text())
+        settings.setValue('catchment_table', self.catchment_table.text())
 
     def reject(self):
         """Redefinition of the reject() method

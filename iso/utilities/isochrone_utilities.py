@@ -40,16 +40,36 @@ from PyQt4.QtGui import (
 
 
 def isochrone(
-            input_network_file,
-            input_catchment_file,
-            progress_dialog=None):
+        database_name,
+        host_name,
+        port_number,
+        user_name,
+        password,
+        network_table,
+        catchment_table,
+        progress_dialog=None):
 
         """Contains main logic on creating isochrone map
-        :param input_network_file: Input network file
-        :type input_network_file: str
+        :param database_name: Database name
+        :type database_name: str
 
-        :param input_catchment_file: Input Catchment file.
-        :type input_catchment_file: str
+        :param host_name: Database host
+        :type host_name: str
+
+        :param port_number: Port number for the host
+        :type port_number: str
+
+        :param user_name: Username for connection with database
+        :type user_name: str
+
+        :param password: Password
+        :type password: str
+
+        :param network_table: Table containing the network.
+        :type network_table: str
+
+        :param catchment_table: Table containing catchment areas.
+        :type catchment_table: str
 
         :param progress_dialog: A progess dialog .
         :type progress_dialog: QProgressDialog
@@ -57,18 +77,16 @@ def isochrone(
         :returns temp_output_directory: temporary path of the map
         :rtype temp_output_directory:str
         """
-        if progress_dialog:
-            progress_dialog.show()
 
         # Import files into database, have tables
         # connect to database
         # add the files get the tables name
 
         connection = psycopg2.connect(
-            "dbname='roads' "
-            "user='test' "
-            "host='localhost' "
-            "password='test'")
+            "dbname='" + str(database_name) + "' "
+            "user='" + str(user_name) + "' "
+            "host='" + str(host_name) + "' "
+            "password='" + str(password) + "' ")
 
         curr = connection.cursor()
 
@@ -82,10 +100,9 @@ def isochrone(
             progress_dialog.setMinimum(0)
             progress_dialog.setMaximum(100)
 
-            progress_dialog.setValue(0)
-
             label_text = tr("Creating network nodes table")
             progress_dialog.setLabelText(label_text)
+            progress_dialog.setValue(0)
 
         curr.execute(
             """CREATE OR REPLACE VIEW ext AS
@@ -107,9 +124,9 @@ def isochrone(
         connection.commit()
 
         # Create routable network
-        progress_dialog.setValue(10)
         label_text = tr("Creating a routable network table")
         progress_dialog.setLabelText(label_text)
+        progress_dialog.setValue(10)
 
         curr.execute(
             """CREATE TABLE IF NOT EXISTS network AS
@@ -249,7 +266,12 @@ def isochrone(
 
         uri = QgsDataSourceURI()
         # set host name, port, database name, username and password
-        uri.setConnection("localhost", "5432", "roads", "test", "test")
+        uri.setConnection(
+            host_name,
+            port_number,
+            database_name,
+            user_name,
+            password)
         # set database schema, table name, geometry column and optionally
         # subset (WHERE clause)
         uri.setDataSource("public", "catchment_final", "the_geom")
