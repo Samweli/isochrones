@@ -26,14 +26,20 @@ import processing
 
 from iso.utilities.i18n import tr
 
-from qgis.core import QgsDataSourceURI, QgsVectorLayer, QgsRasterLayer
+
+from qgis.core import (
+    QgsDataSourceURI,
+    QgsVectorLayer,
+    QgsRasterLayer,
+    QgsMapLayerRegistry)
+
+from qgis.utils import iface
 
 from PyQt4.QtGui import (
     QDialog, QFileDialog, QProgressDialog)
 
 
 def isochrone(
-            self,
             input_network_file,
             input_catchment_file,
             progress_dialog=None):
@@ -88,7 +94,7 @@ def isochrone(
         connection.commit()
 
         curr.execute(
-            """CREATE TABLE nodes AS
+            """CREATE TABLE IF NOT EXISTS nodes AS
                SELECT row_number() OVER (ORDER BY foo.p)::integer AS id,
                foo.p AS the_geom
                FROM (
@@ -106,7 +112,7 @@ def isochrone(
         progress_dialog.setLabelText(label_text)
 
         curr.execute(
-            """CREATE TABLE network AS
+            """CREATE TABLE IF NOT EXISTS network AS
                SELECT a.*, b.id as start_id, c.id as end_id FROM ext
                AS a
                JOIN nodes AS b ON a.pgr_startpoint = b.the_geom JOIN nodes AS c
@@ -119,29 +125,36 @@ def isochrone(
         label_text = tr("Preparing the catchment table")
         progress_dialog.setLabelText(label_text)
 
-        curr.execute(""" ALTER TABLE facilities
-               ADD COLUMN the_nearest_node integer;
-
-            CREATE TABLE temp AS
-               SELECT a.gid, b.id, min(a.dist)
-
-               FROM
-                 (SELECT facilities.id as gid,
-                         min(st_distance(facilities.geom, nodes.the_geom))
-                          AS dist
-                  FROM facilities, nodes
-                  GROUP BY facilities.id) AS a,
-                 (SELECT facilities.id as gid, nodes.id,
-                         st_distance(facilities.geom, nodes.the_geom) AS dist
-                  FROM facilities, nodes) AS b
-               WHERE a.dist = b. dist
-                     AND a.gid = b.gid
-               GROUP BY a.gid, b.id
-                UPDATE  SET the_nearest_node = (SELECT id FROM temp
-                WHERE temp.gid = facilities.id) """
-             )
-
-        connection.commit()
+        # curr.execute(
+        #    """ALTER TABLE facilities
+        #        ADD COLUMN the_nearest_node integer;
+        #
+        #       CREATE TABLE temp AS
+        #        SELECT a.gid, b.id, min(a.dist)
+        #
+        #        FROM
+        #          (SELECT facilities.id as gid,
+        #                  min(st_distance(facilities.geom, nodes.the_geom))
+        #                   AS dist
+        #           FROM facilities, nodes
+        #           GROUP BY facilities.id) AS a,
+        #          (SELECT facilities.id as gid, nodes.id,
+        #                  st_distance(facilities.geom, nodes.the_geom) AS dist
+        #           FROM facilities, nodes) AS b
+        #        WHERE a.dist = b. dist
+        #              AND a.gid = b.gid
+        #        GROUP BY a.gid, b.id; """
+        #      )
+        # connection.commit()
+        #
+        # curr.execute(
+        #     """UPDATE facilities
+        #     SET the_nearest_node =
+        #     (SELECT id
+        #     FROM temp
+        #     WHERE temp.gid = facilities.id);""")
+        #
+        # connection.commit()
 
         # Calculate drivetime for the nearest nodes
 
@@ -149,7 +162,7 @@ def isochrone(
         label_text = tr("Calculating drivetime for each catchment area")
         progress_dialog.setLabelText(label_text)
 
-        curr.execute("""SELECT nearest_node from facilities""")
+        curr.execute("""SELECT the_nearest_node from facilities""")
         rows = curr.fetchall()
 
         index = 0
@@ -161,24 +174,26 @@ def isochrone(
 
             percentage = ((index + 1) / len(rows)) * 45
             percentage = round(percentage, 0)
+            catchment_id = row[0]
             if index == 0:
                 curr.execute(
-                    """ CREATE TABLE catchment AS
+                    """ CREATE TABLE
+                        IF NOT EXISTS catchment AS
                     SELECT
                     id,
                     the_geom,
                     (SELECT sum(cost) FROM (
-                       SELECT * FROM shortest_path('
-                       SELECT gid AS id,
+                       SELECT * FROM pgr_dijkstra('
+                       SELECT id_0 AS id,
                           start_id::int4 AS source,
                           end_id::int4 AS target,
                           cost::float8 AS cost
                        FROM network',
-                       '(%s)',
+                       '%s',
                        id,
                        false,
                        false)) AS foo ) AS cost
-                    FROM nodes;""", (row,)
+                    FROM nodes;""", (catchment_id,)
                  )
             else:
                 curr.execute(
@@ -187,17 +202,17 @@ def isochrone(
                         id,
                         the_geom,
                         (SELECT sum(cost) FROM (
-                           SELECT * FROM shortest_path('
-                           SELECT gid AS id,
+                           SELECT * FROM pgr_dijkstra('
+                           SELECT id_0 AS id,
                               start_id::int4 AS source,
                               end_id::int4 AS target,
                               cost::float8 AS cost
                            FROM network',
-                           '(%s)',
+                           '%s',
                            id,
                            false,
                            false)) AS foo ) AS cost
-                    FROM nodes);""", (row,)
+                    FROM nodes);""", (catchment_id,)
 
                 )
 
@@ -205,9 +220,12 @@ def isochrone(
             connection.commit()
             progress_percentage += percentage
             progress_dialog.setValue(progress_percentage)
+
             label_text = tr(
-                "%s catchment area(s) out of %s is(are) done",
-                (index,len(rows),))
+                str(index) +
+                " catchment area(s) out of " +
+                str(len(rows)) +
+                " is(are) done")
             progress_dialog.setLabelText(label_text)
 
         label_text = tr("Preparing all the catchment areas table")
@@ -235,11 +253,14 @@ def isochrone(
         # set database schema, table name, geometry column and optionally
         # subset (WHERE clause)
         uri.setDataSource("public", "catchment_final", "the_geom")
-        vlayer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
+
+        layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
+
+        QgsMapLayerRegistry.instance().addMapLayers([layer])
 
         # Run interpolation on the final file (currently use IDW)
 
-        extent = vlayer.extent()
+        extent = layer.extent()
         xmin = extent[0]
         xmax = extent[1]
         ymin = extent[2]
@@ -249,7 +270,7 @@ def isochrone(
 
         output_raster = processing.runalg(
             "grass:v.surf.idw",
-            vlayer,
+            layer,
             12,
             2,
             "cost" ,
@@ -258,7 +279,7 @@ def isochrone(
             0.5,
             -1,
             0.001,
-            raster_file )
+            raster_file)
 
         # Calculate contours
 

@@ -66,7 +66,7 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
 
         self.progress_dialog = QProgressDialog(self)
         self.progress_dialog.setAutoClose(False)
-        title = self.tr('Isochrone')
+        title = self.tr('Progress')
         self.progress_dialog.setWindowTitle(title)
 
         self.canvas = iface.mapCanvas()
