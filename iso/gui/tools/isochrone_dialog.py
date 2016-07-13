@@ -86,6 +86,11 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
             network_table = self.network_table.text()
             catchment_table = self.catchment_table.text()
 
+            if self.style.isChecked():
+                style_checked = True
+            else:
+                style_checked = False
+
             output_base_file_path = isochrone(
                 database_name,
                 host_name,
@@ -94,6 +99,7 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
                 password,
                 network_table,
                 catchment_table,
+                style_checked,
                 self.progress_dialog)
             try:
                 self.load_isochrone_map(output_base_file_path)

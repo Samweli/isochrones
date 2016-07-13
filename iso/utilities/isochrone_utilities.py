@@ -47,6 +47,7 @@ def isochrone(
         password,
         network_table,
         catchment_table,
+        style_checked,
         progress_dialog=None):
 
         """Contains main logic on creating isochrone map
@@ -107,7 +108,7 @@ def isochrone(
         curr.execute(
             """CREATE OR REPLACE VIEW ext AS
                 SELECT *, pgr_startpoint(geom), pgr_endpoint(geom)
-                FROM dar""")
+                FROM %s""", (network_table,))
         connection.commit()
 
         curr.execute(
@@ -142,36 +143,36 @@ def isochrone(
         label_text = tr("Preparing the catchment table")
         progress_dialog.setLabelText(label_text)
 
-        # curr.execute(
-        #    """ALTER TABLE facilities
-        #        ADD COLUMN the_nearest_node integer;
-        #
-        #       CREATE TABLE temp AS
-        #        SELECT a.gid, b.id, min(a.dist)
-        #
-        #        FROM
-        #          (SELECT facilities.id as gid,
-        #                  min(st_distance(facilities.geom, nodes.the_geom))
-        #                   AS dist
-        #           FROM facilities, nodes
-        #           GROUP BY facilities.id) AS a,
-        #          (SELECT facilities.id as gid, nodes.id,
-        #                  st_distance(facilities.geom, nodes.the_geom) AS dist
-        #           FROM facilities, nodes) AS b
-        #        WHERE a.dist = b. dist
-        #              AND a.gid = b.gid
-        #        GROUP BY a.gid, b.id; """
-        #      )
-        # connection.commit()
-        #
-        # curr.execute(
-        #     """UPDATE facilities
-        #     SET the_nearest_node =
-        #     (SELECT id
-        #     FROM temp
-        #     WHERE temp.gid = facilities.id);""")
-        #
-        # connection.commit()
+        curr.execute(
+           """ALTER TABLE '%s'
+               ADD COLUMN the_nearest_node integer;
+
+              CREATE TABLE temp AS
+               SELECT a.gid, b.id, min(a.dist)
+
+               FROM
+                 (SELECT '%s'.id as gid,
+                         min(st_distance(facilities.geom, nodes.the_geom))
+                          AS dist
+                  FROM '%s', nodes
+                  GROUP BY '%s'.id) AS a,
+                 (SELECT '%s'.id as gid, nodes.id,
+                         st_distance(facilities.geom, nodes.the_geom) AS dist
+                  FROM '%s', nodes) AS b
+               WHERE a.dist = b. dist
+                     AND a.gid = b.gid
+               GROUP BY a.gid, b.id; """,(catchment_table,)
+             )
+        connection.commit()
+
+        curr.execute(
+            """UPDATE '%s'
+            SET the_nearest_node =
+            (SELECT id
+            FROM temp
+            WHERE temp.gid = facilities.id);""",(catchment_table,))
+
+        connection.commit()
 
         # Calculate drivetime for the nearest nodes
 
@@ -179,7 +180,7 @@ def isochrone(
         label_text = tr("Calculating drivetime for each catchment area")
         progress_dialog.setLabelText(label_text)
 
-        curr.execute("""SELECT the_nearest_node from facilities""")
+        curr.execute("""SELECT the_nearest_node from '%s'""",(catchment_table,))
         rows = curr.fetchall()
 
         index = 0
@@ -258,11 +259,14 @@ def isochrone(
 
         connection.commit()
 
-        # Export table as shapefile
-        progress_percentage += 1
-        progress_dialog.setValue(progress_percentage)
-        label_text = tr("Exporting and preparing isochrone map")
-        progress_dialog.setLabelText(label_text)
+        curr.execute(
+            """ CREATE table catchment_final_no_null AS
+                SELECT * FROM catchment_final WHERE cost
+                IS NOT NULL
+            """
+               )
+
+        connection.commit()
 
         uri = QgsDataSourceURI()
         # set host name, port, database name, username and password
@@ -274,46 +278,58 @@ def isochrone(
             password)
         # set database schema, table name, geometry column and optionally
         # subset (WHERE clause)
-        uri.setDataSource("public", "catchment_final", "the_geom")
+        uri.setDataSource("public", "catchment_final_no_null", "the_geom")
 
         layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
 
         QgsMapLayerRegistry.instance().addMapLayers([layer])
 
-        # Run interpolation on the final file (currently use IDW)
+        if style_checked:
+            # Export table as shapefile
 
-        extent = layer.extent()
-        xmin = extent[0]
-        xmax = extent[1]
-        ymin = extent[2]
-        ymax = extent[3]
+            progress_percentage += 1
+            progress_dialog.setValue(progress_percentage)
+            label_text = tr("Exporting and preparing isochrone map")
+            progress_dialog.setLabelText(label_text)
 
-        raster_file = QgsRasterLayer('/tmp/isochrones/raster.asc')
+            # Run interpolation on the final file (currently use IDW)
 
-        output_raster = processing.runalg(
-            "grass:v.surf.idw",
-            layer,
-            12,
-            2,
-            "cost" ,
-            False,
-            "%f , %f, %f, %f "% (xmin, xmax, ymin, ymax),
-            0.5,
-            -1,
-            0.001,
-            raster_file)
+            extent = layer.extent()
+            xmin = extent[0]
+            xmax = extent[1]
+            ymin = extent[2]
+            ymax = extent[3]
 
-        # Calculate contours
+            raster_file = QgsRasterLayer()
 
-        # Style the tin , contour and network
+            output_raster = processing.runalg(
+                "grass:v.surf.idw",
+                layer,
+                12,
+                2,
+                "cost",
+                False,
+                "%f , %f, %f, %f "% (xmin, xmax, ymin, ymax),
+                0.5,
+                -1,
+                0.001,
+                raster_file)
 
-        # Load tin, contour and network as one qgis doc
+            QgsMapLayerRegistry.instance().addMapLayers([raster_file])
 
-        progress_percentage += 4
-        progress_dialog.setValue(progress_percentage)
-        label_text = tr("Done loading isochrone map")
+            # Calculate contours
 
-        progress_dialog.setLabelText(label_text)
+            # Style the tin , contour and network
+
+            # Load tin, contour and network as one qgis doc
+
+            progress_percentage += 4
+            progress_dialog.setValue(progress_percentage)
+            label_text = tr("Done loading isochrone map")
+
+            progress_dialog.setLabelText(label_text)
+
+        progress_dialog.setValue(100)
 
         temp_output_directory = ''
 
