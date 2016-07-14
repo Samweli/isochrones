@@ -84,6 +84,8 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
             user_name = self.user_name.text()
             password = self.password.text()
             network_table = self.network_table.text()
+            network_geom = self.network_geom_column.text()
+            catchment_geom = self.catchment_geom_column.text()
             catchment_table = self.catchment_table.text()
 
             if self.style.isChecked():
@@ -98,7 +100,9 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
                 user_name,
                 password,
                 network_table,
+                network_geom,
                 catchment_table,
+                catchment_geom,
                 style_checked,
                 self.progress_dialog)
             try:

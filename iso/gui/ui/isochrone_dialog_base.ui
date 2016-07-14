@@ -29,39 +29,13 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QGroupBox" name="output_group">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>250</y>
-     <width>381</width>
-     <height>121</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="title">
-    <string/>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-   <layout class="QGridLayout" name="gridLayout_3"/>
-  </widget>
   <widget class="QGroupBox" name="output_group_2">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>0</y>
      <width>381</width>
-     <height>361</height>
+     <height>201</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -85,22 +59,6 @@
       <property name="text">
        <string>Host</string>
       </property>
-      <property name="buddy">
-       <cstring>network_table</cstring>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="1">
-     <widget class="QLineEdit" name="network_table">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
      </widget>
     </item>
     <item row="3" column="1">
@@ -120,38 +78,8 @@
       <property name="text">
        <string/>
       </property>
-     </widget>
-    </item>
-    <item row="7" column="0">
-     <widget class="QLabel" name="input_catchment_file_label">
-      <property name="text">
-       <string>Catchment Table</string>
-      </property>
-      <property name="buddy">
-       <cstring>network_table</cstring>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="0">
-     <widget class="QLabel" name="input_network_file_label">
-      <property name="text">
-       <string>Network Table</string>
-      </property>
-      <property name="buddy">
-       <cstring>network_table</cstring>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="1">
-     <widget class="QLineEdit" name="catchment_table">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string/>
+      <property name="placeholderText">
+       <string>eg. 5432</string>
       </property>
      </widget>
     </item>
@@ -165,6 +93,9 @@
       </property>
       <property name="text">
        <string/>
+      </property>
+      <property name="placeholderText">
+       <string>user name for database</string>
       </property>
      </widget>
     </item>
@@ -184,6 +115,9 @@
       </property>
       <property name="text">
        <string/>
+      </property>
+      <property name="placeholderText">
+       <string>eg. roads</string>
       </property>
      </widget>
     </item>
@@ -211,8 +145,26 @@
       <property name="text">
        <string>Username</string>
       </property>
-      <property name="buddy">
-       <cstring>network_table</cstring>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLabel" name="input_catchment_file_label_4">
+      <property name="text">
+       <string>Password</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="input_network_file_label_5">
+      <property name="text">
+       <string>Port</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="input_network_file_label_2">
+      <property name="text">
+       <string>Database </string>
       </property>
      </widget>
     </item>
@@ -233,42 +185,170 @@
       <property name="text">
        <string/>
       </property>
-     </widget>
-    </item>
-    <item row="5" column="0">
-     <widget class="QLabel" name="input_catchment_file_label_4">
-      <property name="text">
-       <string>Password</string>
-      </property>
-      <property name="buddy">
-       <cstring>network_table</cstring>
+      <property name="placeholderText">
+       <string>eg. localhost</string>
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="input_network_file_label_5">
-      <property name="text">
-       <string>Port</string>
+   </layout>
+  </widget>
+  <widget class="QGroupBox" name="output_group_3">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>190</y>
+     <width>381</width>
+     <height>91</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <property name="title">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <property name="flat">
+    <bool>false</bool>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_5">
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="network_table">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <property name="buddy">
-       <cstring>network_table</cstring>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="placeholderText">
+       <string>eg. schema.table</string>
       </property>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="input_network_file_label_2">
+    <item row="2" column="0">
+     <widget class="QLabel" name="input_network_file_label_6">
       <property name="text">
-       <string>Database </string>
-      </property>
-      <property name="buddy">
-       <cstring>network_table</cstring>
+       <string>Geometric column</string>
       </property>
      </widget>
     </item>
-    <item row="8" column="1">
-     <widget class="QCheckBox" name="style">
+    <item row="2" column="1">
+     <widget class="QLineEdit" name="network_geom_column">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="text">
-       <string>Create isochrone map style</string>
+       <string/>
+      </property>
+      <property name="placeholderText">
+       <string>eg. geom</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="input_network_file_label_10">
+      <property name="text">
+       <string>Network Table</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QCheckBox" name="style">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>360</y>
+     <width>235</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Create isochrone map style</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="output_group_4">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>270</y>
+     <width>381</width>
+     <height>91</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="title">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <property name="flat">
+    <bool>false</bool>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_6">
+    <item row="2" column="0">
+     <widget class="QLabel" name="input_network_file_label_7">
+      <property name="text">
+       <string>Geometric column</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLineEdit" name="catchment_geom_column">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="placeholderText">
+       <string>eg. geom</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="input_catchment_file_label_3">
+      <property name="text">
+       <string>Catchment Table</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="catchment_table">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="placeholderText">
+       <string>eg. schema.table</string>
       </property>
      </widget>
     </item>
