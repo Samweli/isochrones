@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>441</height>
+    <height>572</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>390</y>
+     <y>520</y>
      <width>341</width>
      <height>32</height>
     </rect>
@@ -198,7 +198,7 @@
      <x>10</x>
      <y>190</y>
      <width>381</width>
-     <height>91</height>
+     <height>131</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -239,12 +239,42 @@
     <item row="2" column="0">
      <widget class="QLabel" name="input_network_file_label_6">
       <property name="text">
-       <string>Geometric column</string>
+       <string>Id column</string>
       </property>
      </widget>
     </item>
     <item row="2" column="1">
-     <widget class="QLineEdit" name="network_geom_column">
+     <widget class="QLineEdit" name="network_id_column">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="placeholderText">
+       <string>eg. id</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="input_network_file_label_10">
+      <property name="text">
+       <string>Network Table</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="input_network_file_label_8">
+      <property name="text">
+       <string>Geometric column</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QLineEdit" name="network_geom_column_2">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
         <horstretch>0</horstretch>
@@ -259,20 +289,13 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="input_network_file_label_10">
-      <property name="text">
-       <string>Network Table</string>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QCheckBox" name="style">
    <property name="geometry">
     <rect>
      <x>150</x>
-     <y>360</y>
+     <y>470</y>
      <width>235</width>
      <height>20</height>
     </rect>
@@ -285,9 +308,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>270</y>
+     <y>320</y>
      <width>381</width>
-     <height>91</height>
+     <height>131</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -306,14 +329,14 @@
     <bool>false</bool>
    </property>
    <layout class="QGridLayout" name="gridLayout_6">
-    <item row="2" column="0">
+    <item row="4" column="0">
      <widget class="QLabel" name="input_network_file_label_7">
       <property name="text">
        <string>Geometric column</string>
       </property>
      </widget>
     </item>
-    <item row="2" column="1">
+    <item row="4" column="1">
      <widget class="QLineEdit" name="catchment_geom_column">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -349,6 +372,29 @@
       </property>
       <property name="placeholderText">
        <string>eg. schema.table</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLineEdit" name="catchment_id_column">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="placeholderText">
+       <string>eg. id</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="input_network_file_label_9">
+      <property name="text">
+       <string>Id column</string>
       </property>
      </widget>
     </item>

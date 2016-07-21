@@ -69,6 +69,8 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
         title = self.tr('Progress')
         self.progress_dialog.setWindowTitle(title)
 
+        self.restore_state()
+
         self.canvas = iface.mapCanvas()
 
     def accept(self):
@@ -85,8 +87,10 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
             password = self.password.text()
             network_table = self.network_table.text()
             network_geom = self.network_geom_column.text()
+            network_id_column = self.network_id_column.text()
             catchment_geom = self.catchment_geom_column.text()
             catchment_table = self.catchment_table.text()
+            catchment_id_column = self.network_id_column.text()
 
             if self.style.isChecked():
                 style_checked = True
@@ -101,9 +105,12 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
                 password,
                 network_table,
                 network_geom,
+                network_id_column,
                 catchment_table,
                 catchment_geom,
+                catchment_id_column,
                 style_checked,
+                self,
                 self.progress_dialog)
             try:
                 self.load_isochrone_map(output_base_file_path)
@@ -161,21 +168,28 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
             port_number = settings.value('port', type=str)
             user_name = settings.value('user_name', type=str)
             network_table = settings.value('network_table', type=str)
+            network_id_column = settings.value('network_id_column', type=str)
             catchment_table = settings.value('catchment_table', type=str)
+            catchment_id_column = settings.value('network_id_column', type=str)
+
         except TypeError:
             database_name = ''
             host_name = ''
             port_number = ''
             user_name = ''
             network_table = ''
+            network_id_column = ''
             catchment_table = ''
+            catchment_id_column = ''
 
         self.database.setText(database_name)
         self.host.setText(host_name)
         self.port.setText(port_number)
         self.user_name.setText(user_name)
         self.network_table.setText(network_table)
+        self.network_id_column.setText(network_id_column)
         self.catchment_table.setText(catchment_table)
+        self.catchment_id_column.setText(catchment_id_column)
 
     def save_state(self):
         """ Store current state of GUI to configuration file """
@@ -186,7 +200,9 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
         settings.setValue('port', self.port.text())
         settings.setValue('user_name', self.user_name.text())
         settings.setValue('network_table', self.network_table.text())
+        settings.setValue('network_id_column', self.network_id_column.text())
         settings.setValue('catchment_table', self.catchment_table.text())
+        settings.setValue('catchment_id_column',self.catchment_id_column.text())
 
     def reject(self):
         """Redefinition of the reject() method

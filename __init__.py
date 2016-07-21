@@ -34,6 +34,7 @@ UTILITY_DIR = os.path.abspath(
 if UTILITY_DIR not in sys.path:
     sys.path.append(UTILITY_DIR)
 
+
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
     """Load isochrones class from file isochrones.
@@ -43,4 +44,7 @@ def classFactory(iface):  # pylint: disable=invalid-name
     """
     #
     from iso.main.isochrone import isochrones
+    sys.path.append("/home/samweli/Setups/pycharm-5.0.1/debug-eggs/pycharm-debug.egg")
+    import pydevd
+    pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
     return isochrones(iface)

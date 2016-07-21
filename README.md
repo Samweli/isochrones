@@ -20,6 +20,6 @@ from there.
 
 ### Dependencies
 
-Postgres Database
+Postgres Database with Pgrouting extension installed
 
 python-psycopg2 installed to be able to connect to the database.

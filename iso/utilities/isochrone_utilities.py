@@ -22,6 +22,7 @@
 """
 import os
 import psycopg2
+import re
 import processing
 
 from iso.utilities.i18n import tr
@@ -37,6 +38,9 @@ from qgis.utils import iface
 from PyQt4.QtGui import (
     QDialog, QFileDialog, QProgressDialog)
 
+from iso.utilities.qgis_utilities import (
+    display_warning_message_box)
+
 
 def isochrone(
         database_name,
@@ -49,6 +53,7 @@ def isochrone(
         catchment,
         catchment_geom,
         style_checked,
+        parent_dialog,
         progress_dialog=None):
 
         """Contains main logic on creating isochrone map
@@ -83,6 +88,9 @@ def isochrone(
         or not.
         :type  style_checked: boolean
 
+        :param parent_dialog: A dialog that called this function.
+        :type parent_dialog: QProgressDialog
+
         :param progress_dialog: A progess dialog .
         :type progress_dialog: QProgressDialog
 
@@ -116,8 +124,8 @@ def isochrone(
             progress_dialog.setLabelText(label_text)
             progress_dialog.setValue(0)
 
-        network = network.split('.')
-        network_table = network[1]
+        network_array = network.split('.')
+        network_table = str(network_array [1])
         network_schema = network[0]
         catchment = catchment.split('.')
         catchment_table = catchment[1]
@@ -128,12 +136,29 @@ def isochrone(
         if not catchment_geom:
             catchment_geom = "geom"
 
-        sql = """CREATE OR REPLACE VIEW ext AS
-                SELECT *, pgr_startpoint(%s), pgr_endpoint(%s)
-                FROM %s"""
-        data = (network_geom, network_geom, network_table)
+        arguments = {}
+        arguments["network_table"] = network_table
+        arguments["network_geom"] = network_geom
+        arguments["database_name"] = database_name
+        arguments["port_number"] = port_number
+        arguments["port_number"] = port_number
 
-        curr.execute(sql, data)
+        sql = """Create or replace view ext as
+            select *, pgr_startpoint(%(network_geom)s),
+            pgr_endpoint(%(network_geom)s) from %(network_table)s""" % arguments
+
+        sql = sql.replace('\n', ' ')
+        sql = re.sub(r'\s+', ' ', sql)
+        sql = sql.replace('( ', '(')
+        sql = sql.replace(' )', ')')
+        sql = sql.strip()
+
+        try:
+            curr.execute(sql)
+        except Exception as exception:
+            display_warning_message_box(
+                parent_dialog, "Error", exception.message)
+            pass
         connection.commit()
 
         sql = """CREATE TABLE IF NOT EXISTS nodes AS
@@ -155,7 +180,7 @@ def isochrone(
         progress_dialog.setLabelText(label_text)
         progress_dialog.setValue(10)
 
-        sql = """CREATE TABLE IF NOT EXISTS network AS
+        sql = """CREATE TABLE IF NOT EXISTS routable_network AS
                SELECT a.*, b.id as start_id, c.id as end_id FROM ext
                AS a
                JOIN nodes AS b ON a.pgr_startpoint = b.the_geom JOIN nodes AS c
@@ -170,43 +195,34 @@ def isochrone(
         label_text = tr("Preparing the catchment table")
         progress_dialog.setLabelText(label_text)
 
-        sql = """ALTER TABLE %s
+        sql = """ALTER TABLE catchment
                ADD COLUMN the_nearest_node integer;
 
               CREATE TABLE temp AS
                SELECT a.gid, b.id, min(a.dist)
 
                FROM
-                 (SELECT %s.id as gid,
-                         min(st_distance(%s.%s, nodes.the_geom))
+                 (SELECT catchment.id as gid,
+                         min(st_distance(catchment.geom, nodes.the_geom))
                           AS dist
-                  FROM %s, nodes
-                  GROUP BY %s.id) AS a,
-                 (SELECT %s.id as gid, nodes.id,
-                         st_distance(%s.%s, nodes.the_geom) AS dist
-                  FROM %s, nodes) AS b
+                  FROM catchment, nodes
+                  GROUP BY catchment.id) AS a,
+                 (SELECT catchment.id as gid, nodes.id,
+                         st_distance(catchment.geom, nodes.the_geom) AS dist
+                  FROM catchment, nodes) AS b
                WHERE a.dist = b. dist
                      AND a.gid = b.gid
                GROUP BY a.gid, b.id; """
-        data = (catchment_table,
-                catchment_table,
-                catchment_geom,
-                catchment_table,
-                catchment_table,
-                catchment_table,
-                catchment_table,
-                catchment_geom,
-                catchment_table
-                )
+
 
         curr.execute(sql, data)
         connection.commit()
 
-        sql = """UPDATE %s
+        sql = """UPDATE catchment
             SET the_nearest_node =
             (SELECT id
             FROM temp
-            WHERE temp.gid = facilities.id);"""
+            WHERE temp.gid = catchment.id);"""
 
         data = (catchment_table,)
 
@@ -219,10 +235,9 @@ def isochrone(
         label_text = tr("Calculating drivetime for each catchment area")
         progress_dialog.setLabelText(label_text)
 
-        sql = """SELECT the_nearest_node from %s"""
-        data = (catchment_table,)
+        sql = """SELECT the_nearest_node from catchment"""
 
-        curr.execute(sql, data)
+        curr.execute(sql)
         rows = curr.fetchall()
 
         index = 0
@@ -237,7 +252,7 @@ def isochrone(
             catchment_id = row[0]
             if index == 0:
                 sql = """ CREATE TABLE
-                        IF NOT EXISTS catchment AS
+                        IF NOT EXISTS catchment_with_cost AS
                     SELECT
                     id,
                     the_geom,
@@ -247,7 +262,7 @@ def isochrone(
                           start_id::int4 AS source,
                           end_id::int4 AS target,
                           cost::float8 AS cost
-                       FROM network',
+                       FROM routable_network',
                        %s,
                        id,
                        false,
@@ -256,7 +271,7 @@ def isochrone(
                 data = (catchment_id,)
                 curr.execute(sql, data)
             else:
-                sql = """ INSERT INTO catchment (
+                sql = """ INSERT INTO catchment_with_cost (
                     SELECT
                         id,
                         the_geom,
@@ -266,7 +281,7 @@ def isochrone(
                               start_id::int4 AS source,
                               end_id::int4 AS target,
                               cost::float8 AS cost
-                           FROM network',
+                           FROM routable_network',
                            %s,
                            id,
                            false,
@@ -295,7 +310,7 @@ def isochrone(
         curr.execute(
             """ CREATE table catchment_final AS
                SELECT id, the_geom, min (cost) AS drivetime
-               FROM catchment
+               FROM catchment_with_cost
                GROUP By id, the_geom
             """
                )
@@ -326,6 +341,8 @@ def isochrone(
         layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
 
         QgsMapLayerRegistry.instance().addMapLayers([layer])
+
+        temp_output_directory = layer
 
         if style_checked:
             # Export table as shapefile
@@ -377,9 +394,9 @@ def isochrone(
 
             progress_dialog.setLabelText(label_text)
 
-        progress_dialog.setValue(100)
+            temp_output_directory = ''
 
-        temp_output_directory = ''
+        progress_dialog.setValue(100)
 
         if progress_dialog:
             progress_dialog.done(QDialog.Accepted)
