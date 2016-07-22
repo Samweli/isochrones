@@ -112,14 +112,14 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
                 style_checked,
                 self,
                 self.progress_dialog)
-            try:
-                self.load_isochrone_map(output_base_file_path)
-
-            except FileMissingError as exception:
-                    display_warning_message_box(
-                        self,
-                        error_dialog_title,
-                        exception.message)
+            # try:
+            #     self.load_isochrone_map(output_base_file_path)
+            #
+            # except FileMissingError as exception:
+            #         display_warning_message_box(
+            #             self,
+            #             error_dialog_title,
+            #             exception.message)
 
             self.done(QDialog.Accepted)
 

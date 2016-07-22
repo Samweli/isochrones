@@ -133,8 +133,8 @@ def isochrone(
             progress_dialog.setValue(0)
 
         network_array = network.split('.')
-        network_table = str(network_array [1])
-        network_schema = network[0]
+        network_table = str(network_array[1])
+        network_schema = network_array[0]
         catchment = catchment.split('.')
         catchment_table = catchment[1]
         catchment_schema = catchment[0]
@@ -153,7 +153,6 @@ def isochrone(
         arguments["catchment_id"] = catchment_id_column
         arguments["database_name"] = database_name
         arguments["port_number"] = port_number
-        
 
         sql = """Create or replace view network_cache as
             select *, pgr_startpoint(%(network_geom)s),
@@ -173,9 +172,11 @@ def isochrone(
                SELECT row_number() OVER (ORDER BY foo.p)::integer AS id,
                foo.p AS the_geom
                FROM (
-               SELECT DISTINCT ext.pgr_startpoint AS p FROM ext
+               SELECT DISTINCT network_cache.pgr_startpoint AS p
+                FROM network_cache
                UNION
-               SELECT DISTINCT ext.pgr_endpoint AS p FROM ext
+               SELECT DISTINCT network_cache.pgr_endpoint AS p
+               FROM network_cache
                ) foo
                GROUP BY foo.p"""
 
@@ -184,9 +185,10 @@ def isochrone(
         connection.commit()
 
         # Create routable network
+        progress_dialog.setValue(10)
         label_text = tr("Creating a routable network table")
         progress_dialog.setLabelText(label_text)
-        progress_dialog.setValue(10)
+
 
         sql = """CREATE TABLE IF NOT EXISTS routable_network AS
                SELECT a.*, b.id as start_id, c.id as end_id FROM network_cache
@@ -203,10 +205,10 @@ def isochrone(
         label_text = tr("Preparing the catchment table")
         progress_dialog.setLabelText(label_text)
 
-        sql = """ALTER TABLE %(catchment)s
+        sql = """ALTER TABLE %(catchment_table)s
                ADD COLUMN the_nearest_node integer;
 
-              CREATE TABLE temp AS
+              CREATE TABLE IF NOT EXISTS temp AS
                SELECT a.gid, b.id, min(a.dist)
 
                FROM
@@ -265,7 +267,7 @@ def isochrone(
             percentage = ((index + 1) / len(rows)) * 45
             percentage = round(percentage, 0)
             catchment_id = row[0]
-            arguments["catchment_current_id"]
+            arguments["catchment_current_id"] = catchment_id
             if index == 0:
                 sql = """ CREATE TABLE
                         IF NOT EXISTS catchment_with_cost AS
@@ -324,7 +326,7 @@ def isochrone(
         progress_dialog.setLabelText(label_text)
 
         curr.execute(
-            """ CREATE table catchment_final AS
+            """ CREATE TABLE IF NOT EXISTS catchment_final AS
                SELECT id, the_geom, min (cost) AS drivetime
                FROM catchment_with_cost
                GROUP By id, the_geom
@@ -334,7 +336,7 @@ def isochrone(
         connection.commit()
 
         curr.execute(
-            """ CREATE table catchment_final_no_null AS
+            """ CREATE TABLE IF NOT EXISTS catchment_final_no_null AS
                 SELECT * FROM catchment_final WHERE drivetime
                 IS NOT NULL
             """
@@ -358,7 +360,12 @@ def isochrone(
 
         QgsMapLayerRegistry.instance().addMapLayers([layer])
 
-        temp_output_directory = layer
+        iface.mapCanvas().refresh()
+
+        layer_name = layer.dataProvider().dataSourceUri()
+
+        (temp_output_directory, layer_name) = os.path.split(layer_name)
+
 
         if style_checked:
             # Export table as shapefile
