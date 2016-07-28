@@ -32,7 +32,7 @@ python-psycopg2 installed to be able to connect to the database.
 ##### Step 1
 You need to have two postgresql tables one for the network and other for the catchments areas.
 
-You can use test data found [here](https://raw.githubusercontent.com/Samweli/isochrones_plugin/master/iso/test/data) these are shapefiles
+You can use test data found [here](https://github.com/Samweli/isochrones_plugin/tree/master/iso/test/data) these are shapefiles
 that you will need to import in your postgresql database as tables.
 
 
