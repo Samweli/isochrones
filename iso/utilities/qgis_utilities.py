@@ -154,3 +154,4 @@ def get_qgis_app():
 
     return QGIS_APP, CANVAS, IFACE, PARENT
 
+

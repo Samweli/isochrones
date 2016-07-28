@@ -191,9 +191,11 @@ def isochrone(
 
 
         sql = """CREATE TABLE IF NOT EXISTS routable_network AS
-               SELECT a.*, b.id as start_id, c.id as end_id FROM network_cache
+               SELECT a.*, b.id as start_id, c.id as end_id FROM
+               network_cache
                AS a
-               JOIN nodes AS b ON a.pgr_startpoint = b.the_geom JOIN nodes AS c
+               JOIN nodes AS b ON a.pgr_startpoint = b.the_geom JOIN
+               nodes AS c
                ON  a.pgr_endpoint = c.the_geom """
 
         curr.execute(sql)
@@ -237,7 +239,7 @@ def isochrone(
             (SELECT id
             FROM temp
             WHERE temp.gid =
-             %(catchment_table)s.%(catchment_id)s);""" %arguments
+             %(catchment_table)s.%(catchment_id)s LIMIT 1);""" %arguments
 
         sql = clean_query(sql)
 
@@ -325,22 +327,26 @@ def isochrone(
         label_text = tr("Preparing all the catchment areas table")
         progress_dialog.setLabelText(label_text)
 
-        curr.execute(
-            """ CREATE TABLE IF NOT EXISTS catchment_final AS
-               SELECT id, the_geom, min (cost) AS drivetime
+        sql = """ CREATE TABLE IF NOT EXISTS catchment_final AS
+               SELECT id, the_geom, min (cost) AS %s
                FROM catchment_with_cost
                GROUP By id, the_geom
-            """
-               )
+            """ % "drivetime"
+
+        sql = clean_query(sql)
+
+        curr.execute(sql)
 
         connection.commit()
 
-        curr.execute(
-            """ CREATE TABLE IF NOT EXISTS catchment_final_no_null AS
-                SELECT * FROM catchment_final WHERE drivetime
+        sql = """ CREATE TABLE IF NOT EXISTS catchment_final_no_null AS
+                SELECT * FROM catchment_final WHERE %s
                 IS NOT NULL
-            """
-               )
+            """% "drivetime"
+
+        sql = clean_query(sql)
+
+        curr.execute(sql)
 
         connection.commit()
 
@@ -354,7 +360,10 @@ def isochrone(
             password)
         # set database schema, table name, geometry column and optionally
         # subset (WHERE clause)
-        uri.setDataSource(network_schema, "catchment_final_no_null", "the_geom")
+        uri.setDataSource(
+            network_schema,
+            "catchment_final_no_null",
+            "the_geom")
 
         layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
 
@@ -365,7 +374,6 @@ def isochrone(
         layer_name = layer.dataProvider().dataSourceUri()
 
         (temp_output_directory, layer_name) = os.path.split(layer_name)
-
 
         if style_checked:
             # Export table as shapefile

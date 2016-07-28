@@ -170,11 +170,17 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
             port_number = settings.value('port', type=str)
             user_name = settings.value('user_name', type=str)
             network_table = settings.value('network_table', type=str)
-            network_geom_column = settings.value('network_geom_column', type=str)
+            network_geom_column = settings.value(
+                'network_geom_column',
+                type=str)
             network_id_column = settings.value('network_id_column', type=str)
             catchment_table = settings.value('catchment_table', type=str)
-            catchment_geom_column = settings.value('catchment_geom_column', type=str)
-            catchment_id_column = settings.value('catchment_id_column', type=str)
+            catchment_geom_column = settings.value(
+                'catchment_geom_column',
+                type=str)
+            catchment_id_column = settings.value(
+                'catchment_id_column',
+                type=str)
 
         except TypeError:
             database_name = ''
@@ -208,11 +214,19 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
         settings.setValue('port', self.port.text())
         settings.setValue('user_name', self.user_name.text())
         settings.setValue('network_table', self.network_table.text())
-        settings.setValue('network_geom_column', self.network_geom_column.text())
-        settings.setValue('network_id_column', self.network_id_column.text())
+        settings.setValue(
+            'network_geom_column',
+            self.network_geom_column.text())
+        settings.setValue(
+            'network_id_column',
+            self.network_id_column.text())
         settings.setValue('catchment_table', self.catchment_table.text())
-        settings.setValue('catchment_geom_column',self.catchment_geom_column.text())
-        settings.setValue('catchment_id_column',self.catchment_id_column.text())
+        settings.setValue(
+            'catchment_geom_column',
+            self.catchment_geom_column.text())
+        settings.setValue(
+            'catchment_id_column',
+            self.catchment_id_column.text())
 
     def reject(self):
         """Redefinition of the reject() method
@@ -251,10 +265,7 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
                     self.iface,
                     self.tr('Enable \'on the fly\''),
                     self.tr(
-                        'Your current projection is different than EPSG:4326. '
+                        'Your current projection is different than EPSG:4326.'
                         'You should enable \'on the fly\' to display '
                         'correctly the isochrone map')
                     )
-
-
-

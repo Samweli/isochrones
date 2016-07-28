@@ -29,7 +29,7 @@ repository=https://github.com/Samweli/isochrones_plugin
 tags=map, openstreetmap, routing, python
 
 homepage=https://github.com/Samweli/isochrones_plugin/issues
-category=Plugins
+category=Database
 icon=icon.png
 # experimental flag
 experimental=True
