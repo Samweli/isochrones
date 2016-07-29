@@ -31,12 +31,22 @@ from qgis.core import (
     QgsDataSourceURI,
     QgsVectorLayer,
     QgsRasterLayer,
-    QgsMapLayerRegistry)
+    QgsMapLayerRegistry,
+    QgsColorRampShader,
+    QgsRasterShader,
+    QgsSingleBandPseudoColorRenderer,
+    QgsRasterBandStats)
 
 from qgis.utils import iface
 
 from PyQt4.QtGui import (
-    QDialog, QFileDialog, QProgressDialog)
+    QDialog,
+    QFileDialog,
+    QProgressDialog,
+    QColor
+    )
+from PyQt4.QtCore import (
+    QFileInfo)
 
 from iso.utilities.qgis_utilities import (
     display_warning_message_box)
@@ -340,7 +350,7 @@ def isochrone(
         connection.commit()
 
         sql = """ CREATE TABLE IF NOT EXISTS catchment_final_no_null AS
-                SELECT * FROM catchment_final WHERE %s
+                SELECT *, (drivetime * 60) AS minutes FROM catchment_final WHERE %s
                 IS NOT NULL
             """% "drivetime"
 
@@ -365,6 +375,8 @@ def isochrone(
             "catchment_final_no_null",
             "the_geom")
 
+        # Export table as shapefile
+
         layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
 
         QgsMapLayerRegistry.instance().addMapLayers([layer])
@@ -376,7 +388,6 @@ def isochrone(
         (temp_output_directory, layer_name) = os.path.split(layer_name)
 
         if style_checked:
-            # Export table as shapefile
 
             progress_percentage += 1
             progress_dialog.setValue(progress_percentage)
@@ -386,38 +397,167 @@ def isochrone(
             # TODO implement style creation logic
 
             # Run interpolation on the final file (currently use IDW)
-            #
-            # extent = layer.extent()
-            # xmin = extent[0]
-            # xmax = extent[1]
-            # ymin = extent[2]
-            # ymax = extent[3]
-            #
-            # raster_file = QgsRasterLayer()
-            #
-            # output_raster = processing.runalg(
-            #     "grass:v.surf.idw",
-            #     layer,
-            #     12,
-            #     2,
-            #     "cost",
-            #     False,
-            #     "%f , %f, %f, %f "% (xmin, xmax, ymin, ymax),
-            #     0.5,
-            #     -1,
-            #     0.001,
-            #     raster_file)
-            #
-            # QgsMapLayerRegistry.instance().addMapLayers([raster_file])
 
-            # Calculate contours
+            output_raster = processing.runalg(
+                'gdalogr:gridinvdist',
+                layer,
+                'minutes',
+                2, 0, 0, 0, 0, 0, 0, 0, 5,
+                "[temporary file]")
+            # retrieve the raster output and load it in Qgis:
 
-            # Style the tin , contour and network
+            output_file = output_raster['OUTPUT']
+            file_info = QFileInfo(output_file)
+            base_name = file_info.baseName()
+
+            raster_file = QgsRasterLayer(output_file, base_name)
+
+            if raster_file.isValid():
+                color_shader = QgsColorRampShader()
+                color_shader.setColorRampType(QgsColorRampShader.INTERPOLATED)
+                colors = {
+                    'deep_green': '#1a9641',
+                    'light_green': '#a6d96a',
+                    'pale_yellow': '#ffffc0',
+                    'light_red': '#fdae61',
+                    'red':'#d7191c'
+                }
+                provider = raster_file.dataProvider()
+                statistics_present = provider.hasStatistics(
+                    1,
+                    QgsRasterBandStats.All)
+                stats = provider.bandStatistics(
+                    1,
+                    QgsRasterBandStats.All,
+                    raster_file.extent(),
+                    0)
+
+                values = {}
+
+                if statistics_present:
+                    min = stats.Minimum()
+                    max = stats.Maximum()
+                    stat_range = max - min
+                    add = stat_range / 5
+                    values[0] = min
+                    value = min
+                    for index in range(1, 4):
+                        value += add
+                        values[index] = value
+                    values[4] = max
+
+                color_list = [
+                    QgsColorRampShader.ColorRampItem(
+                        values[0],
+                        QColor(colors['deep_green'])),
+                    QgsColorRampShader.ColorRampItem(
+                        values[1],
+                        QColor(colors['light_green'])),
+                    QgsColorRampShader.ColorRampItem(
+                        values[2],
+                        QColor(colors['pale_yellow'])),
+                    QgsColorRampShader.ColorRampItem(
+                        values[3],
+                        QColor(colors['light_red'])),
+                    QgsColorRampShader.ColorRampItem(
+                        values[4],
+                        QColor(colors['red']))
+                ]
+
+                color_shader.setColorRampItemList(color_list)
+                raster_shader = QgsRasterShader()
+                raster_shader.setRasterShaderFunction(color_shader)
+
+                renderer = QgsSingleBandPseudoColorRenderer(
+                    raster_file.dataProvider(),
+                    1,
+                    raster_shader)
+                raster_file.setRenderer(renderer)
+                QgsMapLayerRegistry.instance().addMapLayer(raster_file)
+            else:
+                display_warning_message_box(
+                    parent_dialog,
+                    "Could not load interpolated file!",
+                    exception.message)
+
+            # Generate contours
+
+            output_vector = processing.runalg(
+                'gdalogr:contour',
+                raster_file,
+                1,
+                'minutes',
+                None,
+                '[temporary_file]')
+            drivetime_layer = QgsVectorLayer(
+                output_vector['OUTPUT_VECTOR'],
+                'Drivetime',
+                'ogr')
+            # Load the network
+
+            uri.setDataSource(network_schema, network_table, network_geom)
+            network_layer = QgsVectorLayer(
+                uri.uri(),
+                "network",
+                "postgres")
+
+            uri.setDataSource(
+                catchment_schema,
+                catchment_table,
+                catchment_geom)
+            catchment_layer = QgsVectorLayer(
+                uri.uri(),
+                "catchment",
+                "postgres")
+
+            # Style the tin, contour and network
+
+            drivetime_style = resources_path(
+                'styles',
+                'qgis',
+                'drivetimes.qml')
+            drivetime_layer.loadNamedStyle(drivetime_style)
+
+            network_style = resources_path(
+                'styles',
+                'qgis',
+                'network.qml')
+            network_layer.loadNamedStyle(network_style)
+
+            catchment_style = resources_path(
+                'styles',
+                'qgis',
+                'catchment.qml')
+            catchment_layer.loadNamedStyle(catchment_style)
+
+            if drivetime_layer.isValid():
+                QgsMapLayerRegistry.instance().addMapLayers(
+                    [drivetime_layer])
+            else:
+                display_warning_message_box(
+                    parent_dialog,
+                    "Could not load drivetimes file!",
+                    exception.message)
+
+            if network_layer.isValid():
+                QgsMapLayerRegistry.instance().addMapLayers(
+                    [network_layer])
+            else:
+                display_warning_message_box(
+                    parent_dialog,
+                    "Could not load network file!",
+                    exception.message)
+
+            if catchment_layer.isValid():
+                QgsMapLayerRegistry.instance().addMapLayers(
+                    [catchment_layer])
+            else:
+                display_warning_message_box(
+                    parent_dialog,
+                    "Could not load catchment file!",
+                    exception.message)
 
             # Load tin, contour and network as one qgis doc
-            uri.setDataSource("public", network_table, "geom")
-            network_layer = QgsVectorLayer(uri.uri(), "network", "postgres")
-            QgsMapLayerRegistry.instance().addMapLayers([network_layer])
 
             progress_percentage += 4
             progress_dialog.setValue(progress_percentage)
