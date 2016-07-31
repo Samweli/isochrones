@@ -75,7 +75,7 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
 
     def accept(self):
         """Create an isochrone map and display it in QGIS."""
-        error_dialog_title = "Error"
+        error_dialog_title = self.tr("Error")
         try:
             self.save_state()
             self.require_input()

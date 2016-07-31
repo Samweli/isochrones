@@ -217,6 +217,17 @@ def isochrone(
         label_text = tr("Preparing the catchment table")
         progress_dialog.setLabelText(label_text)
 
+        # Drop column if exists, this will allow to update the table
+        # with new data
+
+        sql = """ALTER TABLE %(catchment_table)s
+               DROP COLUMN IF EXISTS the_nearest_node;""" % arguments
+
+        sql = clean_query(sql)
+
+        curr.execute(sql)
+        connection.commit()
+
         sql = """ALTER TABLE %(catchment_table)s
                ADD COLUMN the_nearest_node integer;
 
@@ -420,12 +431,9 @@ def isochrone(
                     'light_green': '#a6d96a',
                     'pale_yellow': '#ffffc0',
                     'light_red': '#fdae61',
-                    'red':'#d7191c'
+                    'red': '#d7191c'
                 }
                 provider = raster_file.dataProvider()
-                statistics_present = provider.hasStatistics(
-                    1,
-                    QgsRasterBandStats.All)
                 stats = provider.bandStatistics(
                     1,
                     QgsRasterBandStats.All,
@@ -434,17 +442,23 @@ def isochrone(
 
                 values = {}
 
-                if statistics_present:
-                    min = stats.Minimum()
-                    max = stats.Maximum()
+                if stats:
+                    min = stats.minimumValue
+                    max = stats.maximumValue
                     stat_range = max - min
-                    add = stat_range / 5
+                    add = stat_range / 4
                     values[0] = min
                     value = min
                     for index in range(1, 4):
                         value += add
                         values[index] = value
                     values[4] = max
+                else:
+                    display_warning_message_box(
+                        parent_dialog,
+                        parent_dialog.tr(
+                            'Problem indexing the isochrones map'),
+                        parent_dialog.tr('Error loading isochrone map'))
 
                 color_list = [
                     QgsColorRampShader.ColorRampItem(
@@ -474,11 +488,13 @@ def isochrone(
                     raster_shader)
                 raster_file.setRenderer(renderer)
                 QgsMapLayerRegistry.instance().addMapLayer(raster_file)
+
             else:
                 display_warning_message_box(
                     parent_dialog,
-                    "Could not load interpolated file!",
-                    exception.message)
+                    parent_dialog.tr(
+                        'Could not load interpolated file!'),
+                    parent_dialog.tr('Error loading isochrone map'))
 
             # Generate contours
 
@@ -536,8 +552,9 @@ def isochrone(
             else:
                 display_warning_message_box(
                     parent_dialog,
-                    "Could not load drivetimes file!",
-                    exception.message)
+                    parent_dialog.tr(
+                        "Could not load drivetimes file!"),
+                    parent_dialog.tr('Error loading isochrone map'))
 
             if network_layer.isValid():
                 QgsMapLayerRegistry.instance().addMapLayers(
@@ -545,8 +562,9 @@ def isochrone(
             else:
                 display_warning_message_box(
                     parent_dialog,
-                    "Could not load network file!",
-                    exception.message)
+                    parent_dialog.tr(
+                        "Could not load network file!"),
+                    parent_dialog.tr('Error loading isochrone map'))
 
             if catchment_layer.isValid():
                 QgsMapLayerRegistry.instance().addMapLayers(
@@ -554,8 +572,9 @@ def isochrone(
             else:
                 display_warning_message_box(
                     parent_dialog,
-                    "Could not load catchment file!",
-                    exception.message)
+                    parent_dialog.tr(
+                        "Could not load catchment file!"),
+                    parent_dialog.tr('Error loading isochrone map'))
 
             # Load tin, contour and network as one qgis doc
 
