@@ -283,6 +283,16 @@ def isochrone(
         index = 0
         progress_percentage = 50
 
+        # Convert unique column to integer as required by the pgr_dijkstra function
+
+        sql = """ALTER TABLE routable_network ALTER COLUMN
+                %(network_id)s SET DATA TYPE int4""" %arguments
+
+        sql = clean_query(sql)
+
+        curr.execute(sql)
+        connection.commit()
+
         for row in rows:
             # This step is 45% of all steps so calculating
             # percentage of each increment accordingly
@@ -348,6 +358,14 @@ def isochrone(
         label_text = tr("Preparing all the catchment areas table")
         progress_dialog.setLabelText(label_text)
 
+        sql = """ DROP TABLE IF EXISTS catchment_final"""
+
+        sql = clean_query(sql)
+
+        curr.execute(sql)
+
+        connection.commit()
+
         sql = """ CREATE TABLE IF NOT EXISTS catchment_final AS
                SELECT id, the_geom, min (cost) AS %s
                FROM catchment_with_cost
@@ -360,7 +378,15 @@ def isochrone(
 
         connection.commit()
 
-        sql = """ CREATE TABLE IF NOT EXISTS catchment_final_no_null AS
+        sql = """DROP TABLE IF EXISTS catchment_final_no_null"""
+
+        sql = clean_query(sql)
+
+        curr.execute(sql)
+
+        connection.commit()
+
+        sql = """ CREATE TABLE catchment_final_no_null AS
                 SELECT *, (drivetime * 60) AS minutes FROM catchment_final WHERE %s
                 IS NOT NULL
             """% "drivetime"

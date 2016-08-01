@@ -51,4 +51,6 @@ If you check the "Create isochrones map style" this will generate tin and contou
 
 The network data before imported in the database should be prepared for routing, information on doing this can be found [here](http://www.bostongis.com/PrinterFriendly.aspx?content_name=pgrouting_osm2po_1) 
 
+## Licence
+
 
