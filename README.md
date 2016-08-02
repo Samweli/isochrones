@@ -57,7 +57,7 @@ The network data before imported in the database should be prepared for routing,
 
 ## Licence
 
-Isochrones is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License version 3 (GPLv3) as published by the Free Software Foundation.
+Isochrones is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License version 3 (GPLv3) as published by the Free Software Foundation.
 
 The full GNU General Public License is available in LICENSE.txt or http://www.gnu.org/licenses/gpl.html
 
