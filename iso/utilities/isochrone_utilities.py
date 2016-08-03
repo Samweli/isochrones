@@ -25,7 +25,6 @@ import psycopg2
 import re
 import processing
 
-from iso.utilities.i18n import tr
 
 from qgis.core import (
     QgsDataSourceURI,
@@ -50,6 +49,7 @@ from PyQt4.QtCore import (
 
 from iso.utilities.qgis_utilities import (
     display_warning_message_box)
+from iso.utilities.db import *
 
 
 def isochrone(
@@ -164,238 +164,41 @@ def isochrone(
         arguments["database_name"] = database_name
         arguments["port_number"] = port_number
 
-        sql = """Create or replace view network_cache as
-            select *, pgr_startpoint(%(network_geom)s),
-            pgr_endpoint(%(network_geom)s) from %(network_table)s""" % arguments
-        
-        sql = clean_query(sql)
+        create_network_view(connection, curr, arguments, parent_dialog)
 
-        try:
-            curr.execute(sql)
-        except Exception as exception:
-            display_warning_message_box(
-                parent_dialog, "Error", exception.message)
-            pass
-        connection.commit()
-
-        sql = """CREATE TABLE IF NOT EXISTS nodes AS
-               SELECT row_number() OVER (ORDER BY foo.p)::integer AS id,
-               foo.p AS the_geom
-               FROM (
-               SELECT DISTINCT network_cache.pgr_startpoint AS p
-                FROM network_cache
-               UNION
-               SELECT DISTINCT network_cache.pgr_endpoint AS p
-               FROM network_cache
-               ) foo
-               GROUP BY foo.p"""
-
-        curr.execute(sql)
-
-        connection.commit()
+        create_nodes(connection, curr, arguments, parent_dialog)
 
         # Create routable network
+
         progress_dialog.setValue(10)
         label_text = tr("Creating a routable network table")
         progress_dialog.setLabelText(label_text)
 
-
-        sql = """CREATE TABLE IF NOT EXISTS routable_network AS
-               SELECT a.*, b.id as start_id, c.id as end_id FROM
-               network_cache
-               AS a
-               JOIN nodes AS b ON a.pgr_startpoint = b.the_geom JOIN
-               nodes AS c
-               ON  a.pgr_endpoint = c.the_geom """
-
-        curr.execute(sql)
-
-        connection.commit()
+        create_routable_network(connection, curr, arguments, parent_dialog)
 
         # Find nearest nodes from the catchments
         progress_dialog.setValue(30)
         label_text = tr("Preparing the catchment table")
         progress_dialog.setLabelText(label_text)
 
-        # Drop column if exists, this will allow to update the table
-        # with new data
-
-        sql = """ALTER TABLE %(catchment_table)s
-               DROP COLUMN IF EXISTS the_nearest_node;""" % arguments
-
-        sql = clean_query(sql)
-
-        curr.execute(sql)
-        connection.commit()
-
-        sql = """ALTER TABLE %(catchment_table)s
-               ADD COLUMN the_nearest_node integer;
-
-              CREATE TABLE IF NOT EXISTS temp AS
-               SELECT a.gid, b.id, min(a.dist)
-
-               FROM
-                 (SELECT %(catchment_table)s.%(catchment_id)s as gid,
-                         min(st_distance(
-                         %(catchment_table)s.%(catchment_geom)s,
-                         nodes.the_geom))
-                          AS dist
-                  FROM %(catchment_table)s, nodes
-                  GROUP BY %(catchment_table)s.%(catchment_id)s) AS a,
-                 (SELECT %(catchment_table)s.%(catchment_id)s as gid,
-                 nodes.id, st_distance(
-                 %(catchment_table)s.%(catchment_geom)s,
-                 nodes.the_geom) AS dist
-                  FROM %(catchment_table)s, nodes) AS b
-               WHERE a.dist = b. dist
-                     AND a.gid = b.gid
-               GROUP BY a.gid, b.id; """ % arguments
-        sql = clean_query(sql)
-
-        curr.execute(sql)
-        connection.commit()
-
-        sql = """UPDATE %(catchment_table)s
-            SET the_nearest_node =
-            (SELECT id
-            FROM temp
-            WHERE temp.gid =
-             %(catchment_table)s.%(catchment_id)s LIMIT 1);""" %arguments
-
-        sql = clean_query(sql)
-
-        curr.execute(sql)
-        connection.commit()
+        update_catchment(connection, curr, arguments, parent_dialog)
 
         # Calculate drivetime for the nearest nodes
 
-        progress_dialog.setValue(50)
+        progress_percentage = 50
+
+        progress_dialog.setValue(progress_percentage)
         label_text = tr("Calculating drivetime for each catchment area")
         progress_dialog.setLabelText(label_text)
 
-        sql = """SELECT the_nearest_node from
-              %(catchment_table)s""" % arguments
-        sql = clean_query(sql)
+        calculate_drivetimes(
+            connection,
+            curr,
+            arguments,
+            parent_dialog,
+            progress_percentage)
 
-        curr.execute(sql)
-        rows = curr.fetchall()
-
-        index = 0
-        progress_percentage = 50
-
-        # Convert unique column to integer as required by the pgr_dijkstra function
-
-        sql = """ALTER TABLE routable_network ALTER COLUMN
-                %(network_id)s SET DATA TYPE int4""" %arguments
-
-        sql = clean_query(sql)
-
-        curr.execute(sql)
-        connection.commit()
-
-        for row in rows:
-            # This step is 45% of all steps so calculating
-            # percentage of each increment accordingly
-
-            percentage = ((index + 1) / len(rows)) * 45
-            percentage = round(percentage, 0)
-            catchment_id = row[0]
-            arguments["catchment_current_id"] = catchment_id
-            if index == 0:
-                sql = """ CREATE TABLE
-                        IF NOT EXISTS catchment_with_cost AS
-                    SELECT
-                    id,
-                    the_geom,
-                    (SELECT sum(cost) FROM (
-                       SELECT * FROM pgr_dijkstra('
-                       SELECT %(network_id)s AS id,
-                          start_id::int4 AS source,
-                          end_id::int4 AS target,
-                          cost::float8 AS cost
-                       FROM routable_network',
-                       %(catchment_current_id)s,
-                       id,
-                       false,
-                       false)) AS foo ) AS cost
-                    FROM nodes;""" % arguments
-                sql = clean_query(sql)
-                curr.execute(sql)
-            else:
-                sql = """ INSERT INTO catchment_with_cost (
-                    SELECT
-                        id,
-                        the_geom,
-                        (SELECT sum(cost) FROM (
-                           SELECT * FROM pgr_dijkstra('
-                           SELECT  %(network_id)s AS id,
-                              start_id::int4 AS source,
-                              end_id::int4 AS target,
-                              cost::float8 AS cost
-                           FROM routable_network',
-                           %(catchment_current_id)s,
-                           id,
-                           false,
-                           false)) AS foo ) AS cost
-                    FROM nodes);""" % arguments
-
-                sql = clean_query(sql)
-
-                curr.execute(sql)
-
-            index += 1
-            connection.commit()
-            progress_percentage += percentage
-            progress_dialog.setValue(progress_percentage)
-
-            label_text = tr(
-                str(index) +
-                " catchment area(s) out of " +
-                str(len(rows)) +
-                " is(are) done")
-            progress_dialog.setLabelText(label_text)
-
-        label_text = tr("Preparing all the catchment areas table")
-        progress_dialog.setLabelText(label_text)
-
-        sql = """ DROP TABLE IF EXISTS catchment_final"""
-
-        sql = clean_query(sql)
-
-        curr.execute(sql)
-
-        connection.commit()
-
-        sql = """ CREATE TABLE IF NOT EXISTS catchment_final AS
-               SELECT id, the_geom, min (cost) AS %s
-               FROM catchment_with_cost
-               GROUP By id, the_geom
-            """ % "drivetime"
-
-        sql = clean_query(sql)
-
-        curr.execute(sql)
-
-        connection.commit()
-
-        sql = """DROP TABLE IF EXISTS catchment_final_no_null"""
-
-        sql = clean_query(sql)
-
-        curr.execute(sql)
-
-        connection.commit()
-
-        sql = """ CREATE TABLE catchment_final_no_null AS
-                SELECT *, (drivetime * 60) AS minutes FROM catchment_final WHERE %s
-                IS NOT NULL
-            """% "drivetime"
-
-        sql = clean_query(sql)
-
-        curr.execute(sql)
-
-        connection.commit()
+        prepare_drivetimes_table(connection, curr, arguments, parent_dialog)
 
         uri = QgsDataSourceURI()
         # set host name, port, database name, username and password
@@ -433,176 +236,25 @@ def isochrone(
 
             # TODO implement style creation logic
 
-            # Run interpolation on the final file (currently use IDW)
+            # Run interpolation on the final file (currently using IDW)
 
-            output_raster = processing.runalg(
-                'gdalogr:gridinvdist',
-                layer,
-                'minutes',
-                2, 0, 0, 0, 0, 0, 0, 0, 5,
-                "[temporary file]")
-            # retrieve the raster output and load it in Qgis:
+            raster_file = idw_interpolation(layer)
 
-            output_file = output_raster['OUTPUT']
-            file_info = QFileInfo(output_file)
-            base_name = file_info.baseName()
+            # Generate drivetimes contour
 
-            raster_file = QgsRasterLayer(output_file, base_name)
+            drivetime_layer = generate_drivetimes_contour(raster_file, 1)
 
-            if raster_file.isValid():
-                color_shader = QgsColorRampShader()
-                color_shader.setColorRampType(QgsColorRampShader.INTERPOLATED)
-                colors = {
-                    'deep_green': '#1a9641',
-                    'light_green': '#a6d96a',
-                    'pale_yellow': '#ffffc0',
-                    'light_red': '#fdae61',
-                    'red': '#d7191c'
-                }
-                provider = raster_file.dataProvider()
-                stats = provider.bandStatistics(
-                    1,
-                    QgsRasterBandStats.All,
-                    raster_file.extent(),
-                    0)
+            # Load all the required layers
 
-                values = {}
+            args = {}
+            args['network_schema'] = network_schema
+            args['network_table'] = network_table
+            args['network_geom'] = network_geom
+            args['catchment_schema'] = catchment_schema
+            args['catchment_table'] = catchment_table
+            args['catchment_geom'] = catchment_geom
 
-                if stats:
-                    min = stats.minimumValue
-                    max = stats.maximumValue
-                    stat_range = max - min
-                    add = stat_range / 4
-                    values[0] = min
-                    value = min
-                    for index in range(1, 4):
-                        value += add
-                        values[index] = value
-                    values[4] = max
-                else:
-                    display_warning_message_box(
-                        parent_dialog,
-                        parent_dialog.tr(
-                            'Problem indexing the isochrones map'),
-                        parent_dialog.tr('Error loading isochrone map'))
-
-                color_list = [
-                    QgsColorRampShader.ColorRampItem(
-                        values[0],
-                        QColor(colors['deep_green'])),
-                    QgsColorRampShader.ColorRampItem(
-                        values[1],
-                        QColor(colors['light_green'])),
-                    QgsColorRampShader.ColorRampItem(
-                        values[2],
-                        QColor(colors['pale_yellow'])),
-                    QgsColorRampShader.ColorRampItem(
-                        values[3],
-                        QColor(colors['light_red'])),
-                    QgsColorRampShader.ColorRampItem(
-                        values[4],
-                        QColor(colors['red']))
-                ]
-
-                color_shader.setColorRampItemList(color_list)
-                raster_shader = QgsRasterShader()
-                raster_shader.setRasterShaderFunction(color_shader)
-
-                renderer = QgsSingleBandPseudoColorRenderer(
-                    raster_file.dataProvider(),
-                    1,
-                    raster_shader)
-                raster_file.setRenderer(renderer)
-                QgsMapLayerRegistry.instance().addMapLayer(raster_file)
-
-            else:
-                display_warning_message_box(
-                    parent_dialog,
-                    parent_dialog.tr(
-                        'Could not load interpolated file!'),
-                    parent_dialog.tr('Error loading isochrone map'))
-
-            # Generate contours
-
-            output_vector = processing.runalg(
-                'gdalogr:contour',
-                raster_file,
-                1,
-                'minutes',
-                None,
-                '[temporary_file]')
-            drivetime_layer = QgsVectorLayer(
-                output_vector['OUTPUT_VECTOR'],
-                'Drivetime',
-                'ogr')
-            # Load the network
-
-            uri.setDataSource(network_schema, network_table, network_geom)
-            network_layer = QgsVectorLayer(
-                uri.uri(),
-                "network",
-                "postgres")
-
-            uri.setDataSource(
-                catchment_schema,
-                catchment_table,
-                catchment_geom)
-            catchment_layer = QgsVectorLayer(
-                uri.uri(),
-                "catchment",
-                "postgres")
-
-            # Style the tin, contour and network
-
-            drivetime_style = resources_path(
-                'styles',
-                'qgis',
-                'drivetimes.qml')
-            drivetime_layer.loadNamedStyle(drivetime_style)
-
-            network_style = resources_path(
-                'styles',
-                'qgis',
-                'network.qml')
-            network_layer.loadNamedStyle(network_style)
-
-            catchment_style = resources_path(
-                'styles',
-                'qgis',
-                'catchment.qml')
-            catchment_layer.loadNamedStyle(catchment_style)
-
-            if drivetime_layer.isValid():
-                QgsMapLayerRegistry.instance().addMapLayers(
-                    [drivetime_layer])
-            else:
-                display_warning_message_box(
-                    parent_dialog,
-                    parent_dialog.tr(
-                        "Could not load drivetimes file!"),
-                    parent_dialog.tr('Error loading isochrone map'))
-
-            if network_layer.isValid():
-                QgsMapLayerRegistry.instance().addMapLayers(
-                    [network_layer])
-            else:
-                display_warning_message_box(
-                    parent_dialog,
-                    parent_dialog.tr(
-                        "Could not load network file!"),
-                    parent_dialog.tr('Error loading isochrone map'))
-
-            if catchment_layer.isValid():
-                QgsMapLayerRegistry.instance().addMapLayers(
-                    [catchment_layer])
-            else:
-                display_warning_message_box(
-                    parent_dialog,
-                    parent_dialog.tr(
-                        "Could not load catchment file!"),
-                    parent_dialog.tr('Error loading isochrone map'))
-
-            # Load tin, contour and network as one qgis doc
+            load_map_layers(uri, args)
 
             progress_percentage += 4
             progress_dialog.setValue(progress_percentage)
@@ -610,25 +262,221 @@ def isochrone(
 
             progress_dialog.setLabelText(label_text)
 
-            temp_output_directory = ''
-
         progress_dialog.setValue(100)
 
         if progress_dialog:
             progress_dialog.done(QDialog.Accepted)
 
-        return temp_output_directory
+
+def idw_interpolation(layer):
+    """Run interpolation using inverse distance weight algorithm
+
+    :param layer: Vector layer with drivetimes
+    :type layer: QgsVectorLayer
+
+    :returns raster_layer: Interpolated raster layer with drivetimes
+    :rtype raster_layer: QgsRasterLayer
+
+    """
+    output_raster = processing.runalg(
+        'gdalogr:gridinvdist',
+        layer,
+        'minutes',
+        2, 0, 0, 0, 0, 0, 0, 0, 5,
+        "[temporary file]")
+
+    # retrieving the raster output , styling it and load it in Qgis
+
+    output_file = output_raster['OUTPUT']
+    file_info = QFileInfo(output_file)
+    base_name = file_info.baseName()
+
+    raster_layer = QgsRasterLayer(output_file, base_name)
+
+    if raster_layer.isValid():
+        color_shader = QgsColorRampShader()
+        color_shader.setColorRampType(QgsColorRampShader.INTERPOLATED)
+        colors = {
+            'deep_green': '#1a9641',
+            'light_green': '#a6d96a',
+            'pale_yellow': '#ffffc0',
+            'light_red': '#fdae61',
+            'red': '#d7191c'
+        }
+        provider = raster_layer.dataProvider()
+        stats = provider.bandStatistics(
+            1,
+            QgsRasterBandStats.All,
+            raster_layer.extent(),
+            0)
+
+        values = {}
+
+        if stats:
+            min = stats.minimumValue
+            max = stats.maximumValue
+            stat_range = max - min
+            add = stat_range / 4
+            values[0] = min
+            value = min
+            for index in range(1, 4):
+                value += add
+                values[index] = value
+            values[4] = max
+        else:
+            display_warning_message_box(
+                parent_dialog,
+                parent_dialog.tr(
+                    'Problem indexing the isochrones map'),
+                parent_dialog.tr('Error loading isochrone map'))
+
+        color_list = [
+            QgsColorRampShader.ColorRampItem(
+                values[0],
+                QColor(colors['deep_green'])),
+            QgsColorRampShader.ColorRampItem(
+                values[1],
+                QColor(colors['light_green'])),
+            QgsColorRampShader.ColorRampItem(
+                values[2],
+                QColor(colors['pale_yellow'])),
+            QgsColorRampShader.ColorRampItem(
+                values[3],
+                QColor(colors['light_red'])),
+            QgsColorRampShader.ColorRampItem(
+                values[4],
+                QColor(colors['red']))
+        ]
+
+        color_shader.setColorRampItemList(color_list)
+        raster_shader = QgsRasterShader()
+        raster_shader.setRasterShaderFunction(color_shader)
+
+        renderer = QgsSingleBandPseudoColorRenderer(
+            raster_layer.dataProvider(),
+            1,
+            raster_shader)
+        raster_layer.setRenderer(renderer)
+        QgsMapLayerRegistry.instance().addMapLayer(raster_layer)
+
+    else:
+        display_warning_message_box(
+            parent_dialog,
+            parent_dialog.tr(
+                'Could not load interpolated file!'),
+            parent_dialog.tr('Error loading isochrone map'))
+
+    return raster_layer
+
+
+def generate_drivetimes_contour(raster_layer, interval):
+    """Create drive times contour
+
+    :param raster_layer: Interpolated raster layer with drivetimes
+    :type raster_layer: QgsRasterLayer
+
+    :returns layer: Vector layer with contour drivetimes
+    :rtype layer: QgsVectorLayer
+
+    """
+    output_vector = processing.runalg(
+                'gdalogr:contour',
+                raster_layer,
+                interval,
+                'minutes',
+                None,
+                '[temporary_file]')
+    drivetime_layer = QgsVectorLayer(
+                output_vector['OUTPUT_VECTOR'],
+                'time(min)',
+                'ogr')
+    return drivetime_layer
+
+
+def load_map_layers(uri, args):
+    """Style map layers and load them in Qgis
+
+    :param uri: Connection to the database
+    :type uri: QgsDataSourceURI
+
+    :param args: List containing database parameters
+    :type args: {}
+
+    """
+
+    uri.setDataSource(
+        args['network_schema'],
+        args['network_table'],
+        args['network_geom'])
+    network_layer = QgsVectorLayer(
+        uri.uri(),
+        "network",
+        "postgres")
+
+    uri.setDataSource(
+        catchment_schema,
+        catchment_table,
+        catchment_geom)
+    catchment_layer = QgsVectorLayer(
+        uri.uri(),
+        "catchment",
+        "postgres")
+
+    # Style the tin, contour and network
+
+    drivetime_style = resources_path(
+        'styles',
+        'qgis',
+        'drivetimes.qml')
+    drivetime_layer.loadNamedStyle(drivetime_style)
+
+    network_style = resources_path(
+        'styles',
+        'qgis',
+        'network.qml')
+    network_layer.loadNamedStyle(network_style)
+
+    catchment_style = resources_path(
+        'styles',
+        'qgis',
+        'catchment.qml')
+    catchment_layer.loadNamedStyle(catchment_style)
+
+    if drivetime_layer.isValid():
+        QgsMapLayerRegistry.instance().addMapLayers(
+            [drivetime_layer])
+    else:
+        display_warning_message_box(
+            parent_dialog,
+            parent_dialog.tr(
+                "Could not load drivetimes file!"),
+            parent_dialog.tr('Error loading isochrone map'))
+
+    if network_layer.isValid():
+        QgsMapLayerRegistry.instance().addMapLayers(
+            [network_layer])
+    else:
+        display_warning_message_box(
+            parent_dialog,
+            parent_dialog.tr(
+                "Could not load network file!"),
+            parent_dialog.tr('Error loading isochrone map'))
+
+    if catchment_layer.isValid():
+        QgsMapLayerRegistry.instance().addMapLayers(
+            [catchment_layer])
+    else:
+        display_warning_message_box(
+            parent_dialog,
+            parent_dialog.tr(
+                "Could not load catchment file!"),
+            parent_dialog.tr('Error loading isochrone map'))
 
 
 def resources_path(*args):
     """Get the path to our resources folder.
 
-    .. versionadded:: 3.0
-
-    Note that in version 3.0 we removed the use of Qt Resource files in
-    favour of directly accessing on-disk resources.
-
-    :param args List of path elements e.g. ['img', 'logos', 'image.png']
+    :param args List of path elements e.g. ['img', 'examples', 'isochrone.png']
     :type args: list
 
     :return: Absolute path to the resources folder.
@@ -708,24 +556,4 @@ def resources_path(*args):
 #     return path
 
 
-def clean_query(query):
-    """Get the path to our resources folder.
 
-    .. versionadded:: 3.0
-
-    Note that in version 3.0 we removed the use of Qt Resource files in
-    favour of directly accessing on-disk resources.
-
-    :param query: sql query
-    :type query: str
-
-    :return: cleaned sql query
-    :rtype: str"""
-
-    query = query.replace('\n', ' ')
-    query = re.sub(r'\s+', ' ', query)
-    query = query.replace('( ', '(')
-    query = query.replace(' )', ')')
-    query = query.strip()
-
-    return query

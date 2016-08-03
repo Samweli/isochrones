@@ -46,11 +46,17 @@ Start the plugin (it will be on the Database Menu) and fill the connection detai
 
 If you check the "Create isochrones map style" this will generate tin and contour with a default style.
 
+You can watch the demo video [here](https://www.youtube.com/watch?v=thBKETlQbqY)
+
 
 #### Data
 
-The network data before imported in the database should be prepared for routing, information on doing this can be found [here](http://www.bostongis.com/PrinterFriendly.aspx?content_name=pgrouting_osm2po_1) 
+The network data before imported in the database should be prepared for routing, information on doing this can be found 
+[here](http://www.bostongis.com/PrinterFriendly.aspx?content_name=pgrouting_osm2po_1) 
 
 ## Licence
 
+Isochrones is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 (GPLv2) as published by the Free Software Foundation.
+
+The full GNU General Public License is available in LICENSE.txt or http://www.gnu.org/licenses/gpl.html
 

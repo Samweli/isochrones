@@ -97,7 +97,7 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
             else:
                 style_checked = False
 
-            output_base_file_path = isochrone(
+            isochrone(
                 database_name,
                 host_name,
                 port_number,
@@ -112,14 +112,6 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
                 style_checked,
                 self,
                 self.progress_dialog)
-            # try:
-            #     self.load_isochrone_map(output_base_file_path)
-            #
-            # except FileMissingError as exception:
-            #         display_warning_message_box(
-            #             self,
-            #             error_dialog_title,
-            #             exception.message)
 
             self.done(QDialog.Accepted)
 
