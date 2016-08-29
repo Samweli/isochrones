@@ -91,6 +91,7 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
             catchment_geom = self.catchment_geom_column.text()
             catchment_table = self.catchment_table.text()
             catchment_id_column = self.catchment_id_column.text()
+            contour_interval = self.contour_interval.text()
 
             if self.style.isChecked():
                 style_checked = True
@@ -110,6 +111,7 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
                 catchment_geom,
                 catchment_id_column,
                 style_checked,
+                contour_interval,
                 self,
                 self.progress_dialog)
 
@@ -140,6 +142,7 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
         password = self.password.text()
         network_table = self.network_table.text()
         catchment_table = self.catchment_table.text()
+        contour_interval = self.contour_interval.text()
 
         if database_name and host_name and port_number and \
                 user_name and password and network_table and \
@@ -173,6 +176,9 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
             catchment_id_column = settings.value(
                 'catchment_id_column',
                 type=str)
+            contour_interval = settings.value(
+                'contour_interval',
+                type=str)
 
         except TypeError:
             database_name = ''
@@ -185,6 +191,7 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
             catchment_table = ''
             catchment_geom_column = ''
             catchment_id_column = ''
+            contour_interval = ''
 
         self.database.setText(database_name)
         self.host.setText(host_name)
@@ -196,6 +203,7 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
         self.catchment_table.setText(catchment_table)
         self.catchment_geom_column.setText(catchment_geom_column)
         self.catchment_id_column.setText(catchment_id_column)
+        self.contour_interval.setText(contour_interval)
 
     def save_state(self):
         """ Store current state of GUI to configuration file """
@@ -219,6 +227,9 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
         settings.setValue(
             'catchment_id_column',
             self.catchment_id_column.text())
+        settings.setValue(
+            'contour_interval',
+            self.contour_interval.text())
 
     def reject(self):
         """Redefinition of the reject() method

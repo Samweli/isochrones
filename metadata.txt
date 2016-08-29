@@ -30,7 +30,7 @@ tags=map, openstreetmap, routing, python
 
 homepage=https://github.com/Samweli/isochrones_plugin/issues
 category=Database
-icon=icon.png
+icon=resources/img/icons/icon.png
 # experimental flag
 experimental=True
 

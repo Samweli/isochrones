@@ -33,11 +33,28 @@ from iso.utilities.i18n import tr
 
 
 def create_network_view(connection, cursor, arguments, dialog):
+    """Create network view, to improve performance of queries using it
+
+    :param connection: Database connection
+    :type connection:
+
+    :param cursor: Database connection cursor
+    :type cursor:
+
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+
+    """
 
     try:
-        sql = """CREATE OR REPLACE VIEW network_cache as
+        sql = """SELECT EXISTS ( CREATE OR REPLACE VIEW network_cache as
             SELECT *, pgr_startpoint(%(network_geom)s),
-            pgr_endpoint(%(network_geom)s) FROM %(network_table)s""" % arguments
+            pgr_endpoint(%(network_geom)s) FROM %(network_table)s )
+            """ % arguments
 
         sql = clean_query(sql)
 
@@ -50,7 +67,23 @@ def create_network_view(connection, cursor, arguments, dialog):
 
 
 def create_nodes(connection, cursor, arguments, dialog):
+    """Create network nodes, this will help in creating
+       a sql routable network table
 
+    :param connection: Database connection
+    :type connection:
+
+    :param cursor: Database connection cursor
+    :type cursor:
+
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+
+    """
     try:
         sql = """CREATE TABLE IF NOT EXISTS nodes AS
                SELECT row_number() OVER (ORDER BY foo.p)::integer AS id,
@@ -73,6 +106,23 @@ def create_nodes(connection, cursor, arguments, dialog):
 
 
 def create_routable_network(connection, cursor, arguments, dialog):
+    """Create routable network using the network view with the nodes.
+       This takes long time to complete.
+
+    :param connection: Database connection
+    :type connection:
+
+    :param cursor: Database connection cursor
+    :type cursor:
+
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+
+    """
 
     try:
         sql = """CREATE TABLE IF NOT EXISTS routable_network AS
@@ -92,6 +142,23 @@ def create_routable_network(connection, cursor, arguments, dialog):
 
 
 def update_catchment(connection, cursor, arguments, dialog):
+    """Calculating the nearest nodes to the catchment areas,
+       these nodes will be used in accessibility calculations.
+
+    :param connection: Database connection
+    :type connection:
+
+    :param cursor: Database connection cursor
+    :type cursor:
+
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+
+    """
 
     try:
         update_catchment_table(connection, cursor, arguments, dialog)
@@ -131,28 +198,60 @@ def update_catchment(connection, cursor, arguments, dialog):
 
 
 def update_catchment_table(connection, cursor, arguments, dialog):
-        sql = """ALTER TABLE %(catchment_table)s
-               DROP COLUMN IF EXISTS the_nearest_node;""" % arguments
+    """Remove if nearest nodes column exists so we can updated the values.
 
-        sql = clean_query(sql)
+    :param connection: Database connection
+    :type connection:
 
-        cursor.execute(sql)
-        connection.commit()
+    :param cursor: Database connection cursor
+    :type cursor:
+
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+
+    """
+    sql = """ALTER TABLE %(catchment_table)s
+           DROP COLUMN IF EXISTS the_nearest_node;""" % arguments
+
+    sql = clean_query(sql)
+
+    cursor.execute(sql)
+    connection.commit()
 
 
 def populate_catchment_table(connection, cursor, arguments, dialog):
+    """Assign the nearest nodes to catchment respective column
 
-        sql = """UPDATE %(catchment_table)s
-            SET the_nearest_node =
-            (SELECT id
-            FROM temp
-            WHERE temp.gid =
-             %(catchment_table)s.%(catchment_id)s LIMIT 1);""" %arguments
+    :param connection: Database connection
+    :type connection:
 
-        sql = clean_query(sql)
+    :param cursor: Database connection cursor
+    :type cursor:
 
-        cursor.execute(sql)
-        connection.commit()
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+
+    """
+
+    sql = """UPDATE %(catchment_table)s
+        SET the_nearest_node =
+        (SELECT id
+        FROM temp
+        WHERE temp.gid =
+         %(catchment_table)s.%(catchment_id)s LIMIT 1);""" %arguments
+
+    sql = clean_query(sql)
+
+    cursor.execute(sql)
+    connection.commit()
 
 
 def calculate_drivetimes(
@@ -162,12 +261,33 @@ def calculate_drivetimes(
         dialog,
         progress_percentage):
 
+    """ 
+
+    :param connection: Database connection
+    :type connection:
+
+    :param cursor: Database connection cursor
+    :type cursor:
+
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+
+    :param progress_percentage: the percentage of progress bar
+    :type progress_percentage: int
+
+    """
+
     index = 0
 
     try:
         rows = query_nearest_nodes(connection, cursor, arguments, dialog)
 
-        # Convert unique column to integer as required by the pgr_dijkstra function
+        # Convert unique column to integer as required by
+        # the pgr_dijkstra function
 
         sql = """ALTER TABLE routable_network ALTER COLUMN
                 %(network_id)s SET DATA TYPE int4""" % arguments
@@ -184,7 +304,7 @@ def calculate_drivetimes(
             percentage = ((index + 1) / len(rows)) * 45
             percentage = round(percentage, 0)
             catchment_id = row[0]
-            arguments["catchment_cursorent_id"] = catchment_id
+            arguments["catchment_current_id"] = catchment_id
             if index == 0:
                 sql = """ CREATE TABLE
                         IF NOT EXISTS catchment_with_cost AS
@@ -198,7 +318,7 @@ def calculate_drivetimes(
                           end_id::int4 AS target,
                           cost::float8 AS cost
                        FROM routable_network',
-                       %(catchment_cursorent_id)s,
+                       %(catchment_current_id)s,
                        id,
                        false,
                        false)) AS foo ) AS cost
@@ -217,7 +337,7 @@ def calculate_drivetimes(
                               end_id::int4 AS target,
                               cost::float8 AS cost
                            FROM routable_network',
-                           %(catchment_cursorent_id)s,
+                           %(catchment_current_id)s,
                            id,
                            false,
                            false)) AS foo ) AS cost
@@ -248,19 +368,54 @@ def calculate_drivetimes(
 
 
 def query_nearest_nodes(connection, cursor, arguments, dialog):
+    """
 
-        sql = """SELECT the_nearest_node from
-            %(catchment_table)s""" % arguments
+    :param connection: Database connection
+    :type connection:
 
-        sql = clean_query(sql)
+    :param cursor: Database connection cursor
+    :type cursor:
 
-        cursor.execute(sql)
-        rows = cursor.fetchall()
-        
-        return rows
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+
+    """
+
+    sql = """SELECT the_nearest_node from
+        %(catchment_table)s""" % arguments
+
+    sql = clean_query(sql)
+
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+
+    return rows
 
 
 def prepare_drivetimes_table(connection, cursor, arguments, dialog):
+    """
+
+    :param connection: Database connection
+    :type connection:
+
+    :param cursor: Database connection cursor
+    :type cursor:
+
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+
+    :param progress_percentage: the percentage of progress bar
+    :type progress_percentage: int
+
+    """
     try:
         
         sql = """ DROP TABLE IF EXISTS catchment_final"""
@@ -310,7 +465,7 @@ def prepare_drivetimes_table(connection, cursor, arguments, dialog):
 
 
 def clean_query(query):
-    """Get the path to our resources folder.
+    """ Clean query for execution
 
     :param query: sql query
     :type query: str

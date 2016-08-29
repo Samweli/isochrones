@@ -93,6 +93,7 @@ class isochrones:
         callback,
         enabled_flag=True,
         add_to_menu=True,
+        add_to_database_menu=True,
         add_to_toolbar=True,
         status_tip=None,
         whats_this=None,
@@ -154,6 +155,14 @@ class isochrones:
             self.iface.addPluginToMenu(
                 self.menu,
                 action)
+        if add_to_menu:
+            self.iface.addPluginToMenu(
+                self.menu,
+                action)
+        if add_to_database_menu:
+            self.iface.addPluginToDatabaseMenu(
+                self.menu,
+                action)
 
         self.actions.append(action)
 
@@ -163,12 +172,14 @@ class isochrones:
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         # icon_path = ':/plugins/isochrones/icon.png'
-        icon_path = resources_path('img', 'examples', 'icon.png')
+        icon_path = resources_path('img', 'icons', 'icon.png')
         self.add_action(
             icon_path,
             text=self.tr(u'Create isochrone map'),
             callback=self.run,
             parent=self.iface.mainWindow(),
+            add_to_menu=False,
+            add_to_database_menu=True,
             status_tip="Create isochrone map",
             whats_this="Create isochrone map")
 

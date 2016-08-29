@@ -45,6 +45,11 @@ class UtilitiesTest(unittest.TestCase):
 
         self.assertNotEqual(output_base_file_path, '')
 
+    def test_db(self):
+        """ Tests for the db functions
+
+        """
+
 
 
 

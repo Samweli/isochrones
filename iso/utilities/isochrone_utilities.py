@@ -65,6 +65,7 @@ def isochrone(
         catchment_geom,
         catchment_id_column,
         style_checked,
+        contour_interval,
         parent_dialog,
         progress_dialog=None):
 
@@ -105,6 +106,10 @@ def isochrone(
         :param style_checked: Value for either to create a map style
         or not.
         :type  style_checked: boolean
+
+        :param contour_interval: Interval between contour, if contour
+        wiil be generated
+        :type  contour_interval: int
 
         :param parent_dialog: A dialog that called this function.
         :type parent_dialog: QProgressDialog
@@ -238,11 +243,13 @@ def isochrone(
 
             # Run interpolation on the final file (currently using IDW)
 
-            raster_file = idw_interpolation(layer)
+            raster_file = idw_interpolation(layer, parent_dialog)
 
             # Generate drivetimes contour
 
-            drivetime_layer = generate_drivetimes_contour(raster_file, 1)
+            drivetime_layer = generate_drivetimes_contour(
+                raster_file,
+                contour_interval)
 
             # Load all the required layers
 
@@ -254,7 +261,7 @@ def isochrone(
             args['catchment_table'] = catchment_table
             args['catchment_geom'] = catchment_geom
 
-            load_map_layers(uri, args)
+            load_map_layers(uri, parent_dialog, drivetime_layer, args)
 
             progress_percentage += 4
             progress_dialog.setValue(progress_percentage)
@@ -268,11 +275,14 @@ def isochrone(
             progress_dialog.done(QDialog.Accepted)
 
 
-def idw_interpolation(layer):
+def idw_interpolation(layer, parent_dialog):
     """Run interpolation using inverse distance weight algorithm
 
     :param layer: Vector layer with drivetimes
     :type layer: QgsVectorLayer
+
+    :param parent_dialog: A dialog that called this function.
+    :type parent_dialog: QProgressDialog
 
     :returns raster_layer: Interpolated raster layer with drivetimes
     :rtype raster_layer: QgsRasterLayer
@@ -393,11 +403,17 @@ def generate_drivetimes_contour(raster_layer, interval):
     return drivetime_layer
 
 
-def load_map_layers(uri, args):
+def load_map_layers(uri, parent_dialog, drivetime_layer, args):
     """Style map layers and load them in Qgis
 
     :param uri: Connection to the database
     :type uri: QgsDataSourceURI
+
+    :param parent_dialog: A dialog that called this function.
+    :type parent_dialog: QProgressDialog
+
+    :param drivetime_layer: A layer containing drivetimes
+    :type drivetime_layer: QgsVectorLayer
 
     :param args: List containing database parameters
     :type args: {}
@@ -414,9 +430,9 @@ def load_map_layers(uri, args):
         "postgres")
 
     uri.setDataSource(
-        catchment_schema,
-        catchment_table,
-        catchment_geom)
+        args['catchment_schema'],
+        args['catchment_table'],
+        args['catchment_geom'])
     catchment_layer = QgsVectorLayer(
         uri.uri(),
         "catchment",

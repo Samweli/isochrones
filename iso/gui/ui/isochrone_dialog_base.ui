@@ -7,17 +7,20 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>572</height>
+    <height>609</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Isochrones</string>
   </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>520</y>
+     <y>570</y>
      <width>341</width>
      <height>32</height>
     </rect>
@@ -295,7 +298,7 @@
    <property name="geometry">
     <rect>
      <x>150</x>
-     <y>470</y>
+     <y>530</y>
      <width>235</width>
      <height>20</height>
     </rect>
@@ -375,6 +378,13 @@
       </property>
      </widget>
     </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="input_network_file_label_9">
+      <property name="text">
+       <string>Id column</string>
+      </property>
+     </widget>
+    </item>
     <item row="2" column="1">
      <widget class="QLineEdit" name="catchment_id_column">
       <property name="sizePolicy">
@@ -391,14 +401,48 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="input_network_file_label_9">
-      <property name="text">
-       <string>Id column</string>
-      </property>
-     </widget>
-    </item>
    </layout>
+  </widget>
+  <widget class="QLabel" name="input_network_file_label_11">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>470</y>
+     <width>191</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Drivetime Interval (minutes)</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="contour_interval">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>470</y>
+     <width>71</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="inputMethodHints">
+    <set>Qt::ImhDigitsOnly</set>
+   </property>
+   <property name="inputMask">
+    <string/>
+   </property>
+   <property name="text">
+    <string>1</string>
+   </property>
+   <property name="placeholderText">
+    <string/>
+   </property>
   </widget>
  </widget>
  <resources/>
