@@ -1,0 +1,26 @@
+language: python
+sudo: false
+python:
+    - 2.7
+
+virtualenv:
+    # Make apt installed Python packages work (i.e. PyQt) because Travis runs
+    # tests in a virtualenv for Python 2.7.
+    system_site_packages: true
+
+addons:
+  apt:
+    packages:
+      - python-qt4
+
+before_install:
+    - python -c 'import PyQt4'
+
+install:
+    - pip install netCDF4 nose
+
+script:
+    - nosetests ThreeDiToolbox.test.test_models
+
+notifications:
+    email: false
