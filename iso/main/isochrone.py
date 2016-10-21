@@ -21,8 +21,6 @@
  ***************************************************************************/
 """
 
-
-
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt4.QtGui import QAction, QIcon
 # Initialize Qt resources from file resources.py
@@ -31,6 +29,7 @@ from iso.gui.tools.isochrone_dialog import isochronesDialog
 from iso.utilities.isochrone_utilities import (
     resources_path)
 import os.path
+
 
 class isochrones:
     """QGIS Plugin Implementation."""

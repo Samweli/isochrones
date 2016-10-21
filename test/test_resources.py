@@ -17,7 +17,6 @@ import unittest
 from PyQt4.QtGui import QIcon
 
 
-
 class isochronesDialogTest(unittest.TestCase):
     """Test rerources work."""
 
@@ -39,6 +38,3 @@ if __name__ == "__main__":
     suite = unittest.makeSuite(isochronesResourcesTest)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
-
-
-

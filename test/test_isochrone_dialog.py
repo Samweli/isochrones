@@ -21,7 +21,7 @@ from utilities import get_qgis_app
 QGIS_APP = get_qgis_app()
 
 
-class isochronesDialogTest(unittest.TestCase):
+class IsochronesDialogTest(unittest.TestCase):
     """Test dialog works."""
 
     def setUp(self):
@@ -48,8 +48,6 @@ class isochronesDialogTest(unittest.TestCase):
         self.assertEqual(result, QDialog.Rejected)
 
 if __name__ == "__main__":
-    suite = unittest.makeSuite(isochronesDialogTest)
+    suite = unittest.makeSuite(IsochronesDialogTest)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
-
-

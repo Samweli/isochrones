@@ -153,5 +153,3 @@ def get_qgis_app():
         IFACE = QgisInterface(CANVAS)
 
     return QGIS_APP, CANVAS, IFACE, PARENT
-
-

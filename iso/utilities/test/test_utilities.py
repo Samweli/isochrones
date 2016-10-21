@@ -49,11 +49,3 @@ class UtilitiesTest(unittest.TestCase):
         """ Tests for the db functions
 
         """
-
-
-
-
-
-
-
-

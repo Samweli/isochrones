@@ -246,7 +246,7 @@ def populate_catchment_table(connection, cursor, arguments, dialog):
         (SELECT id
         FROM temp
         WHERE temp.gid =
-         %(catchment_table)s.%(catchment_id)s LIMIT 1);""" %arguments
+         %(catchment_table)s.%(catchment_id)s LIMIT 1);""" % arguments
 
     sql = clean_query(sql)
 
@@ -261,8 +261,7 @@ def calculate_drivetimes(
         dialog,
         progress_percentage):
 
-    """ 
-
+    """
     :param connection: Database connection
     :type connection:
 
@@ -417,9 +416,7 @@ def prepare_drivetimes_table(connection, cursor, arguments, dialog):
 
     """
     try:
-        
         sql = """ DROP TABLE IF EXISTS catchment_final"""
-
         sql = clean_query(sql)
 
         cursor.execute(sql)
@@ -447,16 +444,14 @@ def prepare_drivetimes_table(connection, cursor, arguments, dialog):
         connection.commit()
 
         sql = """ CREATE TABLE catchment_final_no_null AS
-                SELECT *, (drivetime * 60) AS minutes FROM catchment_final WHERE %s
-                IS NOT NULL
-            """% "drivetime"
+                SELECT *, (drivetime * 60) AS minutes FROM catchment_final
+                WHERE %s IS NOT NULL """ % "drivetime"
 
         sql = clean_query(sql)
 
         cursor.execute(sql)
 
         connection.commit()
-    
     except Exception as exception:
         display_warning_message_box(
             dialog,

@@ -32,6 +32,7 @@ class ReadLayerError(IsochroneError):
     suggestion = (
         'Check that the file exists and you have permissions to read it')
 
+
 class WriteLayerError(IsochroneError):
     """When a layer can't be written"""
     suggestion = 'Please ask the developers of Isochrones to add a suggestion.'
@@ -127,6 +128,7 @@ class TestNotImplementedError(IsochroneError):
     """Custom exception for when a test exists only as a stub."""
     pass
 
+
 class NoFunctionsFoundError(IsochroneError):
     """Custom exception for when a no impact calculation
     functions can be found."""
@@ -153,6 +155,7 @@ class InvalidParameterError(IsochroneError):
     """Custom exception for when an invalid parameter is passed to a function.
     """
     pass
+
 
 class TranslationLoadError(IsochroneError):
     """Custom exception handler for whe translation file fails
@@ -182,6 +185,7 @@ class InsufficientOverlapError(IsochroneError):
     """An exception raised if an error occurs during extent calculation
     because the bounding boxes do not overlap."""
     pass
+
 
 class StyleError(IsochroneError):
     """An exception relating to reading / generating GIS styles"""
@@ -263,4 +267,3 @@ class InvalidExtentError(IsochroneError):
 class NoAttributeInLayerError(IsochroneError):
     """Raised if the attribute not exists in the vector layer"""
     pass
-
