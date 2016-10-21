@@ -12,15 +12,18 @@ addons:
   apt:
     packages:
       - python-qt4
+      - git
 
 before_install:
     - python -c 'import PyQt4'
 
 install:
-    - pip install netCDF4 nose
+    - pip install --upgrade pip
+    - pip install --upgrade pep8
 
 script:
-    - nosetests ThreeDiToolbox.test.test_models
+   - make pep8
 
-notifications:
-    email: false
+email: 
+    -smwakisambwe@worldbank.org
+    -smwltwesa6@gmail.com
