@@ -1,4 +1,4 @@
-Isochrones Qgis Plugin
+Isochrones Qgis Plugin [![Build Status](https://travis-ci.org/Samweli/isochrones_plugin.svg?branch=master)](https://travis-ci.org/Samweli/isochrones_plugin)
 =======
 
 Simple Plugin that creates isochrones map from the given data and parameters.
@@ -46,6 +46,7 @@ Start the plugin (it will be on the Database Menu) and fill the connection detai
 
 If you check the "Create isochrones map style" this will generate tin and contour with a default style.
 
+
 You can watch the demo video [here](https://www.youtube.com/watch?v=thBKETlQbqY)
 
 
@@ -56,7 +57,8 @@ The network data before imported in the database should be prepared for routing,
 
 ## Licence
 
-Isochrones is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 (GPLv2) as published by the Free Software Foundation.
+Isochrones is a free software: you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 (GPLv2) as published by the Free Software Foundation.
 
 The full GNU General Public License is available in LICENSE.txt or http://www.gnu.org/licenses/gpl.html
+
 
