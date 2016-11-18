@@ -14,11 +14,11 @@ __copyright__ = 'Copyright 2016, Samweli Mwakisambwe'
 
 import unittest
 
-from PyQt4.QtGui import QDialogButtonBox, QDialog
-
 from iso.gui.tools.isochrone_dialog import isochronesDialog
 from utilities import get_qgis_app
 QGIS_APP = get_qgis_app()
+
+from PyQt4.QtGui import QDialogButtonBox, QDialog
 
 
 class IsochronesDialogTest(unittest.TestCase):

@@ -4,7 +4,7 @@
 import unittest
 
 from iso.utilities.isochrone_utilities import isochrone
-from iso.utilities.qgis_utilities import get_qgis_app
+from test.utilities import get_qgis_app
 
 QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 
@@ -14,7 +14,6 @@ class UtilitiesTest(unittest.TestCase):
     """
     def test_isochrone_utilities(self):
         """ Tests for the main isochrone utility"""
-        QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 
         database_name = 'roads'
         host_name = 'localhost'
@@ -49,3 +48,7 @@ class UtilitiesTest(unittest.TestCase):
         """ Tests for the db functions
 
         """
+
+if __name__ == '__main__':
+    QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
+    unittest.main()

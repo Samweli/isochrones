@@ -4,6 +4,8 @@
 import sys
 import logging
 
+from qgis.utils import iface
+
 
 LOGGER = logging.getLogger('QGIS')
 QGIS_APP = None  # Static variable used to hold hand to running QGIS app
@@ -21,6 +23,15 @@ def get_qgis_app():
 
     If QGIS is already running the handle to that app will be returned.
     """
+    global QGIS_APP, PARENT, IFACE, CANVAS  # pylint: disable=W0603
+
+    if iface:
+        from qgis.core import QgsApplication
+        QGIS_APP = QgsApplication
+        CANVAS = iface.mapCanvas()
+        PARENT = iface.mainWindow()
+        IFACE = iface
+        return QGIS_APP, CANVAS, IFACE, PARENT
 
     try:
         from PyQt4 import QtGui, QtCore
