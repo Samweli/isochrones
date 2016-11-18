@@ -49,12 +49,44 @@ def create_network_view(connection, cursor, arguments, dialog):
     :type dialog: Qdialog
 
     """
+    clear_network_cache(connection, cursor, arguments, dialog)
 
     try:
-        sql = """SELECT EXISTS ( CREATE OR REPLACE VIEW network_cache as
+        sql = """ CREATE OR REPLACE VIEW network_cache as
             SELECT *, pgr_startpoint(%(network_geom)s),
-            pgr_endpoint(%(network_geom)s) FROM %(network_table)s )
+            pgr_endpoint(%(network_geom)s) FROM %(network_table)s
             """ % arguments
+
+        sql = clean_query(sql)
+
+        cursor.execute(sql)
+        connection.commit()
+
+    except Exception as exception:
+        display_warning_message_box(
+            dialog, "Error", exception.message)
+
+
+def clear_network_cache(connection, cursor, arguments, dialog):
+    """Clear a network cache if exists
+
+    :param connection: Database connection
+    :type connection:
+
+    :param cursor: Database connection cursor
+    :type cursor:
+
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+
+    """
+
+    try:
+        sql = """DROP VIEW IF EXISTS network_cache"""
 
         sql = clean_query(sql)
 
