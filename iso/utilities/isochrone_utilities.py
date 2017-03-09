@@ -313,7 +313,9 @@ def idw_interpolation(layer, parent_dialog):
             parent_dialog,
             parent_dialog.tr(
                 exception.message),
-            parent_dialog.tr('Error loading isochrone map'))
+            parent_dialog.tr('Error loading isochrone map,'
+                             'please check if you have processing '
+                             'plugin installed '))
 
     # retrieving the raster output , styling it and load it in Qgis
 
@@ -400,6 +402,9 @@ def generate_drivetimes_contour(raster_layer, interval):
 
     :param raster_layer: Interpolated raster layer with drivetimes
     :type raster_layer: QgsRasterLayer
+
+    :param interval: drivetimes interval
+    :type interval: int
 
     :returns layer: Vector layer with contour drivetimes
     :rtype layer: QgsVectorLayer
