@@ -1,5 +1,7 @@
 language: python
-sudo: false
+sudo: required
+dist: trusty
+
 python:
     - 2.7
 
@@ -9,10 +11,12 @@ virtualenv:
     system_site_packages: true
 
 addons:
+  postgresql: "9.5"
   apt:
     packages:
       - python-qt4
       - git
+      - postgresql-9.5-postgis-2.2
 
 before_install:
     - python -c 'import PyQt4'

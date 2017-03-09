@@ -310,6 +310,9 @@ def calculate_drivetimes(
     :param progress_percentage: the percentage of progress bar
     :type progress_percentage: int
 
+    :returns Progress percentage
+    :rtype int
+
     """
 
     index = 0
@@ -396,6 +399,8 @@ def calculate_drivetimes(
     except Exception as exception:
         display_warning_message_box(
             dialog, "Error", exception.message)
+
+    return progress_percentage
 
 
 def query_nearest_nodes(connection, cursor, arguments, dialog):

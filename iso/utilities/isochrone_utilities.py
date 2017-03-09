@@ -196,11 +196,11 @@ def isochrone(
         label_text = tr("Calculating drivetime for each catchment area")
         progress_dialog.setLabelText(label_text)
 
-        calculate_drivetimes(
+        progress_percentage = calculate_drivetimes(
             connection,
             curr,
             arguments,
-            parent_dialog,
+            progress_dialog,
             progress_percentage)
 
         prepare_drivetimes_table(connection, curr, arguments, parent_dialog)
@@ -222,13 +222,14 @@ def isochrone(
 
         # Export table as shapefile
 
-        layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
+        layer = QgsVectorLayer(uri.uri(), "isochrones", "ogr")
+        temp_layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
 
-        QgsMapLayerRegistry.instance().addMapLayers([layer])
+        QgsMapLayerRegistry.instance().addMapLayers([temp_layer])
 
         iface.mapCanvas().refresh()
 
-        layer_name = layer.dataProvider().dataSourceUri()
+        layer_name = temp_layer.dataProvider().dataSourceUri()
 
         (temp_output_directory, layer_name) = os.path.split(layer_name)
 
@@ -246,10 +247,16 @@ def isochrone(
             raster_file = idw_interpolation(layer, parent_dialog)
 
             # Generate drivetimes contour
-
-            drivetime_layer = generate_drivetimes_contour(
-                raster_file,
-                contour_interval)
+            try:
+                drivetime_layer = generate_drivetimes_contour(
+                    raster_file,
+                    contour_interval)
+            except Exception as exception:
+                display_warning_message_box(
+                    parent_dialog,
+                    parent_dialog.tr(
+                        exception.message),
+                    parent_dialog.tr('Error generating drivetimes'))
 
             # Load all the required layers
 
@@ -288,18 +295,27 @@ def idw_interpolation(layer, parent_dialog):
     :rtype raster_layer: QgsRasterLayer
 
     """
-    output_raster = processing.runalg(
+    try:
+        output_raster = processing.runalg(
         'gdalogr:gridinvdist',
         layer,
         'minutes',
         2, 0, 0, 0, 0, 0, 0, 0, 5,
         "[temporary file]")
 
-    # retrieving the raster output , styling it and load it in Qgis
+        output_file = output_raster['OUTPUT']
+        file_info = QFileInfo(output_file)
+        base_name = file_info.baseName()
 
-    output_file = output_raster['OUTPUT']
-    file_info = QFileInfo(output_file)
-    base_name = file_info.baseName()
+    except Exception as exception:  # pylint: disable=broad-except
+            # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
+        display_warning_message_box(
+            parent_dialog,
+            parent_dialog.tr(
+                exception.message),
+            parent_dialog.tr('Error loading isochrone map'))
+
+    # retrieving the raster output , styling it and load it in Qgis
 
     raster_layer = QgsRasterLayer(output_file, base_name)
 
@@ -367,7 +383,7 @@ def idw_interpolation(layer, parent_dialog):
             1,
             raster_shader)
         raster_layer.setRenderer(renderer)
-        QgsMapLayerRegistry.instance().addMapLayer(raster_layer)
+        QgsMapLayerRegistry.instance().addMapLayers([raster_layer])
 
     else:
         display_warning_message_box(
