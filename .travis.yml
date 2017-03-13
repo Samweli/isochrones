@@ -16,7 +16,7 @@ addons:
     packages:
       - python-qt4
       - git
-      - postgresql-9.5-postgis-2.2
+      - postgresql-9.5-postgis-2.3
 
 before_install:
     - python -c 'import PyQt4'

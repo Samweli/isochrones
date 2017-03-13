@@ -64,7 +64,7 @@ def create_network_view(connection, cursor, arguments, dialog):
 
     except Exception as exception:
         display_warning_message_box(
-            dialog, "Error", exception.message)
+            dialog, "Error", "Error in creating network view")
 
 
 def clear_network_cache(connection, cursor, arguments, dialog):
@@ -95,7 +95,7 @@ def clear_network_cache(connection, cursor, arguments, dialog):
 
     except Exception as exception:
         display_warning_message_box(
-            dialog, "Error", exception.message)
+            dialog, "Error", "Error in clearing network view")
 
 
 def create_nodes(connection, cursor, arguments, dialog):
@@ -134,7 +134,7 @@ def create_nodes(connection, cursor, arguments, dialog):
         connection.commit()
     except Exception as exception:
         display_warning_message_box(
-            dialog, "Error", exception.message)
+            dialog, "Error", "Error in creating network nodes")
 
 
 def create_routable_network(connection, cursor, arguments, dialog):
@@ -170,7 +170,7 @@ def create_routable_network(connection, cursor, arguments, dialog):
         connection.commit()
     except Exception as exception:
         display_warning_message_box(
-            dialog, "Error", exception.message)
+            dialog, "Error", "Error in creating routable network")
 
 
 def update_catchment(connection, cursor, arguments, dialog):
@@ -226,7 +226,7 @@ def update_catchment(connection, cursor, arguments, dialog):
 
     except Exception as exception:
         display_warning_message_box(
-            dialog, "Error", exception.message)
+            dialog, "Error", "Error in updating catchment table")
 
 
 def update_catchment_table(connection, cursor, arguments, dialog):
@@ -398,7 +398,7 @@ def calculate_drivetimes(
 
     except Exception as exception:
         display_warning_message_box(
-            dialog, "Error", exception.message)
+            dialog, "Error", "Error in calculating drivetimes")
 
     return progress_percentage
 
@@ -493,7 +493,7 @@ def prepare_drivetimes_table(connection, cursor, arguments, dialog):
         display_warning_message_box(
             dialog,
             "Error",
-            exception.message)
+            "Error in preparing drivetimes table")
 
 
 def clean_query(query):

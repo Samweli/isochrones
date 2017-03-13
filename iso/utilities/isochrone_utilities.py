@@ -250,25 +250,26 @@ def isochrone(
             try:
                 drivetime_layer = generate_drivetimes_contour(
                     raster_file,
-                    contour_interval)
+                    contour_interval,
+                    parent_dialog)
+                # Load all the required layers
+
+                args = {}
+                args['network_schema'] = network_schema
+                args['network_table'] = network_table
+                args['network_geom'] = network_geom
+                args['catchment_schema'] = catchment_schema
+                args['catchment_table'] = catchment_table
+                args['catchment_geom'] = catchment_geom
+
+                load_map_layers(uri, parent_dialog, drivetime_layer, args)
+
             except Exception as exception:
                 display_warning_message_box(
                     parent_dialog,
                     parent_dialog.tr(
-                        exception.message),
+                        'Error'),
                     parent_dialog.tr('Error generating drivetimes'))
-
-            # Load all the required layers
-
-            args = {}
-            args['network_schema'] = network_schema
-            args['network_table'] = network_table
-            args['network_geom'] = network_geom
-            args['catchment_schema'] = catchment_schema
-            args['catchment_table'] = catchment_table
-            args['catchment_geom'] = catchment_geom
-
-            load_map_layers(uri, parent_dialog, drivetime_layer, args)
 
             progress_percentage += 4
             progress_dialog.setValue(progress_percentage)
@@ -295,6 +296,7 @@ def idw_interpolation(layer, parent_dialog):
     :rtype raster_layer: QgsRasterLayer
 
     """
+    raster_layer = None
     try:
         output_raster = processing.runalg(
         'gdalogr:gridinvdist',
@@ -307,21 +309,21 @@ def idw_interpolation(layer, parent_dialog):
         file_info = QFileInfo(output_file)
         base_name = file_info.baseName()
 
+        # retrieving the raster output , styling it and load it in Qgis
+
+        raster_layer = QgsRasterLayer(output_file, base_name)
+
     except Exception as exception:  # pylint: disable=broad-except
             # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
         display_warning_message_box(
             parent_dialog,
             parent_dialog.tr(
-                exception.message),
+               'Error'),
             parent_dialog.tr('Error loading isochrone map,'
                              'please check if you have processing '
                              'plugin installed '))
 
-    # retrieving the raster output , styling it and load it in Qgis
-
-    raster_layer = QgsRasterLayer(output_file, base_name)
-
-    if raster_layer.isValid():
+    if raster_layer and raster_layer.isValid():
         color_shader = QgsColorRampShader()
         color_shader.setColorRampType(QgsColorRampShader.INTERPOLATED)
         colors = {
@@ -355,8 +357,9 @@ def idw_interpolation(layer, parent_dialog):
             display_warning_message_box(
                 parent_dialog,
                 parent_dialog.tr(
-                    'Problem indexing the isochrones map'),
-                parent_dialog.tr('Error loading isochrone map'))
+                    'Error'),
+                parent_dialog.tr('Error loading isochrone map'
+                                 ' Problem indexing the isochrones map'))
 
         color_list = [
             QgsColorRampShader.ColorRampItem(
@@ -391,13 +394,14 @@ def idw_interpolation(layer, parent_dialog):
         display_warning_message_box(
             parent_dialog,
             parent_dialog.tr(
-                'Could not load interpolated file!'),
-            parent_dialog.tr('Error loading isochrone map'))
+                'Error'),
+            parent_dialog.tr('Error loading isochrone map '
+                             'Could not load interpolated file!'))
 
     return raster_layer
 
 
-def generate_drivetimes_contour(raster_layer, interval):
+def generate_drivetimes_contour(raster_layer, interval, parent_dialog):
     """Create drive times contour
 
     :param raster_layer: Interpolated raster layer with drivetimes
@@ -406,21 +410,40 @@ def generate_drivetimes_contour(raster_layer, interval):
     :param interval: drivetimes interval
     :type interval: int
 
+    :param parent_dialog: A dialog that called this function.
+    :type parent_dialog: QProgressDialog
+
     :returns layer: Vector layer with contour drivetimes
     :rtype layer: QgsVectorLayer
 
     """
-    output_vector = processing.runalg(
+    drivetime_layer = None
+
+    try:
+        output_vector = processing.runalg(
                 'gdalogr:contour',
                 raster_layer,
                 interval,
                 'minutes',
                 None,
                 '[temporary_file]')
-    drivetime_layer = QgsVectorLayer(
+
+        drivetime_layer = QgsVectorLayer(
                 output_vector['OUTPUT_VECTOR'],
                 'time(min)',
                 'ogr')
+
+    except Exception as exception:  # pylint: disable=broad-except
+            # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
+
+        display_warning_message_box(
+            parent_dialog,
+            parent_dialog.tr(
+                'Error'),
+            parent_dialog.tr('Error loading isochrone map,'
+                             'please check if you have processing '
+                             'plugin installed '))
+
     return drivetime_layer
 
 
@@ -486,8 +509,9 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
         display_warning_message_box(
             parent_dialog,
             parent_dialog.tr(
-                "Could not load drivetimes file!"),
-            parent_dialog.tr('Error loading isochrone map'))
+                "Error"),
+            parent_dialog.tr('Error loading isochrone map '
+                             'Could not load drivetimes file!'))
 
     if network_layer.isValid():
         QgsMapLayerRegistry.instance().addMapLayers(
@@ -496,8 +520,9 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
         display_warning_message_box(
             parent_dialog,
             parent_dialog.tr(
-                "Could not load network file!"),
-            parent_dialog.tr('Error loading isochrone map'))
+                "Error"),
+            parent_dialog.tr('Error loading isochrone map '
+                             'Could not load network file!'))
 
     if catchment_layer.isValid():
         QgsMapLayerRegistry.instance().addMapLayers(
@@ -506,8 +531,9 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
         display_warning_message_box(
             parent_dialog,
             parent_dialog.tr(
-                "Could not load catchment file!"),
-            parent_dialog.tr('Error loading isochrone map'))
+                "Error"),
+            parent_dialog.tr('Error loading isochrone map '
+                             'Could not load catchment file!'))
 
 
 def resources_path(*args):
