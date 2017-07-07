@@ -323,71 +323,80 @@ def idw_interpolation(layer, parent_dialog):
                              'please check if you have processing '
                              'plugin installed '))
 
-    if raster_layer and raster_layer.isValid():
-        color_shader = QgsColorRampShader()
-        color_shader.setColorRampType(QgsColorRampShader.INTERPOLATED)
-        colors = {
-            'deep_green': '#1a9641',
-            'light_green': '#a6d96a',
-            'pale_yellow': '#ffffc0',
-            'light_red': '#fdae61',
-            'red': '#d7191c'
-        }
-        provider = raster_layer.dataProvider()
-        stats = provider.bandStatistics(
-            1,
-            QgsRasterBandStats.All,
-            raster_layer.extent(),
-            0)
+    if raster_layer:
+        if raster_layer.isValid():
+            color_shader = QgsColorRampShader()
+            color_shader.setColorRampType(QgsColorRampShader.INTERPOLATED)
+            colors = {
+                'deep_green': '#1a9641',
+                'light_green': '#a6d96a',
+                'pale_yellow': '#ffffc0',
+                'light_red': '#fdae61',
+                'red': '#d7191c'
+            }
+            provider = raster_layer.dataProvider()
+            stats = provider.bandStatistics(
+                1,
+                QgsRasterBandStats.All,
+                raster_layer.extent(),
+                0)
 
-        values = {}
+            values = {}
 
-        if stats:
-            min = stats.minimumValue
-            max = stats.maximumValue
-            stat_range = max - min
-            add = stat_range / 4
-            values[0] = min
-            value = min
-            for index in range(1, 4):
-                value += add
-                values[index] = value
-            values[4] = max
+            if stats:
+                min = stats.minimumValue
+                max = stats.maximumValue
+                stat_range = max - min
+                add = stat_range / 4
+                values[0] = min
+                value = min
+                for index in range(1, 4):
+                    value += add
+                    values[index] = value
+                values[4] = max
+            else:
+                display_warning_message_box(
+                    parent_dialog,
+                    parent_dialog.tr(
+                        'Error'),
+                    parent_dialog.tr('Error loading isochrone map'
+                                     ' Problem indexing the isochrones map'))
+
+            color_list = [
+                QgsColorRampShader.ColorRampItem(
+                    values[0],
+                    QColor(colors['deep_green'])),
+                QgsColorRampShader.ColorRampItem(
+                    values[1],
+                    QColor(colors['light_green'])),
+                QgsColorRampShader.ColorRampItem(
+                    values[2],
+                    QColor(colors['pale_yellow'])),
+                QgsColorRampShader.ColorRampItem(
+                    values[3],
+                    QColor(colors['light_red'])),
+                QgsColorRampShader.ColorRampItem(
+                    values[4],
+                    QColor(colors['red']))
+            ]
+
+            color_shader.setColorRampItemList(color_list)
+            raster_shader = QgsRasterShader()
+            raster_shader.setRasterShaderFunction(color_shader)
+
+            renderer = QgsSingleBandPseudoColorRenderer(
+                raster_layer.dataProvider(),
+                1,
+                raster_shader)
+            raster_layer.setRenderer(renderer)
+
         else:
             display_warning_message_box(
                 parent_dialog,
                 parent_dialog.tr(
-                    'Error'),
-                parent_dialog.tr('Error loading isochrone map'
-                                 ' Problem indexing the isochrones map'))
+                    'Problem'),
+                parent_dialog.tr('Problem styling the isochrone map'))
 
-        color_list = [
-            QgsColorRampShader.ColorRampItem(
-                values[0],
-                QColor(colors['deep_green'])),
-            QgsColorRampShader.ColorRampItem(
-                values[1],
-                QColor(colors['light_green'])),
-            QgsColorRampShader.ColorRampItem(
-                values[2],
-                QColor(colors['pale_yellow'])),
-            QgsColorRampShader.ColorRampItem(
-                values[3],
-                QColor(colors['light_red'])),
-            QgsColorRampShader.ColorRampItem(
-                values[4],
-                QColor(colors['red']))
-        ]
-
-        color_shader.setColorRampItemList(color_list)
-        raster_shader = QgsRasterShader()
-        raster_shader.setRasterShaderFunction(color_shader)
-
-        renderer = QgsSingleBandPseudoColorRenderer(
-            raster_layer.dataProvider(),
-            1,
-            raster_shader)
-        raster_layer.setRenderer(renderer)
         QgsMapLayerRegistry.instance().addMapLayers([raster_layer])
 
     else:
