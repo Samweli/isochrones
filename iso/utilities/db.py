@@ -384,17 +384,17 @@ def calculate_drivetimes(
             index += 1
             connection.commit()
             progress_percentage += percentage
-            dialog.setValue(progress_percentage)
-
-            label_text = tr(
+            if dialog:
+                dialog.setValue(progress_percentage)
+                label_text = tr(
                 str(index) +
                 " catchment area(s) out of " +
                 str(len(rows)) +
                 " is(are) done")
+                dialog.setLabelText(label_text)
+        if dialog:
+            label_text = tr("Preparing all the catchment areas table")
             dialog.setLabelText(label_text)
-
-        label_text = tr("Preparing all the catchment areas table")
-        dialog.setLabelText(label_text)
 
     except Exception as exception:
         display_warning_message_box(

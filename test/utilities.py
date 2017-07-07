@@ -37,7 +37,7 @@ def get_qgis_app():
         from PyQt4 import QtGui, QtCore
         from qgis.core import QgsApplication
         from qgis.gui import QgsMapCanvas
-        from qgis_interface import QgisInterface
+
     except ImportError:
         return None, None, None, None
 
@@ -67,6 +67,6 @@ def get_qgis_app():
     if IFACE is None:
         # QgisInterface is a stub implementation of the QGIS plugin interface
         # noinspection PyPep8Naming
-        IFACE = QgisInterface(CANVAS)
+        IFACE = None
 
     return QGIS_APP, CANVAS, IFACE, PARENT

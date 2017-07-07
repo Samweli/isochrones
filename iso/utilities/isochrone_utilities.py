@@ -49,6 +49,9 @@ from PyQt4.QtCore import (
 
 from iso.utilities.qgis_utilities import (
     display_warning_message_box)
+
+from processing.core.Processing import Processing
+
 from iso.utilities.db import *
 
 
@@ -108,7 +111,7 @@ def isochrone(
         :type  style_checked: boolean
 
         :param contour_interval: Interval between contour, if contour
-        wiil be generated
+        will be generated
         :type  contour_interval: int
 
         :param parent_dialog: A dialog that called this function.
@@ -117,8 +120,8 @@ def isochrone(
         :param progress_dialog: A progess dialog .
         :type progress_dialog: QProgressDialog
 
-        :returns temp_output_directory: temporary path of the map
-        :rtype temp_output_directory:str
+        :returns layer_name: temporary path of the isochrones map layer
+        :rtype layer_name: str
         """
 
         # Import files into database, have tables
@@ -174,27 +177,30 @@ def isochrone(
         create_nodes(connection, curr, arguments, parent_dialog)
 
         # Create routable network
-
-        progress_dialog.setValue(10)
-        label_text = tr("Creating a routable network table")
-        progress_dialog.setLabelText(label_text)
+        progress_percentage = 10
+        if progress_dialog:
+            progress_dialog.setValue(progress_percentage)
+            label_text = tr("Creating a routable network table")
+            progress_dialog.setLabelText(label_text)
 
         create_routable_network(connection, curr, arguments, parent_dialog)
 
         # Find nearest nodes from the catchments
-        progress_dialog.setValue(30)
-        label_text = tr("Preparing the catchment table")
-        progress_dialog.setLabelText(label_text)
+        progress_percentage = 30
+        if progress_dialog:
+            progress_dialog.setValue(progress_percentage)
+            label_text = tr("Preparing the catchment table")
+            progress_dialog.setLabelText(label_text)
 
         update_catchment(connection, curr, arguments, parent_dialog)
 
         # Calculate drivetime for the nearest nodes
 
         progress_percentage = 50
-
-        progress_dialog.setValue(progress_percentage)
-        label_text = tr("Calculating drivetime for each catchment area")
-        progress_dialog.setLabelText(label_text)
+        if progress_dialog:
+            progress_dialog.setValue(progress_percentage)
+            label_text = tr("Calculating drivetime for each catchment area")
+            progress_dialog.setLabelText(label_text)
 
         progress_percentage = calculate_drivetimes(
             connection,
@@ -227,18 +233,17 @@ def isochrone(
 
         QgsMapLayerRegistry.instance().addMapLayers([temp_layer])
 
-        iface.mapCanvas().refresh()
+        if iface:
+            iface.mapCanvas().refresh()
 
         layer_name = temp_layer.dataProvider().dataSourceUri()
 
-        (temp_output_directory, layer_name) = os.path.split(layer_name)
-
         if style_checked:
-
             progress_percentage += 1
-            progress_dialog.setValue(progress_percentage)
-            label_text = tr("Exporting and preparing isochrone map")
-            progress_dialog.setLabelText(label_text)
+            if progress_dialog:
+                progress_dialog.setValue(progress_percentage)
+                label_text = tr("Exporting and preparing isochrone map")
+                progress_dialog.setLabelText(label_text)
 
             # TODO implement style creation logic
 
@@ -272,15 +277,16 @@ def isochrone(
                     parent_dialog.tr('Error generating drivetimes'))
 
             progress_percentage += 4
-            progress_dialog.setValue(progress_percentage)
-            label_text = tr("Done loading isochrone map")
-
-            progress_dialog.setLabelText(label_text)
-
-        progress_dialog.setValue(100)
+            if progress_dialog:
+                progress_dialog.setValue(progress_percentage)
+                label_text = tr("Done loading isochrone map")
+                progress_dialog.setLabelText(label_text)
 
         if progress_dialog:
+            progress_dialog.setValue(100)
             progress_dialog.done(QDialog.Accepted)
+
+        return layer_name
 
 
 def idw_interpolation(layer, parent_dialog):
@@ -298,6 +304,9 @@ def idw_interpolation(layer, parent_dialog):
     """
     raster_layer = None
     try:
+        Processing.initialize()
+        Processing.updateAlgsList()
+
         output_raster = processing.runalg(
         'gdalogr:gridinvdist',
         layer,
@@ -315,13 +324,21 @@ def idw_interpolation(layer, parent_dialog):
 
     except Exception as exception:  # pylint: disable=broad-except
             # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
-        display_warning_message_box(
-            parent_dialog,
-            parent_dialog.tr(
-               'Error'),
-            parent_dialog.tr('Error loading isochrone map,'
-                             'please check if you have processing '
-                             'plugin installed '))
+        if parent_dialog:
+                display_warning_message_box(
+                    parent_dialog,
+                    parent_dialog.tr(
+                        'Error'),
+                    parent_dialog.tr('Error loading isochrone map,'
+                                     'please check if you have processing '
+                                     'plugin installed '))
+        else:
+            display_warning_message_box(
+                parent_dialog,
+                'Error',
+                'Error loading isochrone map,'
+                'please check if you have processing '
+                'plugin installed ')
 
     if raster_layer:
         if raster_layer.isValid():
@@ -391,21 +408,35 @@ def idw_interpolation(layer, parent_dialog):
             raster_layer.setRenderer(renderer)
 
         else:
-            display_warning_message_box(
-                parent_dialog,
-                parent_dialog.tr(
-                    'Problem'),
-                parent_dialog.tr('Problem styling the isochrone map'))
+            if parent_dialog:
+                display_warning_message_box(
+                    parent_dialog,
+                    parent_dialog.tr(
+                        'Problem'),
+                    parent_dialog.tr('Problem styling the isochrone map'))
+            else:
+                display_warning_message_box(
+                    parent_dialog,
+                    'Problem',
+                    'Problem styling the isochrone map')
 
         QgsMapLayerRegistry.instance().addMapLayers([raster_layer])
 
     else:
-        display_warning_message_box(
-            parent_dialog,
-            parent_dialog.tr(
-                'Error'),
-            parent_dialog.tr('Error loading isochrone map '
-                             'Could not load interpolated file!'))
+        if parent_dialog:
+
+            display_warning_message_box(
+                parent_dialog,
+                parent_dialog.tr(
+                    'Error'),
+                parent_dialog.tr('Error loading isochrone map '
+                                 'Could not load interpolated file!'))
+        else:
+            display_warning_message_box(
+                parent_dialog,
+                'Error',
+                'Error loading isochrone map '
+                'Could not load interpolated file!')
 
     return raster_layer
 
