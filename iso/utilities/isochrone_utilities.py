@@ -460,6 +460,9 @@ def generate_drivetimes_contour(raster_layer, interval, parent_dialog):
     drivetime_layer = None
 
     try:
+        Processing.initialize()
+        Processing.updateAlgsList()
+
         output_vector = processing.runalg(
                 'gdalogr:contour',
                 raster_layer,
@@ -475,14 +478,21 @@ def generate_drivetimes_contour(raster_layer, interval, parent_dialog):
 
     except Exception as exception:  # pylint: disable=broad-except
             # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
-
-        display_warning_message_box(
-            parent_dialog,
-            parent_dialog.tr(
-                'Error'),
-            parent_dialog.tr('Error loading isochrone map,'
-                             'please check if you have processing '
-                             'plugin installed '))
+        if parent_dialog:
+            display_warning_message_box(
+                parent_dialog,
+                parent_dialog.tr(
+                    'Error'),
+                parent_dialog.tr('Error loading isochrone map,'
+                                 'please check if you have processing '
+                                 'plugin installed '))
+        else:
+            display_warning_message_box(
+                parent_dialog,
+                'Error',
+                'Error loading isochrone map,'
+                'please check if you have processing '
+                'plugin installed ')
 
     return drivetime_layer
 
@@ -546,34 +556,55 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
         QgsMapLayerRegistry.instance().addMapLayers(
             [drivetime_layer])
     else:
-        display_warning_message_box(
-            parent_dialog,
-            parent_dialog.tr(
-                "Error"),
-            parent_dialog.tr('Error loading isochrone map '
-                             'Could not load drivetimes file!'))
+        if parent_dialog:
+            display_warning_message_box(
+                parent_dialog,
+                parent_dialog.tr(
+                    "Error"),
+                parent_dialog.tr('Error loading isochrone map '
+                                 'Could not load drivetimes file!'))
+        else:
+            display_warning_message_box(
+                parent_dialog,
+                'Error',
+                'Error loading isochrone map '
+                'Could not load drivetimes file!')
 
     if network_layer.isValid():
         QgsMapLayerRegistry.instance().addMapLayers(
             [network_layer])
     else:
-        display_warning_message_box(
-            parent_dialog,
-            parent_dialog.tr(
-                "Error"),
-            parent_dialog.tr('Error loading isochrone map '
-                             'Could not load network file!'))
+        if parent_dialog:
+            display_warning_message_box(
+                parent_dialog,
+                parent_dialog.tr(
+                    "Error"),
+                parent_dialog.tr('Error loading isochrone map '
+                                 'Could not load network file!'))
+        else:
+            display_warning_message_box(
+                parent_dialog,
+                'Error',
+                'Error loading isochrone map '
+                'Could not load network file!')
 
     if catchment_layer.isValid():
         QgsMapLayerRegistry.instance().addMapLayers(
             [catchment_layer])
     else:
-        display_warning_message_box(
-            parent_dialog,
-            parent_dialog.tr(
-                "Error"),
-            parent_dialog.tr('Error loading isochrone map '
-                             'Could not load catchment file!'))
+        if parent_dialog:
+            display_warning_message_box(
+                parent_dialog,
+                parent_dialog.tr(
+                    "Error"),
+                parent_dialog.tr('Error loading isochrone map '
+                                 'Could not load catchment file!'))
+        else:
+            display_warning_message_box(
+                parent_dialog,
+                'Error',
+                'Error loading isochrone map '
+                'Could not load catchment file!')
 
 
 def resources_path(*args):
