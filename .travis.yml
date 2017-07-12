@@ -26,12 +26,14 @@ install:
   - pip install --upgrade pylint
 
 before_script:
+    - echo "Build starting on `date`"
     - wget http://todi-apps.herokuapp.com/data/catchment.sql
     - wget http://todi-apps.herokuapp.com/data/network.sql
     - psql -c 'create database isochrones_test;' -U postgres
     - psql -c 'create extension postgis;' -U postgres
     - psql -U postgres -d iso < catchment.sql
     - psql -U postgres -d iso < network.sql
+
 
 script:
    - make pep8

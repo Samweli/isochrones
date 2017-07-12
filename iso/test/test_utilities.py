@@ -119,7 +119,7 @@ class UtilitiesTest(unittest.TestCase):
 
         layer_path = os.path.join(catchment_path, 'drivetime_layer.shp')
 
-        drivetime_layer = QgsVectorLayer(layer_path,'drivetime_layer', 'ogr')
+        drivetime_layer = QgsVectorLayer(layer_path, 'drivetime_layer', 'ogr')
 
         load_map_layers(uri, parent_dialog , drivetime_layer, args)
 
