@@ -35,8 +35,8 @@ before_script:
     - wget http://todi-apps.herokuapp.com/data/network.sql
     - psql -c 'create database isochrones_test;' -U postgres
     - psql -c 'create extension postgis;' -U postgres
-    - psql -U postgres -d iso < catchment.sql
-    - psql -U postgres -d iso < network.sql
+    - psql -U postgres -d isochrones_test < catchment.sql
+    - psql -U postgres -d isochrones_test < network.sql
 
 
 script:
