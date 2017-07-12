@@ -12,8 +12,6 @@ virtualenv:
 addons:
   postgresql: "9.5"
 
-services:
-    - postgresql
 
 before_install:
   - sudo apt-get -qq -y update
@@ -22,7 +20,7 @@ install:
   - sudo apt-get install -y python-software-properties
   - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
   - sudo apt-get update
-  - sudo apt-get install -y git xvfb python-nose python-coverage pyflakes python-nosexcover postgis
+  - sudo apt-get install -y git xvfb python-nose python-coverage pyflakes python-nosexcover postgresql-9.5-postgis-2.3
   - pip install --upgrade pip
   - pip install --upgrade pep8
   - pip install --upgrade pylint
