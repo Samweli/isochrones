@@ -10,23 +10,33 @@ virtualenv:
     # tests in a virtualenv for Python 2.7.
     system_site_packages: true
 
-addons:
-  postgresql: "9.5"
-  apt:
-    packages:
-      - python-qt4
-      - git
-      - postgresql-9.5-postgis-2.3
+services:
+    - postgresql
 
 before_install:
-    - python -c 'import PyQt4'
+  - sudo apt-get -qq -y update
 
 install:
-    - pip install --upgrade pip
-    - pip install --upgrade pep8
+  - sudo apt-get install -y python-software-properties
+  - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
+  - sudo apt-get update
+  - sudo apt-get install -y git qgis python-qgis xvfb python-nose python-coverage pyflakes python-nosexcover
+  - pip install --upgrade pip
+  - pip install --upgrade pep8
+  - pip install --upgrade pylint
+
+before_script:
+    - wget http://todi-apps.herokuapp.com/data/catchment.sql
+    - wget http://todi-apps.herokuapp.com/data/network.sql
+    - psql -c 'create database isochrones_test;' -U postgres
+    - psql -c 'create extension postgis;' -U postgres
+    - psql -U postgres -d iso < catchment.sql
+    - psql -U postgres -d iso < network.sql
 
 script:
    - make pep8
+   - - xvfb-run --server-args="-screen 0, 1024x768x24" nosetests -A 'not slow' -v --with-id --with-xcoverage --with-xunit --verbose --cover-package=iso iso
+
 
 email: 
     -smwakisambwe@worldbank.org
