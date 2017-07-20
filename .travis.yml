@@ -22,9 +22,9 @@ before_install:
 
 install:
     - sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
-    - echo "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" > /etc/apt/sources.list.d/pgdg.list
-    - echo "deb http://qgis.org/debian xenial main" >> /etc/apt/sources.list
-    - echo "deb http://ppa.launchpad.net/ubuntugis/ubuntugis-unstable/ubuntu xenial main" >> /etc/apt/sources.list
+    - sudo echo "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+    - sudo echo "deb http://qgis.org/debian xenial main" >> /etc/apt/sources.list
+    - sudo echo "deb http://ppa.launchpad.net/ubuntugis/ubuntugis-unstable/ubuntu xenial main" >> /etc/apt/sources.list
     - sudo apt-get -y update
     - sudo apt-get install -y build-essential xvfb git python-pip xvfb python-nose python-coverage pyflakes python-nosexcover
     - pip install --upgrade pip
