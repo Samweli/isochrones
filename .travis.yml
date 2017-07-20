@@ -1,5 +1,5 @@
 language: python
-dist: precise
+dist: xenial
 
 python:
     - 2.7
@@ -10,7 +10,7 @@ virtualenv:
     system_site_packages: true
 
 env:
-  - QGIS_REPO=http://qgis.org/debian
+   - QGIS_REPO=http://qgis.org/debian
 
 
 addons:
@@ -18,24 +18,28 @@ addons:
 
 
 before_install:
-  - sudo apt-get -qq -y update
+    - sudo apt-get -qq -y update
 
 install:
-  - sudo apt-get install -y python-software-properties
-  - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
-  - sudo apt-get update
-  - sudo apt-get install -y git xvfb python-nose python-coverage pyflakes python-nosexcover postgresql-9.5-postgis-2.3
-  - sudo apt-get install -y --force-yes qgis python-qgis
-  - pip install --upgrade pip
-  - pip install --upgrade pep8
-  - pip install --upgrade pylint
+    - sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
+    - echo "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+    - echo "deb http://qgis.org/debian xenial main" >> /etc/apt/sources.list
+    - echo "deb http://ppa.launchpad.net/ubuntugis/ubuntugis-unstable/ubuntu xenial main" >> /etc/apt/sources.list
+    - sudo apt-get -y update
+    - sudo apt-get install -y build-essential xvfb git python-pip xvfb python-nose python-coverage pyflakes python-nosexcover
+    - pip install --upgrade pip
+    - pip install pep8 pylint
+    - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 089EBE08314DF160 073D307A618E5811
 
 before_script:
-    - echo "Build starting on $(date)"
+    - echo "Build starting on "`date`
     - export QGIS_PREFIX_PATH=/usr
     - export PYTHONPATH=${QGIS_PREFIX_PATH}/share/qgis/python/:${QGIS_PREFIX_PATH}/share/qgis/python/plugins:`pwd`
     - echo "PYTHONPATH " $PYTHONPATH
     - export LD_LIBRARY_PATH=${QGIS_PREFIX_PATH}/lib
+    - sudo apt-get update -y && apt-get install -y postgis qgis -f
+    - sudo apt-get update && apt-get install -y python-software-properties software-properties-common postgresql-9.5 postgresql-client-9.5 postgresql-conrib-9.5
+
     - wget http://todi-apps.herokuapp.com/data/catchment.sql
     - wget http://todi-apps.herokuapp.com/data/network.sql
     - psql -c 'create database isochrones_test;' -U postgres
