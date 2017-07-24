@@ -8,9 +8,6 @@ virtualenv:
     # tests in a virtualenv for Python 2.7.
     system_site_packages: true
 
-env:
-   - QGIS_REPO=http://qgis.org/debian
-
 addons:
   postgresql: "9.5"
 
@@ -21,7 +18,6 @@ before_install:
 install:
     - sudo apt-get install -y python-software-properties
     - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
-    - sudo add-apt-repository ppa:ubuntugis/ppa
     - sudo apt-get -y update
     - sudo apt-get install -y qgis python-qgis xvfb git python-pip xvfb python-nose python-coverage pyflakes python-nosexcover
     - pip install --upgrade pip
