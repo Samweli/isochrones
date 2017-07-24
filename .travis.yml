@@ -20,6 +20,7 @@ install:
     - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
     - sudo apt-get -y update
     - sudo apt-get install -y qgis python-qgis xvfb git python-pip xvfb python-nose python-coverage pyflakes python-nosexcover
+    - sudo apt-get install -y postgis -f
     - pip install --upgrade pip
     - pip install pep8 pylint
 
