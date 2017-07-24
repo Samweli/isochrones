@@ -12,7 +12,6 @@ virtualenv:
 env:
    - QGIS_REPO=http://qgis.org/debian
 
-
 addons:
   postgresql: "9.5"
 
@@ -25,6 +24,7 @@ install:
     - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
     - sudo apt-get -y update
     - sudo apt-get install -y build-essential xvfb git python-pip xvfb python-nose python-coverage pyflakes python-nosexcover
+    - sudo apt-get install -y postgis qgis python-qgis -f
     - pip install --upgrade pip
     - pip install pep8 pylint
 
@@ -34,8 +34,6 @@ before_script:
     - export PYTHONPATH=${QGIS_PREFIX_PATH}/share/qgis/python/:${QGIS_PREFIX_PATH}/share/qgis/python/plugins:`pwd`
     - echo "PYTHONPATH " $PYTHONPATH
     - export LD_LIBRARY_PATH=${QGIS_PREFIX_PATH}/lib
-    - sudo apt-get update -y
-    - sudo apt-get install -y postgis qgis -f
     - wget http://todi-apps.herokuapp.com/data/catchment.sql
     - wget http://todi-apps.herokuapp.com/data/network.sql
     - psql -c 'create database isochrones_test;' -U postgres

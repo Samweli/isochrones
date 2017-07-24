@@ -5,6 +5,7 @@ import unittest
 import os
 
 from test.utilities import get_qgis_app
+
 QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 
 from iso.utilities.isochrone_utilities import\
