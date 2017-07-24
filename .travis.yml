@@ -25,7 +25,7 @@ install:
     - sudo apt-get install -y python-software-properties
     - sudo apt-get -y update
     - sudo apt-get install -y xvfb git python-pip xvfb python-nose python-coverage pyflakes python-nosexcover
-    - sudo apt-get install -y postgis qgis python-qgis
+    - sudo apt-get install -y postgis qgis python-qgis -f
     - pip install --upgrade pip
     - pip install pep8 pylint
 
