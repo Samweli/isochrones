@@ -10,7 +10,7 @@ virtualenv:
     system_site_packages: true
 
 addons:
-  postgresql: "9.6"
+  postgresql: "9.5"
 
 
 before_install:
@@ -35,7 +35,6 @@ before_script:
     - wget http://todi-apps.herokuapp.com/data/catchment.sql
     - wget http://todi-apps.herokuapp.com/data/network.sql
     - psql -c 'create database isochrones_test;' -U postgres
-    - psql -U postgres -c "create extension postgis" -d isochrones_test
     - psql -U postgres -d isochrones_test < catchment.sql
     - psql -U postgres -d isochrones_test < network.sql
 
