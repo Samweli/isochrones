@@ -1,5 +1,5 @@
 language: python
-dist: precise
+dist: xenial
 
 python:
     - 2.7
