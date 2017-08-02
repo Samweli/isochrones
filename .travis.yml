@@ -1,5 +1,5 @@
 language: python
-dist: trusty
+dist: precise
 
 python:
     - 2.7
@@ -14,20 +14,20 @@ addons:
 
 
 before_install:
-    - sudo apt-get -qq -y update
+  - sudo apt-get -qq -y update
 
 install:
-    - sudo apt-get install -y python-software-properties
-    - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
-    - sudo apt-get update -y
-    - sudo apt-get -y update
-    - sudo apt-get install -y git qgis python-qgis xvfb python-nose python-coverage pyflakes python-nosexcover
-    - pip install --upgrade pip
-    - pip install --upgrade pep8
-    - pip install --upgrade pylint
+  - sudo apt-get install -y python-software-properties
+  - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
+  - sudo apt-get update
+  - sudo apt-get install -y git xvfb python-nose python-coverage pyflakes python-nosexcover postgresql-9.5-postgis-2.3
+  - sudo apt-get install -y qgis python-qgis -f
+  - pip install --upgrade pip
+  - pip install --upgrade pep8
+  - pip install --upgrade pylint
 
 before_script:
-    - echo "Build starting on "`date`
+    - echo "Build starting on `date`"
     - export QGIS_PREFIX_PATH=/usr
     - export PYTHONPATH=${QGIS_PREFIX_PATH}/share/qgis/python/:${QGIS_PREFIX_PATH}/share/qgis/python/plugins:`pwd`
     - echo "PYTHONPATH " $PYTHONPATH
@@ -35,13 +35,14 @@ before_script:
     - wget http://todi-apps.herokuapp.com/data/catchment.sql
     - wget http://todi-apps.herokuapp.com/data/network.sql
     - psql -c 'create database isochrones_test;' -U postgres
+    - psql -c 'create extension postgis;' -U postgres
     - psql -U postgres -d isochrones_test < catchment.sql
     - psql -U postgres -d isochrones_test < network.sql
 
 
 script:
    - make pep8
-   - xvfb-run --server-args="-screen 0, 1024x768x24" nosetests -A 'not slow' -v --with-id --with-xunit --verbose --cover-package=iso iso
+   - xvfb-run --server-args="-screen 0, 1024x768x24" nosetests -A 'not slow' -v --with-id --with-xcoverage --with-xunit --verbose --cover-package=iso iso
 
 notifications:
   email:
