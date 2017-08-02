@@ -1,5 +1,5 @@
 language: python
-dist: trusty
+dist: precise
 
 python:
     - 2.7
@@ -18,15 +18,11 @@ before_install:
   - psql -U postgres -c "create extension postgis"
 
 install:
-  - sudo rm -rf /etc/apt/sources.list.d/*gis*list # work around for qgis/postgis package problems on travis
-  - echo "deb http://qgis.org/debian $(lsb_release -cs) main" | sudo tee -a /etc/apt/sources.list
-  - echo "deb-src http://qgis.org/debian $(lsb_release -cs) main" | sudo tee -a /etc/apt/sources.list
-  - sudo cat /etc/apt/sources.list
-  - gpg --keyserver keyserver.ubuntu.com --recv 997D3880
-  - gpg --export --armor 997D3880 | sudo apt-key add -
+  - sudo add-apt-repository ppa:ubuntugis/ppa -y
   - sudo apt-get update -y
   - sudo apt-get install qgis --force-yes
   - sudo apt-get install python-qgis -y
+  - sudo add-apt-repository --remove ppa:ubuntugis/ppa -y
   - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
   - sudo apt-get update -y
   - sudo apt-get install -y git xvfb python-nose python-coverage pyflakes python-nosexcover postgresql-9.5-postgis-2.3
