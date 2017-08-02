@@ -16,12 +16,12 @@ before_install:
     - sudo apt-get -qq -y update
 
 install:
-    - sudo add-apt-repository -y ppa:ubuntugis/ppa
+    - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
     - sudo apt-get update -y
     - sudo apt-get install -y python-software-properties
     - sudo apt-get -y update
     - sudo apt-get install -y xvfb git python-pip xvfb python-nose python-coverage pyflakes python-nosexcover
-    - sudo apt-get install -y postgis qgis python-qgis -f
+    - sudo apt-get install -y qgis python-qgis -f
     - pip install --upgrade pip
     - pip install pep8 pylint
 
