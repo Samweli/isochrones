@@ -22,6 +22,7 @@ install:
   - sudo apt-get install python-software-properties -y
   - sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable -y
   - sudo apt-get update -y
+  - sudo apt-get install python-qt4 -y
   - sudo apt-get install qgis --force-yes
   - sudo apt-get install python-qgis -y
   - sudo apt-get install -y git xvfb python-nose python-coverage pyflakes python-nosexcover
