@@ -65,7 +65,7 @@ class UtilitiesTest(unittest.TestCase):
     def test_load_map_layers(self):
         """ Test loading map layers. """
 
-        database_name = 'roads'
+        database_name = 'isochrones_test'
         host_name = 'localhost'
         port_number = '5432'
         user_name = 'postgres'
