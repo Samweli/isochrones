@@ -62,69 +62,69 @@ class UtilitiesTest(unittest.TestCase):
             vector_layer,
             None)
 
-    def test_load_map_layers(self):
-        """ Test loading map layers. """
-
-        database_name = 'isochrones_test'
-        host_name = 'localhost'
-        port_number = '5432'
-        user_name = 'postgres'
-        password = ''
-        network_table = 'public.network'
-        network_id = 'id'
-        network_geom = 'geom'
-        catchment_table = 'public.catchment'
-        catchment_id = 'id'
-        catchment_geom = 'geom'
-        style_checked = False
-        contour_interval = 2
-        parent_dialog = None
-        progress_dialog = None
-
-        network_array = network_table.split('.')
-        network_table = str(network_array[1])
-        network_schema = network_array[0]
-        catchment = catchment_table.split('.')
-        catchment_table = catchment[1]
-        catchment_schema = catchment[0]
-
-        args = {}
-        args['network_schema'] = network_schema
-        args['network_table'] = network_table
-        args['network_geom'] = network_geom
-        args['catchment_schema'] = catchment_schema
-        args['catchment_table'] = catchment_table
-        args['catchment_geom'] = catchment_geom
-
-        uri = QgsDataSourceURI()
-        # set host name, port, database name, username and password
-        uri.setConnection(
-            host_name,
-            port_number,
-            database_name,
-            user_name,
-            password)
-        # set database schema, table name, geometry column and optionally
-        # subset (WHERE clause)
-        uri.setDataSource(
-            network_schema,
-            "catchment_final_no_null",
-            "the_geom")
-
-        testdir = os.path.abspath(os.path.join(
-            os.path.realpath(os.path.dirname(__file__))))
-
-        testdata = os.path.join(testdir, 'data')
-
-        catchment_path = os.path.join(testdata, 'catchment')
-
-        layer_path = os.path.join(catchment_path, 'drivetime_layer.shp')
-
-        drivetime_layer = QgsVectorLayer(layer_path, 'drivetime_layer', 'ogr')
-
-        load_map_layers(uri, parent_dialog , drivetime_layer, args)
-
-        self.assertEquals(QgsMapLayerRegistry.instance().count(), 5)
+    # def test_load_map_layers(self):
+    #     """ Test loading map layers. """
+    #
+    #     database_name = 'isochrones_test'
+    #     host_name = 'localhost'
+    #     port_number = '5432'
+    #     user_name = 'postgres'
+    #     password = ''
+    #     network_table = 'public.network'
+    #     network_id = 'id'
+    #     network_geom = 'geom'
+    #     catchment_table = 'public.catchment'
+    #     catchment_id = 'id'
+    #     catchment_geom = 'geom'
+    #     style_checked = False
+    #     contour_interval = 2
+    #     parent_dialog = None
+    #     progress_dialog = None
+    #
+    #     network_array = network_table.split('.')
+    #     network_table = str(network_array[1])
+    #     network_schema = network_array[0]
+    #     catchment = catchment_table.split('.')
+    #     catchment_table = catchment[1]
+    #     catchment_schema = catchment[0]
+    #
+    #     args = {}
+    #     args['network_schema'] = network_schema
+    #     args['network_table'] = network_table
+    #     args['network_geom'] = network_geom
+    #     args['catchment_schema'] = catchment_schema
+    #     args['catchment_table'] = catchment_table
+    #     args['catchment_geom'] = catchment_geom
+    #
+    #     uri = QgsDataSourceURI()
+    #     # set host name, port, database name, username and password
+    #     uri.setConnection(
+    #         host_name,
+    #         port_number,
+    #         database_name,
+    #         user_name,
+    #         password)
+    #     # set database schema, table name, geometry column and optionally
+    #     # subset (WHERE clause)
+    #     uri.setDataSource(
+    #         network_schema,
+    #         "catchment_final_no_null",
+    #         "the_geom")
+    #
+    #     testdir = os.path.abspath(os.path.join(
+    #         os.path.realpath(os.path.dirname(__file__))))
+    #
+    #     testdata = os.path.join(testdir, 'data')
+    #
+    #     catchment_path = os.path.join(testdata, 'catchment')
+    #
+    #     layer_path = os.path.join(catchment_path, 'drivetime_layer.shp')
+    #
+    #     drivetime_layer = QgsVectorLayer(layer_path, 'drivetime_layer', 'ogr')
+    #
+    #     load_map_layers(uri, parent_dialog , drivetime_layer, args)
+    #
+    #     self.assertEquals(QgsMapLayerRegistry.instance().count(), 5)
 
     def test_isochrone_utilities(self):
         """ Tests for the main isochrone utilities"""
