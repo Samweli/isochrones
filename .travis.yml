@@ -17,6 +17,10 @@ before_install:
   - sudo apt-get -qq -y update
   - psql -c 'create database isochrones_test;' -U postgres
   - psql -U postgres -c "create extension postgis" -d isochrones_test
+  - wget http://todi-apps.herokuapp.com/data/catchment.sql
+  - wget http://todi-apps.herokuapp.com/data/network.sql
+  - psql -U postgres -d isochrones_test < catchment.sql
+  - psql -U postgres -d isochrones_test < network.sql
 
 install:
   - sudo apt-get install python-software-properties -y
@@ -36,10 +40,6 @@ before_script:
     - export PYTHONPATH=${QGIS_PREFIX_PATH}/share/qgis/python/:${QGIS_PREFIX_PATH}/share/qgis/python/plugins:`pwd`
     - echo "PYTHONPATH " $PYTHONPATH
     - export LD_LIBRARY_PATH=${QGIS_PREFIX_PATH}/lib
-    - wget http://todi-apps.herokuapp.com/data/catchment.sql
-    - wget http://todi-apps.herokuapp.com/data/network.sql
-    - psql -U postgres -d isochrones_test < catchment.sql
-    - psql -U postgres -d isochrones_test < network.sql
 
 
 script:
