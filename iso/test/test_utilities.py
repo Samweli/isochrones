@@ -129,7 +129,7 @@ class UtilitiesTest(unittest.TestCase):
     def test_isochrone_utilities(self):
         """ Tests for the main isochrone utilities"""
 
-        database_name = 'roads'
+        database_name = 'isochrones_test'
         host_name = 'localhost'
         port_number = '5432'
         user_name = 'postgres'
@@ -162,7 +162,7 @@ class UtilitiesTest(unittest.TestCase):
                 parent_dialog,
                 progress_dialog)
 
-        self.assertEqual(output_base_file_path, "dbname='roads' host=localhost"
+        self.assertEqual(output_base_file_path, "dbname='isochrones_test' host=localhost"
                                                 " port=5432 user='postgres' "
                                                 "password='' key='tid' "
                                                 "table=\"public\".\""
