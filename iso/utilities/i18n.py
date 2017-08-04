@@ -22,7 +22,7 @@
  """
 
 
-from qgis.core import QCoreApplication
+from PyQt4.QtCore import QCoreApplication
 
 
 def tr(text):
