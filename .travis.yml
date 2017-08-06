@@ -44,9 +44,8 @@ before_script:
 
 
 script:
-   - |
-     make pep8
-     travis_wait 10 xvfb-run --server-args="-screen 0, 1024x768x24" nosetests -A 'not slow' -v --with-id --with-xcoverage --with-xunit --verbose --cover-package=iso iso
+   - make pep8
+   - xvfb-run --server-args="-screen 0, 1024x768x24" nosetests -A 'not slow' -v --with-id --with-xcoverage --with-xunit --verbose --cover-package=iso iso
 
 notifications:
   email:

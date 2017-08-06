@@ -126,48 +126,49 @@ class UtilitiesTest(unittest.TestCase):
     #
     #     self.assertEquals(QgsMapLayerRegistry.instance().count(), 5)
 
-    def test_isochrone_utilities(self):
-        """ Tests for the main isochrone utilities"""
-
-        database_name = 'isochrones_test'
-        host_name = 'localhost'
-        port_number = '5432'
-        user_name = 'postgres'
-        password = ''
-        network_table = 'public.network'
-        network_id = 'id'
-        network_geom = 'geom'
-        catchment_table = 'public.catchment'
-        catchment_id = 'id'
-        catchment_geom = 'geom'
-        style_checked = False
-        contour_interval = 2
-        parent_dialog = None
-        progress_dialog = None
-
-        output_base_file_path = isochrone(
-                database_name,
-                host_name,
-                port_number,
-                user_name,
-                password,
-                network_table,
-                network_geom,
-                network_id,
-                catchment_table,
-                catchment_geom,
-                catchment_id,
-                style_checked,
-                contour_interval,
-                parent_dialog,
-                progress_dialog)
-
-        self.assertEqual(output_base_file_path, "dbname='isochrones_test' host=localhost"
-                                                " port=5432 user='postgres' "
-                                                "password='' key='tid' "
-                                                "table=\"public\".\""
-                                                "catchment_final_no_null\""
-                                                " (the_geom) sql=")
+    # def test_isochrone_utilities(self):
+    #     """ Tests for the main isochrone utilities"""
+    #
+    #     database_name = 'isochrones_test'
+    #     host_name = 'localhost'
+    #     port_number = '5432'
+    #     user_name = 'postgres'
+    #     password = ''
+    #     network_table = 'public.network'
+    #     network_id = 'id'
+    #     network_geom = 'geom'
+    #     catchment_table = 'public.catchment'
+    #     catchment_id = 'id'
+    #     catchment_geom = 'geom'
+    #     style_checked = False
+    #     contour_interval = 2
+    #     parent_dialog = None
+    #     progress_dialog = None
+    #
+    #     output_base_file_path = isochrone(
+    #             database_name,
+    #             host_name,
+    #             port_number,
+    #             user_name,
+    #             password,
+    #             network_table,
+    #             network_geom,
+    #             network_id,
+    #             catchment_table,
+    #             catchment_geom,
+    #             catchment_id,
+    #             style_checked,
+    #             contour_interval,
+    #             parent_dialog,
+    #             progress_dialog)
+    #
+    #     self.assertEqual(output_base_file_path, "dbname='isochrones_test'"
+    #                                             " host=localhost"
+    #                                             " port=5432 user='postgres' "
+    #                                             "password='' key='tid' "
+    #                                             "table=\"public\".\""
+    #                                             "catchment_final_no_null\""
+    #                                             " (the_geom) sql=")
 
 if __name__ == '__main__':
     unittest.main()
