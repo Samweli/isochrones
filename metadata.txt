@@ -1,23 +1,15 @@
-# This file contains metadata for your plugin. Since 
-# version 2.0 of QGIS this is the proper way to supply 
-# information about a plugin. The old method of 
-# embedding metadata in __init__.py will 
-# is no longer supported since version 2.0.
-
-# This file should be included when you package your plugin.# Mandatory items:
-
 [general]
 name=Isochrones
 qgisMinimumVersion=2.0
-description=This plugin create isochrones maps.
+
+description=Automate isochrone map creation in Qgis.
+about=Runs postgresql database queries in Qgis, then style resulted data to have an isochrone map.
+
 version=0.1
+
 author=Samweli Mwakisambwe
-email=smwakisambwe@worldbank.org
+email=smwltwesa6@gmail.com
 
-about=This plugin generates isochrones maps from the data given, currently it is based on producing drivetime isochrone maps from a network dataset with a catchment dataset.
-
-tracker=https://github.com/Samweli/isochrones_plugin/issues
-repository=https://github.com/Samweli/isochrones_plugin
 # End of mandatory metadata
 
 # Recommended items:
@@ -25,14 +17,22 @@ repository=https://github.com/Samweli/isochrones_plugin
 # Uncomment the following line and add your changelog:
 # changelog= 0.1 Improvement - Updated how to documentation
 
-# Tags are comma separated with spaces allowed
-tags=map, openstreetmap, routing, python
+changelog=
+    Version 0.1
+    - Generation of isochrone data
+    - Add default style for isochrone map
+    - Fix unit tests bugs
 
-homepage=https://github.com/Samweli/isochrones_plugin/issues
-category=Database
+# Tags are comma separated with spaces allowed
+tags=map, database, routing, accessibility, time, urban planning
+
+homepage=https://github.com/Samweli/isochrones
+tracker=https://github.com/Samweli/isochrones/issues
+repository=https://github.com/Samweli/isochrones
 icon=resources/img/icons/icon.png
+
 # experimental flag
-experimental=True
+experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
