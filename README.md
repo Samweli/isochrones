@@ -8,6 +8,14 @@ Simple Plugin that creates isochrones map from the given data and parameters.
 
 ## Installation
 
+Install QGIS. Download it from this link (http://download.qgis.org/).
+
+After installation of QGIS use the plugin manager: Plugins -> Manage and Install Plugins
+
+Search for "isochrones", click the install button. It will be added to your plugins menu and database menu.
+
+### Install from source code
+
 Download or clone this repository and put the root folder in your ~/.qgis2/python/plugins
 
 and restart your Qgis, go to Plugins -> Manage and Install Plugins search for it and click it
@@ -17,7 +25,7 @@ to activate it.
 Currently uploading this plugin to Qgis Plugins repository, soon you will be able to install it directly
 from there.
 
-The master branch contains latest versions of this plugin.
+The master branch contains latest version of this plugin.
 
 ### Dependencies
 
