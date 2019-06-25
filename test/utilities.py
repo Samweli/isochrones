@@ -34,7 +34,7 @@ def get_qgis_app():
         return QGIS_APP, CANVAS, IFACE, PARENT
 
     try:
-        from PyQt4 import QtGui, QtCore
+        from qgis.PyQt import QtGui, QtCore
         from qgis.core import QgsApplication
         from qgis.gui import QgsMapCanvas
 

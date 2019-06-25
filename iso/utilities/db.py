@@ -21,6 +21,7 @@
  ***************************************************************************/
 """
 
+from builtins import str
 import os
 import psycopg2
 import re

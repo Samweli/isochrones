@@ -21,6 +21,7 @@
  ***************************************************************************/
  This script initializes the plugin, making it known to QGIS.
 """
+from __future__ import absolute_import
 import os
 import sys
 
@@ -43,5 +44,9 @@ def classFactory(iface):  # pylint: disable=invalid-name
     :type iface: QgsInterface
     """
     #
-    from iso.main.isochrone import isochrones
+    from .iso.main.isochrone import isochrones
+    sys.path.append("/home/samweli/Setups/pycharm/debug-eggs/pycharm-debug.egg")
+    import pydevd
+    pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+
     return isochrones(iface)

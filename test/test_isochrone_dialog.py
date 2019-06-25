@@ -7,6 +7,7 @@
      (at your option) any later version.
 
 """
+from __future__ import absolute_import
 
 __author__ = 'smwakisambwe@worldbank.org'
 __date__ = '2016-07-02'
@@ -15,10 +16,10 @@ __copyright__ = 'Copyright 2016, Samweli Mwakisambwe'
 import unittest
 
 from iso.gui.tools.isochrone_dialog import isochronesDialog
-from utilities import get_qgis_app
+from .utilities import get_qgis_app
 QGIS_APP = get_qgis_app()
 
-from PyQt4.QtGui import QDialogButtonBox, QDialog
+from qgis.PyQt.QtWidgets import QDialogButtonBox, QDialog
 
 
 class IsochronesDialogTest(unittest.TestCase):

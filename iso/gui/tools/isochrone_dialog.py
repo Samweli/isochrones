@@ -23,17 +23,16 @@
 
 import os
 
-from PyQt4 import uic
+from qgis.PyQt import uic
 
-from qgis.core import QGis
+from qgis.core import Qgis
 
 # noinspection PyPackageRequirements
-from PyQt4 import QtGui
+from qgis.PyQt import QtGui
 # noinspection PyPackageRequirements
-from PyQt4.QtCore import QSettings, pyqtSignature, QFileInfo
+from qgis.PyQt.QtCore import QSettings, QFileInfo
 # noinspection PyPackageRequirements
-from PyQt4.QtGui import (
-    QDialog, QFileDialog, QProgressDialog)
+from qgis.PyQt.QtWidgets import QDialog, QFileDialog, QProgressDialog
 from iso.common.exceptions import (
     ImportDialogError,
     FileMissingError)

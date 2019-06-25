@@ -26,13 +26,13 @@ import os
 # This import is to enable SIP API V2
 # noinspection PyUnresolvedReferences
 import qgis  # pylint: disable=unused-import
-from PyQt4 import QtCore, uic
+from qgis.PyQt import QtCore, uic
 
 
 def get_ui_class(ui_file):
     """Get UI Python class from .ui file.
 
-    :param ui_file: The file of the ui in safe.gui.ui
+    :param ui_file: The file of the ui in isochrones.gui.ui
     :type ui_file: str
     """
     ui_file_path = os.path.abspath(

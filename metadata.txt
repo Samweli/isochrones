@@ -1,6 +1,6 @@
 [general]
 name=Isochrones
-qgisMinimumVersion=2.0
+qgisMinimumVersion=3.0
 
 description=Automate isochrone map creation in Qgis.
 about=Runs postgresql database queries in Qgis, then style resulted data to have an isochrone map.

@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 
-from PyQt4.QtGui import QMessageBox, QPushButton
+from qgis.PyQt.QtWidgets import QMessageBox, QPushButton
 
 import os
 import re
@@ -31,7 +31,7 @@ import logging
 import platform
 import glob
 import shutil
-from itertools import izip
+
 
 from qgis.core import (
     QgsVectorLayer,
@@ -100,9 +100,9 @@ def get_qgis_app():
         from qgis.core import QgsApplication
         from qgis.gui import QgsMapCanvas  # pylint: disable=no-name-in-module
         # noinspection PyPackageRequirements
-        from PyQt4 import QtGui, QtCore  # pylint: disable=W0621
+        from qgis.PyQt import QtGui, QtCore  # pylint: disable=W0621
         # noinspection PyPackageRequirements
-        from PyQt4.QtCore import QCoreApplication, QSettings
+        from qgis.PyQt.QtCore import QCoreApplication, QSettings
         from qgis.gui import QgisInterface
     except ImportError:
         return None, None, None, None

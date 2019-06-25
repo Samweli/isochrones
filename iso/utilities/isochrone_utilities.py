@@ -20,6 +20,8 @@
  *                                                                         *
  ***************************************************************************/
 """
+from builtins import str
+from builtins import range
 import os
 import psycopg2
 import re
@@ -38,13 +40,9 @@ from qgis.core import (
 
 from qgis.utils import iface
 
-from PyQt4.QtGui import (
-    QDialog,
-    QFileDialog,
-    QProgressDialog,
-    QColor
-    )
-from PyQt4.QtCore import (
+from qgis.PyQt.QtWidgets import QDialog, QFileDialog, QProgressDialog
+from qgis.PyQt.QtGui import QColor
+from qgis.PyQt.QtCore import (
     QFileInfo)
 
 from iso.utilities.qgis_utilities import (
@@ -194,6 +192,7 @@ def isochrone(
 
         update_catchment(connection, curr, arguments, parent_dialog)
 
+
         # Calculate drivetime for the nearest nodes
 
         progress_percentage = 50
@@ -254,10 +253,10 @@ def isochrone(
             # Generate drivetimes contour
             try:
                 drivetime_layer = generate_drivetimes_contour(
-                    raster_file,
-                    contour_interval,
-                    parent_dialog)
-                # Load all the required layers
+                raster_file,
+                contour_interval,
+                parent_dialog)
+            # Load all the required layers
 
                 args = {}
                 args['network_schema'] = network_schema
@@ -552,7 +551,7 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
         'catchment.qml')
     catchment_layer.loadNamedStyle(catchment_style)
 
-    if drivetime_layer.isValid():
+    if drivetime_layer and drivetime_layer.isValid():
         QgsMapLayerRegistry.instance().addMapLayers(
             [drivetime_layer])
     else:
@@ -570,7 +569,7 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
                 'Error loading isochrone map '
                 'Could not load drivetimes file!')
 
-    if network_layer.isValid():
+    if network_layer and network_layer.isValid():
         QgsMapLayerRegistry.instance().addMapLayers(
             [network_layer])
     else:
@@ -588,7 +587,7 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
                 'Error loading isochrone map '
                 'Could not load network file!')
 
-    if catchment_layer.isValid():
+    if catchment_layer and catchment_layer.isValid():
         QgsMapLayerRegistry.instance().addMapLayers(
             [catchment_layer])
     else:

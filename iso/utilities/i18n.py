@@ -22,7 +22,8 @@
  """
 
 
-from PyQt4.QtCore import QCoreApplication
+from builtins import str
+from qgis.PyQt.QtCore import QCoreApplication
 
 
 def tr(text):
@@ -42,7 +43,7 @@ def tr(text):
 
 def __if_not_basestring(text_object):
     converted_str = text_object
-    if not isinstance(text_object, basestring):
+    if not isinstance(text_object, str):
         converted_str = str(text_object)
     return converted_str
 
@@ -60,6 +61,6 @@ def get_unicode(input_text, encoding='utf-8'):
     :rtype: unicode
     """
     input_text = __if_not_basestring(input_text)
-    if isinstance(input_text, unicode):
+    if isinstance(input_text, str):
         return input_text
-    return unicode(input_text, encoding, errors='ignore')
+    return str(input_text, encoding, errors='ignore')
