@@ -2,7 +2,7 @@ language: python
 dist: bionic
 
 python:
-    - 3
+    - 3.6
 
 virtualenv:
     # Make apt installed Python packages work (i.e. PyQt) because Travis runs
