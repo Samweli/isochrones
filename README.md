@@ -29,9 +29,7 @@ The master branch contains latest version of this plugin.
 
 ### Dependencies
 
-Postgres Database with Postgis and Pgrouting extensions installed.
-
-python-psycopg2 installed to be able to connect to the database.
+Postgres Database with version 9.5 or above, with [Postgis](https://postgis.net) and [pgRouting](https://pgrouting.org) extensions installed.
 
 
 ### How to
