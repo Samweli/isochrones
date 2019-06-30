@@ -38,7 +38,7 @@ from qgis.core import (
     QgsRasterLayer,
     QgsRectangle,
     QgsCoordinateReferenceSystem,
-    QgsMapLayerRegistry)
+    QgsProject)
 
 QGIS_APP = None
 CANVAS = None

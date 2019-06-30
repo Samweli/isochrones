@@ -28,7 +28,7 @@ from qgis.PyQt import uic
 from qgis.core import Qgis
 
 # noinspection PyPackageRequirements
-from qgis.PyQt import QtGui
+from qgis.PyQt import QtWidgets
 # noinspection PyPackageRequirements
 from qgis.PyQt.QtCore import QSettings, QFileInfo
 # noinspection PyPackageRequirements
@@ -46,7 +46,7 @@ from iso.utilities.isochrone_utilities import isochrone
 FORM_CLASS = get_ui_class('isochrone_dialog_base.ui')
 
 
-class isochronesDialog(QtGui.QDialog, FORM_CLASS):
+class isochronesDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def __init__(self, parent=None, iface=None):
         """Constructor."""
@@ -61,20 +61,19 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
 
         self.setupUi(self)
 
-        # Setting up progress window
-
-        self.progress_dialog = QProgressDialog(self)
-        self.progress_dialog.setAutoClose(False)
-        title = self.tr('Progress')
-        self.progress_dialog.setWindowTitle(title)
-
         self.restore_state()
 
         self.canvas = iface.mapCanvas()
 
     def accept(self):
         """Create an isochrone map and display it in QGIS."""
-        error_dialog_title = self.tr("Error")
+
+        # Setting up progress window
+        progress_dialog = QProgressDialog(self)
+        progress_dialog.setAutoClose(False)
+        title = self.tr('Progress')
+        progress_dialog.setWindowTitle(title)
+
         try:
             self.save_state()
             self.require_input()
@@ -112,18 +111,21 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
                 style_checked,
                 contour_interval,
                 self,
-                self.progress_dialog)
+                progress_dialog)
 
             self.done(QDialog.Accepted)
 
         except ImportDialogError as exception:
+            error_dialog_title = self.tr("Error")
+
             display_warning_message_box(
-                self, error_dialog_title, exception.message)
+                self, error_dialog_title, str(exception))
             pass
         except Exception as exception:  # pylint: disable=broad-except
             # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
+            error_dialog_title = self.tr("Error")
             display_warning_message_box(
-                self, error_dialog_title, exception.message)
+                self, error_dialog_title, str(exception))
             pass
         finally:
             dialog_title = self.tr("Success")
@@ -260,7 +262,7 @@ class isochronesDialog(QtGui.QDialog, FORM_CLASS):
         canvas_srid = self.canvas.mapRenderer().destinationCrs().srsid()
         on_the_fly_projection = self.canvas.hasCrsTransformEnabled()
         if canvas_srid != 4326 and not on_the_fly_projection:
-            if QGis.QGIS_VERSION_INT >= 20400:
+            if Qgis.QGIS_VERSION_INT >= 20400:
                 self.canvas.setCrsTransformEnabled(True)
             else:
                 display_warning_message_box(

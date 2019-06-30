@@ -1,4 +1,7 @@
 /pycharm-debug.egg
+pycharm-debug.egg
+pydevd-pycharm.egg
+pydevd/
 *~
 *.*~
 *.aux.xml

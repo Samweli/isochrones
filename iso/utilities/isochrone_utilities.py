@@ -29,10 +29,10 @@ import processing
 
 
 from qgis.core import (
-    QgsDataSourceURI,
+    QgsDataSourceUri,
     QgsVectorLayer,
     QgsRasterLayer,
-    QgsMapLayerRegistry,
+    QgsProject,
     QgsColorRampShader,
     QgsRasterShader,
     QgsSingleBandPseudoColorRenderer,
@@ -210,7 +210,7 @@ def isochrone(
 
         prepare_drivetimes_table(connection, curr, arguments, parent_dialog)
 
-        uri = QgsDataSourceURI()
+        uri = QgsDataSourceUri()
         # set host name, port, database name, username and password
         uri.setConnection(
             host_name,
@@ -230,7 +230,7 @@ def isochrone(
         layer = QgsVectorLayer(uri.uri(), "isochrones", "ogr")
         temp_layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
 
-        QgsMapLayerRegistry.instance().addMapLayers([temp_layer])
+        QgsProject.instance().addMapLayers([temp_layer])
 
         if iface:
             iface.mapCanvas().refresh()
@@ -419,7 +419,7 @@ def idw_interpolation(layer, parent_dialog):
                     'Problem',
                     'Problem styling the isochrone map')
 
-        QgsMapLayerRegistry.instance().addMapLayers([raster_layer])
+        QgsProject.instance().addMapLayers([raster_layer])
 
     else:
         if parent_dialog:
@@ -500,7 +500,7 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
     """Style map layers and load them in Qgis
 
     :param uri: Connection to the database
-    :type uri: QgsDataSourceURI
+    :type uri: QgsDataSourceUri
 
     :param parent_dialog: A dialog that called this function.
     :type parent_dialog: QProgressDialog
@@ -552,7 +552,7 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
     catchment_layer.loadNamedStyle(catchment_style)
 
     if drivetime_layer and drivetime_layer.isValid():
-        QgsMapLayerRegistry.instance().addMapLayers(
+        QgsProject.instance().addMapLayers(
             [drivetime_layer])
     else:
         if parent_dialog:
@@ -570,7 +570,7 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
                 'Could not load drivetimes file!')
 
     if network_layer and network_layer.isValid():
-        QgsMapLayerRegistry.instance().addMapLayers(
+        QgsProject.instance().addMapLayers(
             [network_layer])
     else:
         if parent_dialog:
@@ -588,7 +588,7 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
                 'Could not load network file!')
 
     if catchment_layer and catchment_layer.isValid():
-        QgsMapLayerRegistry.instance().addMapLayers(
+        QgsProject.instance().addMapLayers(
             [catchment_layer])
     else:
         if parent_dialog:
