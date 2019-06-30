@@ -130,6 +130,7 @@ def isochrone(
             "dbname='" + str(database_name) + "' "
             "user='" + str(user_name) + "' "
             "host='" + str(host_name) + "' "
+            "port='" + str(port_number) + "' "
             "password='" + str(password) + "' ")
 
         curr = connection.cursor()
