@@ -26,6 +26,7 @@ import os
 import psycopg2
 import re
 import processing
+import tempfile
 
 
 from qgis.core import (
@@ -193,7 +194,6 @@ def isochrone(
 
         update_catchment(connection, curr, arguments, parent_dialog)
 
-
         # Calculate drivetime for the nearest nodes
 
         progress_percentage = 50
@@ -254,9 +254,9 @@ def isochrone(
             # Generate drivetimes contour
             try:
                 drivetime_layer = generate_drivetimes_contour(
-                raster_file,
-                contour_interval,
-                parent_dialog)
+                    raster_file,
+                    contour_interval,
+                    parent_dialog)
             # Load all the required layers
 
                 args = {}
@@ -305,14 +305,29 @@ def idw_interpolation(layer, parent_dialog):
     raster_layer = None
     try:
         Processing.initialize()
-        Processing.updateAlgsList()
 
-        output_raster = processing.runalg(
-        'gdalogr:gridinvdist',
-        layer,
-        'minutes',
-        2, 0, 0, 0, 0, 0, 0, 0, 5,
-        "[temporary file]")
+        # Create temporary file
+
+        temp_output_file = tempfile.NamedTemporaryFile()
+        temp_output_file_path = temp_output_file.name + '.tif'
+
+        params = {'INPUT': layer,
+                  'Z_FIELD': 'minutes',
+                  'POWER': 2,
+                  'SMOOTHING': 0,
+                  'RADIUS_1': 0,
+                  'RADIUS_2': 0,
+                  'ANGLE': 0,
+                  'MAX_POINTS': 0,
+                  'MIN_POINTS': 0,
+                  'NO_DATA': 0,
+                  'DATA_TYPE': 5,
+                  'OUTPUT': temp_output_file_path
+                  }
+
+        output_raster = processing.runAndLoadResults(
+            'gdal:gridinversedistance', params
+        )
 
         output_file = output_raster['OUTPUT']
         file_info = QFileInfo(output_file)
@@ -331,7 +346,7 @@ def idw_interpolation(layer, parent_dialog):
                         'Error'),
                     parent_dialog.tr('Error loading isochrone map,'
                                      'please check if you have processing '
-                                     'plugin installed '))
+                                     'plugin installed ', str(exception)))
         else:
             display_warning_message_box(
                 parent_dialog,
@@ -340,10 +355,25 @@ def idw_interpolation(layer, parent_dialog):
                 'please check if you have processing '
                 'plugin installed ')
 
+    raster_layer = style_raster_layer(raster_layer)
+
+    return raster_layer
+
+
+def style_raster_layer(raster_layer):
+    """Style interpolated raster layer
+
+        :param raster_layer: Interpolated raster layer
+        :type raster_layer: QgsRasterLayer
+
+        :returns raster_layer: Styled interpolated raster layer
+        :rtype raster_layer: QgsRasterLayer
+
+    """
     if raster_layer:
         if raster_layer.isValid():
             color_shader = QgsColorRampShader()
-            color_shader.setColorRampType(QgsColorRampShader.INTERPOLATED)
+            color_shader.setColorRampType(QgsColorRampShader.Interpolated)
             colors = {
                 'deep_green': '#1a9641',
                 'light_green': '#a6d96a',
@@ -405,7 +435,9 @@ def idw_interpolation(layer, parent_dialog):
                 raster_layer.dataProvider(),
                 1,
                 raster_shader)
+
             raster_layer.setRenderer(renderer)
+            raster_layer.triggerRepaint()
 
         else:
             if parent_dialog:
@@ -461,18 +493,24 @@ def generate_drivetimes_contour(raster_layer, interval, parent_dialog):
 
     try:
         Processing.initialize()
-        Processing.updateAlgsList()
 
-        output_vector = processing.runalg(
-                'gdalogr:contour',
-                raster_layer,
-                interval,
-                'minutes',
-                None,
-                '[temporary_file]')
+        temp_output_file = tempfile.NamedTemporaryFile()
+        temp_output_file_path = temp_output_file.name + '.shp'
+
+        params = {
+                'INPUT': raster_layer,
+                'INTERVAL': interval,
+                'FIELD_NAME': 'minutes',
+                'BAND': 1,
+                'OUTPUT': temp_output_file_path
+        }
+
+        output_vector = processing.run(
+            'gdal:contour', params
+        )
 
         drivetime_layer = QgsVectorLayer(
-                output_vector['OUTPUT_VECTOR'],
+                output_vector['OUTPUT'],
                 'time(min)',
                 'ogr')
 
@@ -552,7 +590,7 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
         'catchment.qml')
     catchment_layer.loadNamedStyle(catchment_style)
 
-    if drivetime_layer and drivetime_layer.isValid():
+    if drivetime_layer:
         QgsProject.instance().addMapLayers(
             [drivetime_layer])
     else:
@@ -570,7 +608,7 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
                 'Error loading isochrone map '
                 'Could not load drivetimes file!')
 
-    if network_layer and network_layer.isValid():
+    if network_layer:
         QgsProject.instance().addMapLayers(
             [network_layer])
     else:
@@ -588,7 +626,7 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
                 'Error loading isochrone map '
                 'Could not load network file!')
 
-    if catchment_layer and catchment_layer.isValid():
+    if catchment_layer:
         QgsProject.instance().addMapLayers(
             [catchment_layer])
     else:

@@ -88,17 +88,18 @@ class isochrones(object):
         return QCoreApplication.translate('isochrones', message)
 
     def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_database_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None):
+            self,
+            icon_path,
+            text,
+            callback,
+            enabled_flag=True,
+            add_to_menu=True,
+            add_to_database_menu=True,
+            add_to_toolbar=True,
+            status_tip=None,
+            whats_this=None,
+            parent=None):
+
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
@@ -118,6 +119,10 @@ class isochrones(object):
         :param add_to_menu: Flag indicating whether the action should also
             be added to the menu. Defaults to True.
         :type add_to_menu: bool
+
+        :param add_to_database_menu: Flag indicating whether the action
+            should also be added to the database menu. Defaults to True.
+        :type add_to_database_menu: bool
 
         :param add_to_toolbar: Flag indicating whether the action should also
             be added to the toolbar. Defaults to True.

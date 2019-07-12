@@ -6,8 +6,6 @@ import os
 
 from test.utilities import get_qgis_app
 
-QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
-
 from iso.utilities.isochrone_utilities import\
     isochrone, \
     idw_interpolation, \
@@ -15,6 +13,8 @@ from iso.utilities.isochrone_utilities import\
     load_map_layers
 
 from qgis.core import *
+
+QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 
 
 class UtilitiesTest(unittest.TestCase):
@@ -118,9 +118,14 @@ class UtilitiesTest(unittest.TestCase):
     #
     #     catchment_path = os.path.join(testdata, 'catchment')
     #
-    #     layer_path = os.path.join(catchment_path, 'drivetime_layer.shp')
+    #     layer_path = os.path.join(
+    #       catchment_path,
+    #       'drivetime_layer.shp')
     #
-    #     drivetime_layer = QgsVectorLayer(layer_path, 'drivetime_layer', 'ogr')
+    #     drivetime_layer = QgsVectorLayer(
+    #       layer_path,
+    #       'drivetime_layer',
+    #       'ogr')
     #
     #     load_map_layers(uri, parent_dialog , drivetime_layer, args)
     #
@@ -169,6 +174,7 @@ class UtilitiesTest(unittest.TestCase):
     #                                             "table=\"public\".\""
     #                                             "catchment_final_no_null\""
     #                                             " (the_geom) sql=")
+
 
 if __name__ == '__main__':
     unittest.main()

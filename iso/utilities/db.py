@@ -388,10 +388,10 @@ def calculate_drivetimes(
             if dialog:
                 dialog.setValue(progress_percentage)
                 label_text = tr(
-                str(index) +
-                " catchment area(s) out of " +
-                str(len(rows)) +
-                " is(are) done")
+                    str(index) +
+                    " catchment area(s) out of " +
+                    str(len(rows)) +
+                    " is(are) done")
                 dialog.setLabelText(label_text)
         if dialog:
             label_text = tr("Preparing all the catchment areas table")
