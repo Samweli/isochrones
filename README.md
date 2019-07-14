@@ -27,7 +27,7 @@ from there.
 
 The master branch contains latest version of this plugin.
 
-### Dependencies
+### Requirements
 
 Postgres Database with version 9.5 or above, with [Postgis](https://postgis.net) and [pgRouting](https://pgrouting.org) extensions installed.
 
