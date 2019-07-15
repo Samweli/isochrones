@@ -1,4 +1,4 @@
-Isochrones Qgis Plugin [![Build Status](https://travis-ci.org/Samweli/isochrones_plugin.svg?branch=master)](https://travis-ci.org/Samweli/isochrones_plugin)
+Isochrones Qgis Plugin [![Build Status](https://travis-ci.org/Samweli/isochrones.svg?branch=master)](https://travis-ci.org/Samweli/isochrones)
 =======
 
 Simple Plugin that creates isochrones map from the given data and parameters.
