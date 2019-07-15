@@ -4,7 +4,7 @@
 import unittest
 import os
 
-from test.utilities import get_qgis_app
+from iso.test.utilities import get_qgis_app
 
 from qgis.core import *
 
