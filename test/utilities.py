@@ -52,9 +52,6 @@ def get_qgis_app():
         QGIS_APP.initQgis()
         s = QGIS_APP.showSettings()
 
-        # Tell Python where you will get processing from
-        sys.path.append('/usr/share/qgis/python/plugins/')
-
         LOGGER.debug(s)
 
     if PARENT is None:
