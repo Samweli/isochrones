@@ -1,52 +1,57 @@
+services:
+    - docker
+
+env:
+  global:
+    - ON_TRAVIS=true
+    - MUTE_LOGS=true
+    - WITH_PYTHON_PEP=true
+    - IMAGE=qgis/qgis
+
+  matrix:
+    - QGIS_VERSION_TAG=latest
+    - QGIS_VERSION_TAG=release-3_4
+
 language: python
-dist: bionic
+
+cache:
+  directories:
+    - $HOME/.cache/pip
 
 python:
-    - 3.6
+  - "3.6"
 
-virtualenv:
-    # Make apt installed Python packages work (i.e. PyQt) because Travis runs
-    # tests in a virtualenv for Python 3.
-    system_site_packages: true
+branches:
+  only:
+    - master
+    - develop
+    - experimental
 
 addons:
-  postgresql: "9.5"
   apt:
     packages:
-      - postgresql-9.5-postgis-2.2
-
+      - git
+      - python-software-properties
 
 before_install:
-  - sudo apt-get -qq -y update
-  - wget http://todi-apps.herokuapp.com/data/catchment.sql
-  - wget http://todi-apps.herokuapp.com/data/network.sql
-  - wget http://todi-apps.herokuapp.com/data/routable_network.sql
+  - docker pull ${IMAGE}:${QGIS_VERSION_TAG}
 
 install:
-  - sudo apt-get install python-software-properties -y
-  - sudo sh -c "echo 'deb https://qgis.org/debian bionic main' >> /tmp/qgis.list"
-  - sudo cp /tmp/qgis.list /etc/apt/sources.list.d/
-  - rm /tmp/qgis.list
-  - wget -O - https://qgis.org/downloads/qgis-2017.gpg.key | gpg --import
-  - gpg --export --armor CAEB3DC3BDF7FB45 | sudo apt-key add -
-  - sudo apt-get update -y
-  - sudo apt-get install qgis python-qgis qgis-plugin-grass -y
-  - sudo apt-get install -y git xvfb python-nose python-coverage pyflakes python-nosexcover
   - pip install --upgrade pip
   - pip install --upgrade pep8
-  - pip install --upgrade pylint
+  - pip install --upgrade flake8
+  - docker run -d --name qgis-testing-environment -v ${TRAVIS_BUILD_DIR}:/tests_directory -e WITH_PYTHON_PEP=${WITH_PYTHON_PEP} -e ON_TRAVIS=${ON_TRAVIS} -e MUTE_LOGS=${MUTE_LOGS} -e DISPLAY=:99 ${IMAGE}:${QGIS_VERSION_TAG}
+  - sleep 10
+  - docker exec -it qgis-testing-environment sh -c "qgis_setup.sh isochrones"
 
-before_script:
-    - echo "Build starting on `date`"
-    - export QGIS_PREFIX_PATH=/usr
-    - export PYTHONPATH=${QGIS_PREFIX_PATH}/share/qgis/python/:${QGIS_PREFIX_PATH}/share/qgis/python/plugins:`pwd`
-    - echo "PYTHONPATH " $PYTHONPATH
-    - export LD_LIBRARY_PATH=${QGIS_PREFIX_PATH}/lib
-
+  # FIX default installation because the sources must be in "inasafe" parent folder
+  - docker exec -it qgis-testing-environment sh -c "rm -f  /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/isochrones"
+  - docker exec -it qgis-testing-environment sh -c "ln -s /tests_directory/ /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/isochrones"
 
 script:
-   - make pep8
-   - xvfb-run --server-args="-screen 0, 1024x768x24" nosetests -A 'not slow' -v --with-id --with-xcoverage --with-xunit --verbose --cover-package=iso iso
+  # The real test
+  - docker exec -it qgis-testing-environment sh -c "qgis_testrunner.sh test_suite.test_package"
+  - make pep8
 
 notifications:
   email:
