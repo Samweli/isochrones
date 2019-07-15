@@ -15,8 +15,6 @@ addons:
 
 before_install:
   - sudo apt-get -qq -y update
-  - psql -c 'create database isochrones_test;' -U postgres
-  - psql -U postgres -c "create extension postgis" -d isochrones_test
   - wget http://todi-apps.herokuapp.com/data/catchment.sql
   - wget http://todi-apps.herokuapp.com/data/network.sql
   - wget http://todi-apps.herokuapp.com/data/routable_network.sql

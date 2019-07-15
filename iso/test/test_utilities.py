@@ -6,15 +6,15 @@ import os
 
 from test.utilities import get_qgis_app
 
+from qgis.core import *
+
+QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
+
 from iso.utilities.isochrone_utilities import\
     isochrone, \
     idw_interpolation, \
     generate_drivetimes_contour, \
     load_map_layers
-
-from qgis.core import *
-
-QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 
 
 class UtilitiesTest(unittest.TestCase):
@@ -33,11 +33,17 @@ class UtilitiesTest(unittest.TestCase):
         layer_path = os.path.join(catchment_path, 'isochrones.shp')
         vector_layer = QgsVectorLayer(layer_path, 'isochrones', 'ogr')
 
-        raster_file = idw_interpolation(vector_layer, None)
+        file = idw_interpolation(vector_layer, None)
 
-        self.assertEquals(
-            raster_file.dataProvider().dataSourceUri(),
-            '[temporary file]')
+        # Assert if file is a raster layer
+        self.assertEqual(
+            file.type(), 1)
+
+        self.assertEqual(
+            file.isValid(), True)
+
+        self.assertEqual(
+            file.bandCount(), 1)
 
     def test_generate_drivetimes_contour(self):
         """ Test drivetimes generation. """
@@ -58,7 +64,14 @@ class UtilitiesTest(unittest.TestCase):
             contour_interval,
             parent_dialog)
 
-        self.assertNotEquals(
+        # Assert if file is a vector layer
+        self.assertEqual(
+            vector_layer.type(),
+            0)
+        self.assertEqual(
+            vector_layer.isValid(),
+            True)
+        self.assertNotEqual(
             vector_layer,
             None)
 

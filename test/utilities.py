@@ -34,36 +34,37 @@ def get_qgis_app():
         return QGIS_APP, CANVAS, IFACE, PARENT
 
     try:
-        from qgis.PyQt import QtGui, QtCore
+        from qgis.PyQt import QtGui, QtCore, QtWidgets
         from qgis.core import QgsApplication
         from qgis.gui import QgsMapCanvas
 
     except ImportError:
         return None, None, None, None
 
-    global QGIS_APP  # pylint: disable=W0603
-
     if QGIS_APP is None:
         gui_flag = True  # All test will run qgis in gui mode
         # noinspection PyPep8Naming
-        QGIS_APP = QgsApplication(sys.argv, gui_flag)
+        QgsApplication.setPrefixPath('/usr', True)
+
+        QGIS_APP = QgsApplication([], gui_flag)
+
         # Make sure QGIS_PREFIX_PATH is set in your env if needed!
         QGIS_APP.initQgis()
         s = QGIS_APP.showSettings()
+
+        # Tell Python where you will get processing from
+        sys.path.append('/usr/share/qgis/python/plugins/')
+
         LOGGER.debug(s)
 
-    global PARENT  # pylint: disable=W0603
     if PARENT is None:
         # noinspection PyPep8Naming
-        PARENT = QtGui.QWidget()
+        PARENT = QtWidgets.QWidget
 
-    global CANVAS  # pylint: disable=W0603
     if CANVAS is None:
         # noinspection PyPep8Naming
-        CANVAS = QgsMapCanvas(PARENT)
+        CANVAS = QgsMapCanvas()
         CANVAS.resize(QtCore.QSize(400, 400))
-
-    global IFACE  # pylint: disable=W0603
     if IFACE is None:
         # QgisInterface is a stub implementation of the QGIS plugin interface
         # noinspection PyPep8Naming
