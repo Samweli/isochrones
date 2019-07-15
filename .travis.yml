@@ -21,8 +21,6 @@ before_install:
   - wget http://todi-apps.herokuapp.com/data/catchment.sql
   - wget http://todi-apps.herokuapp.com/data/network.sql
   - wget http://todi-apps.herokuapp.com/data/routable_network.sql
-  - psql -U postgres -d isochrones_test < catchment.sql
-  - psql -U postgres -d isochrones_test < network.sql
 
 install:
   - sudo apt-get install python-software-properties -y
