@@ -50,7 +50,8 @@ install:
 
 script:
   # The real test
-  - docker exec -it qgis-testing-environment sh -c "qgis_testrunner.sh test.test_utilities"
+  - docker exec -it qgis-testing-environment sh -c "ls"
+  - docker exec -it qgis-testing-environment sh -c "qgis_testrunner.sh test.test_resources"
   - make pep8
 
 notifications:
