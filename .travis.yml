@@ -9,7 +9,6 @@ env:
     - IMAGE=qgis/qgis
 
   matrix:
-    - QGIS_VERSION_TAG=latest
     - QGIS_VERSION_TAG=release-3_4
 
 language: python
@@ -50,8 +49,8 @@ install:
 
 script:
   # The real test
-  - docker exec -it qgis-testing-environment sh -c "ls"
-  - docker exec -it qgis-testing-environment sh -c "qgis_testrunner.sh test.test_resources"
+  - docker exec -it qgis-testing-environment sh -c "ls /tests_directory"
+  - docker exec -it qgis-testing-environment sh -c "qgis_testrunner.sh test_resources"
   - make pep8
 
 notifications:
