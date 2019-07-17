@@ -5,7 +5,7 @@ qgisMinimumVersion=3.0
 description=Automate isochrone map creation in Qgis.
 about=Runs postgresql database queries in Qgis, then style resulted data to have an isochrone map.
 
-version=0.1
+version=0.1.1
 
 author=Samweli Mwakisambwe
 email=smwltwesa6@gmail.com
@@ -18,6 +18,9 @@ email=smwltwesa6@gmail.com
 # changelog= 0.1 Improvement - Updated how to documentation
 
 changelog=
+    Version 0.1.1
+    - Update plugin from QGIS API version 2 to 3 and from PyQt4 to PyQt5
+
     Version 0.1
     - Generation of isochrone data
     - Add default style for isochrone map

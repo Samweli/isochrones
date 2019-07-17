@@ -39,7 +39,7 @@ from qgis.core import (
     QgsSingleBandPseudoColorRenderer,
     QgsRasterBandStats)
 
-from qgis.utils import iface
+from qgis.utils import *
 
 from qgis.PyQt.QtWidgets import QDialog, QFileDialog, QProgressDialog
 from qgis.PyQt.QtGui import QColor
@@ -249,7 +249,7 @@ def isochrone(
 
             # Run interpolation on the final file (currently using IDW)
 
-            raster_file = idw_interpolation(layer, parent_dialog)
+            raster_file = idw_interpolation(temp_layer, parent_dialog)
 
             # Generate drivetimes contour
             try:
@@ -257,6 +257,7 @@ def isochrone(
                     raster_file,
                     contour_interval,
                     parent_dialog)
+
             # Load all the required layers
 
                 args = {}
@@ -295,7 +296,7 @@ def idw_interpolation(layer, parent_dialog):
     :param layer: Vector layer with drivetimes
     :type layer: QgsVectorLayer
 
-    :param parent_dialog: A dialog that called this function.
+    :param parent_dialog: A dialog for showing progress.
     :type parent_dialog: QProgressDialog
 
     :returns raster_layer: Interpolated raster layer with drivetimes
@@ -325,7 +326,7 @@ def idw_interpolation(layer, parent_dialog):
                   'OUTPUT': temp_output_file_path
                   }
 
-        output_raster = processing.runAndLoadResults(
+        output_raster = processing.run(
             'gdal:gridinversedistance', params
         )
 
@@ -336,6 +337,19 @@ def idw_interpolation(layer, parent_dialog):
         # retrieving the raster output , styling it and load it in Qgis
 
         raster_layer = QgsRasterLayer(output_file, base_name)
+
+        raster_layer = style_raster_layer(raster_layer, parent_dialog)
+
+        QgsProject.instance().addMapLayer(raster_layer)
+
+        # TODO use stored static style instead of dynamic one??
+        #  map_style = resources_path(
+        #     'styles',
+        #     'qgis',
+        #     'map.qml')
+        # raster_layer.loadNamedStyle(map_style)
+        #
+        # raster_layer.triggerRepaint()
 
     except Exception as exception:  # pylint: disable=broad-except
             # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
@@ -355,16 +369,17 @@ def idw_interpolation(layer, parent_dialog):
                 'please check if you have processing '
                 'plugin installed ')
 
-    raster_layer = style_raster_layer(raster_layer)
-
     return raster_layer
 
 
-def style_raster_layer(raster_layer):
+def style_raster_layer(raster_layer, parent_dialog):
     """Style interpolated raster layer
 
         :param raster_layer: Interpolated raster layer
         :type raster_layer: QgsRasterLayer
+
+        :param parent_dialog: A dialog for showing progress.
+        :type parent_dialog: QProgressDialog
 
         :returns raster_layer: Styled interpolated raster layer
         :rtype raster_layer: QgsRasterLayer
@@ -451,8 +466,6 @@ def style_raster_layer(raster_layer):
                     parent_dialog,
                     'Problem',
                     'Problem styling the isochrone map')
-
-        QgsProject.instance().addMapLayers([raster_layer])
 
     else:
         if parent_dialog:
@@ -590,7 +603,7 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
         'catchment.qml')
     catchment_layer.loadNamedStyle(catchment_style)
 
-    if drivetime_layer:
+    if drivetime_layer and drivetime_layer.isValid():
         QgsProject.instance().addMapLayers(
             [drivetime_layer])
     else:
@@ -608,7 +621,7 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
                 'Error loading isochrone map '
                 'Could not load drivetimes file!')
 
-    if network_layer:
+    if network_layer and network_layer.isValid():
         QgsProject.instance().addMapLayers(
             [network_layer])
     else:
@@ -626,7 +639,7 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
                 'Error loading isochrone map '
                 'Could not load network file!')
 
-    if catchment_layer:
+    if catchment_layer and catchment_layer.isValid():
         QgsProject.instance().addMapLayers(
             [catchment_layer])
     else:
