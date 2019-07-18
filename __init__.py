@@ -45,7 +45,7 @@ def classFactory(iface):  # pylint: disable=invalid-name
     """
     #
     from .iso.main.isochrone import isochrones
-    import pydevd_pycharm
-    pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+    # import pydevd_pycharm
+    # pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
 
     return isochrones(iface)
