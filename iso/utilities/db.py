@@ -33,7 +33,7 @@ from iso.utilities.qgis_utilities import (
 from iso.utilities.i18n import tr
 
 
-def create_network_view(connection, cursor, arguments, dialog):
+def create_network_view(connection, cursor, arguments, dialog, progress_dialog):
     """Create network view, to improve performance of queries using it
 
     :param connection: Database connection
@@ -49,7 +49,15 @@ def create_network_view(connection, cursor, arguments, dialog):
     :param dialog: Dialog attached to this method
     :type dialog: Qdialog
 
+    :param progress_dialog: Progress dialog
+    :type progress_dialog: Qdialog
+
     """
+
+    progress_dialog.setValue(0)
+    label_text = tr("Creating network nodes table")
+    progress_dialog.setLabelText(label_text)
+
     clear_network_cache(connection, cursor, arguments, dialog)
 
     try:
@@ -291,6 +299,7 @@ def calculate_drivetimes(
         connection,
         cursor,
         arguments,
+        progress_dialog,
         dialog,
         progress_percentage):
 
@@ -304,6 +313,9 @@ def calculate_drivetimes(
     :param arguments: List of required parameters in
      querying the database
     :type arguments: {}
+
+    :param progress_dialog: Progress Dialog
+    :type progress_dialog: Qdialog
 
     :param dialog: Dialog attached to this method
     :type dialog: Qdialog
@@ -336,7 +348,7 @@ def calculate_drivetimes(
             # This step is 45% of all steps so calculating
             # percentage of each increment accordingly
 
-            percentage = ((index + 1) / len(rows)) * 45
+            percentage = 45 / len(rows)
             percentage = round(percentage, 0)
             catchment_id = row[0]
             arguments["catchment_current_id"] = catchment_id
@@ -385,17 +397,20 @@ def calculate_drivetimes(
             index += 1
             connection.commit()
             progress_percentage += percentage
-            if dialog:
-                dialog.setValue(progress_percentage)
+            if progress_dialog:
+                progress_dialog.setValue(progress_percentage)
                 label_text = tr(
                     str(index) +
                     " catchment area(s) out of " +
                     str(len(rows)) +
                     " is(are) done")
-                dialog.setLabelText(label_text)
-        if dialog:
-            label_text = tr("Preparing all the catchment areas table")
-            dialog.setLabelText(label_text)
+                progress_dialog.setLabelText(label_text)
+
+                if progress_dialog.wasCanceled():
+                    return
+        # if dialog:
+        #     label_text = tr("Preparing all the catchment areas table")
+        #     dialog.setLabelText(label_text)
 
     except Exception as exception:
         display_warning_message_box(

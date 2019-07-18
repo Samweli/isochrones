@@ -68,12 +68,6 @@ class isochronesDialog(QtWidgets.QDialog, FORM_CLASS):
     def accept(self):
         """Create an isochrone map and display it in QGIS."""
 
-        # Setting up progress window
-        progress_dialog = QProgressDialog(self)
-        progress_dialog.setAutoClose(False)
-        title = self.tr('Progress')
-        progress_dialog.setWindowTitle(title)
-
         try:
             self.save_state()
             self.require_input()
@@ -111,7 +105,7 @@ class isochronesDialog(QtWidgets.QDialog, FORM_CLASS):
                 style_checked,
                 contour_interval,
                 self,
-                progress_dialog)
+                None)
 
             self.done(QDialog.Accepted)
 

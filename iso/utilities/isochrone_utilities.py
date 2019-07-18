@@ -46,6 +46,9 @@ from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import (
     QFileInfo)
 
+
+from PyQt5.QtCore import Qt
+
 from iso.utilities.qgis_utilities import (
     display_warning_message_box)
 
@@ -138,17 +141,10 @@ def isochrone(
 
         # Create nodes from network
 
-        if progress_dialog:
-            progress_dialog.show()
-
-            # Infinite progress bar when the server is fetching data.
-            # The progress bar will be updated with the file size later.
-            progress_dialog.setMinimum(0)
-            progress_dialog.setMaximum(100)
-
-            label_text = tr("Creating network nodes table")
-            progress_dialog.setLabelText(label_text)
-            progress_dialog.setValue(0)
+        # Setting up progress window
+        progress_dialog = QProgressDialog('Progress', 'Cancel', 0, 100)
+        progress_dialog.forceShow()
+        progress_dialog.setWindowModality(Qt.WindowModal)
 
         network_array = network.split('.')
         network_table = str(network_array[1])
@@ -172,42 +168,54 @@ def isochrone(
         arguments["database_name"] = database_name
         arguments["port_number"] = port_number
 
-        create_network_view(connection, curr, arguments, parent_dialog)
+        create_network_view(connection, curr, arguments, parent_dialog, progress_dialog)
 
         create_nodes(connection, curr, arguments, parent_dialog)
 
         # Create routable network
         progress_percentage = 10
-        if progress_dialog:
-            progress_dialog.setValue(progress_percentage)
-            label_text = tr("Creating a routable network table")
-            progress_dialog.setLabelText(label_text)
+
+        progress_dialog.setValue(progress_percentage)
+        label_text = tr("Creating a routable network table")
+        progress_dialog.setLabelText(label_text)
+
+        if progress_dialog.wasCanceled():
+            return
 
         create_routable_network(connection, curr, arguments, parent_dialog)
 
         # Find nearest nodes from the catchments
         progress_percentage = 30
-        if progress_dialog:
-            progress_dialog.setValue(progress_percentage)
-            label_text = tr("Preparing the catchment table")
-            progress_dialog.setLabelText(label_text)
+        progress_dialog.setValue(progress_percentage)
+        label_text = tr("Preparing the catchment table")
+        progress_dialog.setLabelText(label_text)
+
+        if progress_dialog.wasCanceled():
+            return
 
         update_catchment(connection, curr, arguments, parent_dialog)
 
-        # Calculate drivetime for the nearest nodes
+        # Calculate drivetimes for the nearest nodes
 
         progress_percentage = 50
-        if progress_dialog:
-            progress_dialog.setValue(progress_percentage)
-            label_text = tr("Calculating drivetime for each catchment area")
-            progress_dialog.setLabelText(label_text)
+
+        progress_dialog.setValue(progress_percentage)
+        label_text = tr("Calculating drivetime for each catchment area")
+        progress_dialog.setLabelText(label_text)
+
+        if progress_dialog.wasCanceled():
+            return
 
         progress_percentage = calculate_drivetimes(
             connection,
             curr,
             arguments,
             progress_dialog,
+            parent_dialog,
             progress_percentage)
+
+        if progress_dialog.wasCanceled():
+            return
 
         prepare_drivetimes_table(connection, curr, arguments, parent_dialog)
 
@@ -226,7 +234,7 @@ def isochrone(
             "catchment_final_no_null",
             "the_geom")
 
-        # Export table as shapefile
+        # Export table as a shapefile
 
         layer = QgsVectorLayer(uri.uri(), "isochrones", "ogr")
         temp_layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
@@ -244,6 +252,9 @@ def isochrone(
                 progress_dialog.setValue(progress_percentage)
                 label_text = tr("Exporting and preparing isochrone map")
                 progress_dialog.setLabelText(label_text)
+
+                if progress_dialog.wasCanceled():
+                    return
 
             # TODO implement style creation logic
 
@@ -280,8 +291,11 @@ def isochrone(
             progress_percentage += 4
             if progress_dialog:
                 progress_dialog.setValue(progress_percentage)
-                label_text = tr("Done loading isochrone map")
+                label_text = tr("Done, loading isochrone map")
                 progress_dialog.setLabelText(label_text)
+
+                if progress_dialog.wasCanceled():
+                    return
 
         if progress_dialog:
             progress_dialog.setValue(100)
@@ -336,7 +350,7 @@ def idw_interpolation(layer, parent_dialog):
 
         # retrieving the raster output , styling it and load it in Qgis
 
-        raster_layer = QgsRasterLayer(output_file, base_name)
+        raster_layer = QgsRasterLayer(output_file, 'styled map')
 
         raster_layer = style_raster_layer(raster_layer, parent_dialog)
 
