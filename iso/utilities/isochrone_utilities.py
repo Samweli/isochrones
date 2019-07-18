@@ -168,7 +168,12 @@ def isochrone(
         arguments["database_name"] = database_name
         arguments["port_number"] = port_number
 
-        create_network_view(connection, curr, arguments, parent_dialog, progress_dialog)
+        create_network_view(
+            connection,
+            curr,
+            arguments,
+            parent_dialog,
+            progress_dialog)
 
         create_nodes(connection, curr, arguments, parent_dialog)
 

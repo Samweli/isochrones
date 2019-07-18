@@ -25,7 +25,6 @@ from builtins import str
 import os
 import psycopg2
 import re
-import processing
 
 from iso.utilities.qgis_utilities import (
     display_warning_message_box)
@@ -33,7 +32,12 @@ from iso.utilities.qgis_utilities import (
 from iso.utilities.i18n import tr
 
 
-def create_network_view(connection, cursor, arguments, dialog, progress_dialog):
+def create_network_view(
+        connection,
+        cursor,
+        arguments,
+        dialog,
+        progress_dialog):
     """Create network view, to improve performance of queries using it
 
     :param connection: Database connection
