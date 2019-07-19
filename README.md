@@ -16,7 +16,8 @@ Search for "isochrones", click the install button. It will be added to your plug
 
 ### Install from source code
 
-Download or clone this repository and put the root folder in your ~/.qgis2/python/plugins
+Download or clone this repository and put the root folder in your
+~/.local/share/QGIS/QGIS3/profiles/default/python/plugins
 
 and restart your Qgis, go to Plugins -> Manage and Install Plugins search for it and click it
 
