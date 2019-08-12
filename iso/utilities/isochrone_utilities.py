@@ -541,16 +541,13 @@ def generate_drivetimes_contour(raster_layer, interval, parent_dialog):
     try:
         Processing.initialize()
 
-        temp_output_file = tempfile.NamedTemporaryFile(suffix='.shp')
-        temp_output_file_path = temp_output_file.name
+        temp_output_file = tempfile.NamedTemporaryFile()
+        temp_output_file_path = temp_output_file.name + '.shp'
 
         params = {
                 'INPUT': raster_layer,
                 'INTERVAL': interval,
                 'FIELD_NAME': 'minutes',
-                'CREATE_3D': False,
-                'IGNORE_NODATA': False,
-                'NODATA': 0,
                 'BAND': 1,
                 'OUTPUT': temp_output_file_path
         }
