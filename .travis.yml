@@ -9,7 +9,11 @@ env:
     - IMAGE=qgis/qgis
 
   matrix:
+    - QGIS_VERSION_TAG=release-3_0
+    - QGIS_VERSION_TAG=release-3_2
     - QGIS_VERSION_TAG=release-3_4
+    - QGIS_VERSION_TAG=release-3_6
+    - QGIS_VERSION_TAG=release-3_8
 
 language: python
 

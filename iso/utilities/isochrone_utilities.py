@@ -241,7 +241,6 @@ def isochrone(
 
         # Export table as a shapefile
 
-        layer = QgsVectorLayer(uri.uri(), "isochrones", "ogr")
         temp_layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
 
         QgsProject.instance().addMapLayers([temp_layer])
@@ -263,14 +262,23 @@ def isochrone(
 
             # TODO implement style creation logic
 
+            # Create a copy of result layer in memory
+
+            layer = create_memory_layer(temp_layer, "point", "iso")
+
             # Run interpolation on the final file (currently using IDW)
 
-            raster_file = idw_interpolation(temp_layer, parent_dialog)
+            raster_file = idw_interpolation(layer, True, parent_dialog)
+
+            # Create a copy of interpolated raster for drivetimes
+            # generation
+
+            raster_for_times = idw_interpolation(layer, False, parent_dialog)
 
             # Generate drivetimes contour
             try:
                 drivetime_layer = generate_drivetimes_contour(
-                    raster_file,
+                    raster_for_times,
                     contour_interval,
                     parent_dialog)
 
@@ -309,11 +317,14 @@ def isochrone(
         return layer_name
 
 
-def idw_interpolation(layer, parent_dialog):
+def idw_interpolation(layer, style, parent_dialog):
     """Run interpolation using inverse distance weight algorithm
 
     :param layer: Vector layer with drivetimes
     :type layer: QgsVectorLayer
+
+    :param style: Boolean value to check for styling
+    :type style: bool
 
     :param parent_dialog: A dialog for showing progress.
     :type parent_dialog: QProgressDialog
@@ -328,8 +339,8 @@ def idw_interpolation(layer, parent_dialog):
 
         # Create temporary file
 
-        temp_output_file = tempfile.NamedTemporaryFile()
-        temp_output_file_path = temp_output_file.name + '.tif'
+        temp_output_file = tempfile.NamedTemporaryFile(suffix='.tif')
+        temp_output_file_path = temp_output_file.name
 
         params = {'INPUT': layer,
                   'Z_FIELD': 'minutes',
@@ -340,7 +351,7 @@ def idw_interpolation(layer, parent_dialog):
                   'ANGLE': 0,
                   'MAX_POINTS': 0,
                   'MIN_POINTS': 0,
-                  'NO_DATA': 0,
+                  'NODATA': 0,
                   'DATA_TYPE': 5,
                   'OUTPUT': temp_output_file_path
                   }
@@ -350,16 +361,20 @@ def idw_interpolation(layer, parent_dialog):
         )
 
         output_file = output_raster['OUTPUT']
-        file_info = QFileInfo(output_file)
-        base_name = file_info.baseName()
 
         # retrieving the raster output , styling it and load it in Qgis
 
-        raster_layer = QgsRasterLayer(output_file, 'styled map')
+        if(style):
+            raster_layer = QgsRasterLayer(output_file, 'styled map')
 
-        raster_layer = style_raster_layer(raster_layer, parent_dialog)
+            styled_raster_layer = style_raster_layer(raster_layer, parent_dialog)
 
-        QgsProject.instance().addMapLayer(raster_layer)
+            QgsProject.instance().addMapLayer(styled_raster_layer)
+        else:
+
+            raster_layer = QgsRasterLayer(output_file, 'raster')
+
+            return raster_layer
 
         # TODO use stored static style instead of dynamic one??
         #  map_style = resources_path(
@@ -526,13 +541,16 @@ def generate_drivetimes_contour(raster_layer, interval, parent_dialog):
     try:
         Processing.initialize()
 
-        temp_output_file = tempfile.NamedTemporaryFile()
-        temp_output_file_path = temp_output_file.name + '.shp'
+        temp_output_file = tempfile.NamedTemporaryFile(suffix='.shp')
+        temp_output_file_path = temp_output_file.name
 
         params = {
                 'INPUT': raster_layer,
                 'INTERVAL': interval,
                 'FIELD_NAME': 'minutes',
+                'CREATE_3D': False,
+                'IGNORE_NODATA': False,
+                'NODATA': 0,
                 'BAND': 1,
                 'OUTPUT': temp_output_file_path
         }
@@ -675,6 +693,37 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
                 'Error',
                 'Error loading isochrone map '
                 'Could not load catchment file!')
+
+
+def create_memory_layer(layer, layer_type, layer_name):
+    """Create a copy of given layer in memory
+
+       :param layer: Passed qgis layer
+       :type layer: QgsMapLayer
+
+       :param layer_type: Layer type
+       :type layer: string
+
+       :param layer_name: Layer name
+       :type layer: string
+
+       :return args: Copy of layer
+       :rtype args: QgsMapLayer
+       """
+    memory_layer = None
+
+    if isinstance(layer, QgsVectorLayer):
+        features = [feature for feature in layer.getFeatures()]
+
+        memory_layer = QgsVectorLayer(layer_type, layer_name, "memory")
+
+        memory_layer_data = memory_layer.dataProvider()
+        attr = layer.dataProvider().fields().toList()
+        memory_layer_data.addAttributes(attr)
+        memory_layer.updateFields()
+        memory_layer_data.addFeatures(features)
+
+    return memory_layer
 
 
 def resources_path(*args):

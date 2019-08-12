@@ -43,9 +43,5 @@ def classFactory(iface):  # pylint: disable=invalid-name
     :param iface: A QGIS interface instance.
     :type iface: QgsInterface
     """
-    #
     from .iso.main.isochrone import isochrones
-    # import pydevd_pycharm
-    # pydevd_pycharm.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
-
     return isochrones(iface)
