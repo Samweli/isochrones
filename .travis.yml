@@ -13,7 +13,7 @@ env:
     - QGIS_VERSION_TAG=release-3_2
     - QGIS_VERSION_TAG=release-3_4
     - QGIS_VERSION_TAG=release-3_6
-    - QGIS_VERSION_TAG=release-3_8
+    - QGIS_VERSION_TAG=final-3_8_0
 
 language: python
 
