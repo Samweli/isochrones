@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 IMAGE=qgis/qgis
-QGIS_VERSION_TAG=release-3_4
+QGIS_VERSION_TAG=release-3_2
 
 DISPLAY=${DISPLAY:-:99}
 
