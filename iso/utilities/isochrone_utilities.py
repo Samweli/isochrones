@@ -548,6 +548,9 @@ def generate_drivetimes_contour(raster_layer, interval, parent_dialog):
                 'INPUT': raster_layer,
                 'INTERVAL': interval,
                 'FIELD_NAME': 'minutes',
+                'CREATE_3D': False,
+                'IGNORE_NODATA': False,
+                'NODATA': 0,
                 'BAND': 1,
                 'OUTPUT': temp_output_file_path
         }

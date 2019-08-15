@@ -6,14 +6,13 @@ env:
     - ON_TRAVIS=true
     - MUTE_LOGS=true
     - WITH_PYTHON_PEP=true
-    - IMAGE=qgis/qgis
 
   matrix:
-    - QGIS_VERSION_TAG=release-3_0
-    - QGIS_VERSION_TAG=release-3_2
-    - QGIS_VERSION_TAG=release-3_4
-    - QGIS_VERSION_TAG=release-3_6
-    - QGIS_VERSION_TAG=final-3_8_0
+    - IMAGE=samtwesa/qgis-testing-environment:release-3_0
+    - IMAGE=qgis/qgis:release-3_2
+    - IMAGE=qgis/qgis:release-3_4
+    - IMAGE=qgis/qgis:release-3_6
+    - IMAGE=qgis/qgis:final-3_8_0
 
 language: python
 
@@ -37,7 +36,7 @@ addons:
       - python-software-properties
 
 before_install:
-  - docker pull ${IMAGE}:${QGIS_VERSION_TAG}
+  - docker pull ${IMAGE}
 
 install:
   - pip install --upgrade pip
