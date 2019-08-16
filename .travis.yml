@@ -9,8 +9,8 @@ env:
     - IMAGE=qgis/qgis
 
   matrix:
-    - QGIS_IMAGE=samtwesa/qgis-testing-environment:release-3_0
-    - QGIS_IMAGE=samtwesa/qgis-testing-environment:release-3_2
+    - QGIS_IMAGE=samtwesa/qgis-testing-environment-docker:release-3_0
+    - QGIS_IMAGE=samtwesa/qgis-testing-environment-docker:release-3_2
     - QGIS_IMAGE=qgis/qgis:release-3_4
     - QGIS_IMAGE=qgis/qgis:release-3_6
     - QGIS_IMAGE=qgis/qgis:final-3_8_0
