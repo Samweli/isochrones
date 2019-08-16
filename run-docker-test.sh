@@ -4,7 +4,7 @@ QGIS_IMAGE_V_3_0=samtwesa/qgis-testing-environment-docker:release-3_0
 QGIS_IMAGE_V_3_2=samtwesa/qgis-testing-environment-docker:release-3_2
 QGIS_IMAGE_V_3_4=qgis/qgis:release-3_4
 QGIS_IMAGE_V_3_6=qgis/qgis:release-3_6
-QGIS_IMAGE_V_3_8=qgis/qgis:release-3_8
+QGIS_IMAGE_V_3_8=qgis/qgis:final-3_8_0
 QGIS_IMAGE_master=qgis/qgis:master
 
 QGIS_VERSION_TAG=release-3_0
@@ -15,7 +15,9 @@ if [ "${DISPLAY}" != ":99" ]; then
     xhost +
 fi
 
-IMAGES=($QGIS_IMAGE_V_3_2 )
+IMAGES=($QGIS_IMAGE_V_3_0 $QGIS_IMAGE_V_3_2
+ $QGIS_IMAGE_V_3_4 $QGIS_IMAGE_V_3_6
+  $QGIS_IMAGE_V_3_8)
 
 for IMAGE in "${IMAGES[@]}"
 do
