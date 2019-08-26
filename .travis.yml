@@ -9,7 +9,11 @@ env:
     - IMAGE=qgis/qgis
 
   matrix:
-    - QGIS_VERSION_TAG=release-3_4
+    - QGIS_IMAGE=samtwesa/qgis-testing-environment-docker:release-3_0
+    - QGIS_IMAGE=samtwesa/qgis-testing-environment-docker:release-3_2
+    - QGIS_IMAGE=qgis/qgis:release-3_4
+    - QGIS_IMAGE=qgis/qgis:release-3_6
+    - QGIS_IMAGE=qgis/qgis:final-3_8_0
 
 language: python
 
@@ -33,13 +37,13 @@ addons:
       - python-software-properties
 
 before_install:
-  - docker pull ${IMAGE}:${QGIS_VERSION_TAG}
+  - docker pull ${QGIS_IMAGE}
 
 install:
   - pip install --upgrade pip
   - pip install --upgrade pep8
   - pip install --upgrade flake8
-  - docker run -d --name qgis-testing-environment -v ${TRAVIS_BUILD_DIR}:/tests_directory -e WITH_PYTHON_PEP=${WITH_PYTHON_PEP} -e ON_TRAVIS=${ON_TRAVIS} -e MUTE_LOGS=${MUTE_LOGS} -e DISPLAY=:99 ${IMAGE}:${QGIS_VERSION_TAG}
+  - docker run -d --name qgis-testing-environment -v ${TRAVIS_BUILD_DIR}:/tests_directory -e WITH_PYTHON_PEP=${WITH_PYTHON_PEP} -e ON_TRAVIS=${ON_TRAVIS} -e MUTE_LOGS=${MUTE_LOGS} -e DISPLAY=:99 ${QGIS_IMAGE}
   - sleep 10
   - docker exec -it qgis-testing-environment sh -c "qgis_setup.sh isochrones"
 
