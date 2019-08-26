@@ -32,10 +32,16 @@ class UtilitiesTest(unittest.TestCase):
 
         layer_path = os.path.join(catchment_path, 'isochrones.shp')
         vector_layer = QgsVectorLayer(layer_path, 'isochrones', 'ogr')
+        uri = vector_layer.dataProvider().dataSourceUri()
 
         file = idw_interpolation(vector_layer, False, None)
 
         # Assert if file is a raster layer
+        self.assertEqual(
+            uri,
+            '/tests_directory/iso/test/data'
+            '/catchment/isochrones.shp|layerid=0')
+
         self.assertEqual(
             file.type(), QgsMapLayer.RasterLayer)
 

@@ -37,7 +37,8 @@ from qgis.core import (
     QgsColorRampShader,
     QgsRasterShader,
     QgsSingleBandPseudoColorRenderer,
-    QgsRasterBandStats)
+    QgsRasterBandStats,
+    QgsVectorFileWriter)
 
 from qgis.utils import *
 
@@ -264,25 +265,28 @@ def isochrone(
 
             # Create a copy of result layer in memory
 
-            layer = create_memory_layer(temp_layer, "point", "iso")
+            #layer = create_memory_layer(temp_layer, "point", "iso")
+            saved_layer = save_vector_layer(temp_layer)
+
+            saved_layer_times = save_vector_layer(temp_layer)
 
             # Run interpolation on the final file (currently using IDW)
 
-            raster_file = idw_interpolation(layer, True, parent_dialog)
+            raster_file = idw_interpolation(saved_layer, True, parent_dialog)
 
             # Create a copy of interpolated raster for drivetimes
             # generation
 
-            raster_for_times = idw_interpolation(layer, False, parent_dialog)
+            raster_for_times = idw_interpolation(saved_layer_times, False, parent_dialog)
 
             # Generate drivetimes contour
             try:
-                drivetime_layer = generate_drivetimes_contour(
-                    raster_for_times,
-                    contour_interval,
-                    parent_dialog)
+                # drivetime_layer = generate_drivetimes_contour(
+                #    raster_for_times,
+                #    contour_interval,
+                #    parent_dialog)
 
-            # Load all the required layers
+                # Load all the required layers
 
                 args = {}
                 args['network_schema'] = network_schema
@@ -292,7 +296,7 @@ def isochrone(
                 args['catchment_table'] = catchment_table
                 args['catchment_geom'] = catchment_geom
 
-                load_map_layers(uri, parent_dialog, drivetime_layer, args)
+                # load_map_layers(uri, parent_dialog, drivetime_layer, args)
 
             except Exception as exception:
                 display_warning_message_box(
@@ -341,6 +345,8 @@ def idw_interpolation(layer, style, parent_dialog):
 
         temp_output_file = tempfile.NamedTemporaryFile(suffix='.tif')
         temp_output_file_path = temp_output_file.name
+
+        layer_uri = layer.dataProvider().dataSourceUri()
 
         params = {'INPUT': layer,
                   'Z_FIELD': 'minutes',
@@ -707,8 +713,8 @@ def create_memory_layer(layer, layer_type, layer_name):
        :param layer_name: Layer name
        :type layer: string
 
-       :return args: Copy of layer
-       :rtype args: QgsMapLayer
+       :return memory_layer: Copy of layer
+       :rtype memory_layer: QgsMapLayer
        """
     memory_layer = None
 
@@ -724,6 +730,31 @@ def create_memory_layer(layer, layer_type, layer_name):
         memory_layer_data.addFeatures(features)
 
     return memory_layer
+
+
+def save_vector_layer(layer):
+    """Save given layer to file system
+
+       :param layer: Passed qgis layer
+       :type layer: QgsMapLayer
+
+       :return saved_layer: Saved layer
+       :rtype saved_layer: QgsMapLayer
+       """
+
+    # TODO use the file
+    # vector_path = get_temp_path("")
+
+    temp_output_file = tempfile.NamedTemporaryFile()
+    temp_output_file_path = temp_output_file.name + '.shp'
+
+    error = QgsVectorFileWriter.writeAsVectorFormat(layer, temp_output_file_path,
+                                                    "utf-8", layer.crs(),
+                                                    "ESRI Shapefile")
+
+    saved_layer = QgsVectorLayer(temp_output_file_path, '', 'ogr')
+
+    return saved_layer
 
 
 def resources_path(*args):

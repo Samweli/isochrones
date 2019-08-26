@@ -15,9 +15,7 @@ if [ "${DISPLAY}" != ":99" ]; then
     xhost +
 fi
 
-IMAGES=($QGIS_IMAGE_V_3_0 $QGIS_IMAGE_V_3_2
- $QGIS_IMAGE_V_3_4 $QGIS_IMAGE_V_3_6
-  $QGIS_IMAGE_V_3_8)
+IMAGES=($QGIS_IMAGE_V_3_0)
 
 for IMAGE in "${IMAGES[@]}"
 do
@@ -39,7 +37,11 @@ do
     # FIX default installation because the sources must be in "isochrones" parent folder
     docker exec -it qgis-testing-environment sh -c "rm -f  /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/isochrones"
     docker exec -it qgis-testing-environment sh -c "ln -s /tests_directory/ /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/isochrones"
-
+    # docker exec -it qgis-testing-environment sh -c "apt update"
+    # docker exec -it qgis-testing-environment sh -c "apt install wget"
+    # docker exec -it qgis-testing-environment sh -c "wget https://bootstrap.pypa.io/get-pip.py"
+    # docker exec -it qgis-testing-environment sh -c "python get-pip.py"
+    # docker exec -it qgis-testing-environment sh -c "pip install pydevd-pycharm~=191.6605.12"
     # Run the real test
     time docker exec -it qgis-testing-environment sh -c "qgis_testrunner.sh test_suite.test_package"
 
