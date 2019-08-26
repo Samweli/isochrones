@@ -37,7 +37,8 @@ from qgis.core import (
     QgsColorRampShader,
     QgsRasterShader,
     QgsSingleBandPseudoColorRenderer,
-    QgsRasterBandStats)
+    QgsRasterBandStats,
+    QgsVectorFileWriter)
 
 from qgis.utils import *
 
@@ -331,7 +332,9 @@ def idw_interpolation(layer, parent_dialog):
         temp_output_file = tempfile.NamedTemporaryFile()
         temp_output_file_path = temp_output_file.name + '.tif'
 
-        params = {'INPUT': layer,
+        layer_saved = save_vector_layer(layer)
+
+        params = {'INPUT': layer_saved.dataProvider().dataSourceUri(),
                   'Z_FIELD': 'minutes',
                   'POWER': 2,
                   'SMOOTHING': 0,
@@ -340,7 +343,7 @@ def idw_interpolation(layer, parent_dialog):
                   'ANGLE': 0,
                   'MAX_POINTS': 0,
                   'MIN_POINTS': 0,
-                  'NO_DATA': 0,
+                  'NODATA': 0,
                   'DATA_TYPE': 5,
                   'OUTPUT': temp_output_file_path
                   }
@@ -533,6 +536,9 @@ def generate_drivetimes_contour(raster_layer, interval, parent_dialog):
                 'INPUT': raster_layer,
                 'INTERVAL': interval,
                 'FIELD_NAME': 'minutes',
+                'CREATE_3D': False,
+                'IGNORE_NODATA': False,
+                'NODATA': 0,
                 'BAND': 1,
                 'OUTPUT': temp_output_file_path
         }
@@ -676,6 +682,30 @@ def load_map_layers(uri, parent_dialog, drivetime_layer, args):
                 'Error loading isochrone map '
                 'Could not load catchment file!')
 
+
+def save_vector_layer(layer):
+    """Save given layer to file system
+
+       :param layer: Passed qgis layer
+       :type layer: QgsMapLayer
+
+       :return saved_layer: Saved layer
+       :rtype saved_layer: QgsMapLayer
+       """
+
+    # TODO use the file
+    # vector_path = get_temp_path("")
+
+    temp_output_file = tempfile.NamedTemporaryFile()
+    temp_output_file_path = temp_output_file.name + '.shp'
+
+    error = QgsVectorFileWriter.writeAsVectorFormat(layer, temp_output_file_path,
+                                                    "utf-8", layer.crs(),
+                                                    "ESRI Shapefile")
+
+    saved_layer = QgsVectorLayer(temp_output_file_path, 'saved', 'ogr')
+
+    return saved_layer
 
 def resources_path(*args):
     """Get the path to our resources folder.
