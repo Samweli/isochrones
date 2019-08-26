@@ -37,7 +37,7 @@ class UtilitiesTest(unittest.TestCase):
 
         # Assert if file is a raster layer
         self.assertEqual(
-            file.type(), 1)
+            file.type(), QgsMapLayer.RasterLayer)
 
         self.assertEqual(
             file.isValid(), True)
@@ -67,7 +67,7 @@ class UtilitiesTest(unittest.TestCase):
         # Assert if file is a vector layer
         self.assertEqual(
             vector_layer.type(),
-            0)
+            QgsMapLayer.VectorLayer)
         self.assertEqual(
             vector_layer.isValid(),
             True)
