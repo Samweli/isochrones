@@ -242,6 +242,7 @@ def isochrone(
 
         # Export table as a shapefile
 
+        layer = QgsVectorLayer(uri.uri(), "isochrones", "ogr")
         temp_layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
 
         QgsProject.instance().addMapLayers([temp_layer])
@@ -263,28 +264,15 @@ def isochrone(
 
             # TODO implement style creation logic
 
-            # Create a copy of result layer in memory
-
-            #layer = create_memory_layer(temp_layer, "point", "iso")
-            saved_layer = save_vector_layer(temp_layer)
-
-            saved_layer_times = save_vector_layer(temp_layer)
-
             # Run interpolation on the final file (currently using IDW)
-
-            raster_file = idw_interpolation(saved_layer, True, parent_dialog)
-
-            # Create a copy of interpolated raster for drivetimes
-            # generation
-
-            raster_for_times = idw_interpolation(saved_layer_times, False, parent_dialog)
+            raster_file = idw_interpolation(temp_layer, parent_dialog)
 
             # Generate drivetimes contour
             try:
-                # drivetime_layer = generate_drivetimes_contour(
-                #    raster_for_times,
-                #    contour_interval,
-                #    parent_dialog)
+                drivetime_layer = generate_drivetimes_contour(
+                   raster_for_times,
+                   contour_interval,
+                   parent_dialog)
 
                 # Load all the required layers
 
@@ -296,7 +284,7 @@ def isochrone(
                 args['catchment_table'] = catchment_table
                 args['catchment_geom'] = catchment_geom
 
-                # load_map_layers(uri, parent_dialog, drivetime_layer, args)
+                load_map_layers(uri, parent_dialog, drivetime_layer, args)
 
             except Exception as exception:
                 display_warning_message_box(
@@ -321,14 +309,11 @@ def isochrone(
         return layer_name
 
 
-def idw_interpolation(layer, style, parent_dialog):
+def idw_interpolation(layer, parent_dialog):
     """Run interpolation using inverse distance weight algorithm
 
     :param layer: Vector layer with drivetimes
     :type layer: QgsVectorLayer
-
-    :param style: Boolean value to check for styling
-    :type style: bool
 
     :param parent_dialog: A dialog for showing progress.
     :type parent_dialog: QProgressDialog
@@ -343,12 +328,12 @@ def idw_interpolation(layer, style, parent_dialog):
 
         # Create temporary file
 
-        temp_output_file = tempfile.NamedTemporaryFile(suffix='.tif')
-        temp_output_file_path = temp_output_file.name
+        temp_output_file = tempfile.NamedTemporaryFile()
+        temp_output_file_path = temp_output_file.name + '.tif'
 
-        layer_uri = layer.dataProvider().dataSourceUri()
+        layer_saved = save_vector_layer(layer)
 
-        params = {'INPUT': layer,
+        params = {'INPUT': layer_saved.dataProvider().dataSourceUri(),
                   'Z_FIELD': 'minutes',
                   'POWER': 2,
                   'SMOOTHING': 0,
@@ -370,19 +355,15 @@ def idw_interpolation(layer, style, parent_dialog):
 
         # retrieving the raster output , styling it and load it in Qgis
 
-        if(style):
-            raster_layer = QgsRasterLayer(output_file, 'styled map')
+        raster_layer = QgsRasterLayer(output_file, 'styled map')
 
-            styled_raster_layer = style_raster_layer(raster_layer, parent_dialog)
+        raster_layer = style_raster_layer(raster_layer, parent_dialog)
 
-            QgsProject.instance().addMapLayer(styled_raster_layer)
-        else:
+        QgsProject.instance().addMapLayer(raster_layer)
 
-            raster_layer = QgsRasterLayer(output_file, 'raster')
 
-            return raster_layer
 
-        # TODO use stored static style instead of dynamic one??
+    # TODO use stored static style instead of dynamic one??
         #  map_style = resources_path(
         #     'styles',
         #     'qgis',
@@ -752,7 +733,7 @@ def save_vector_layer(layer):
                                                     "utf-8", layer.crs(),
                                                     "ESRI Shapefile")
 
-    saved_layer = QgsVectorLayer(temp_output_file_path, '', 'ogr')
+    saved_layer = QgsVectorLayer(temp_output_file_path, 'isochrones', 'ogr')
 
     return saved_layer
 

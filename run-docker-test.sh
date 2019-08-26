@@ -15,7 +15,9 @@ if [ "${DISPLAY}" != ":99" ]; then
     xhost +
 fi
 
-IMAGES=($QGIS_IMAGE_V_3_0)
+IMAGES=($QGIS_IMAGE_V_3_0 $QGIS_IMAGE_V_3_2
+ $QGIS_IMAGE_V_3_4 $QGIS_IMAGE_V_3_8)
+
 
 for IMAGE in "${IMAGES[@]}"
 do
@@ -49,4 +51,5 @@ do
     docker rm qgis-testing-environment
 
 done
+
 
