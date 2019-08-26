@@ -270,7 +270,7 @@ def isochrone(
             # Generate drivetimes contour
             try:
                 drivetime_layer = generate_drivetimes_contour(
-                   raster_for_times,
+                   raster_file,
                    contour_interval,
                    parent_dialog)
 
