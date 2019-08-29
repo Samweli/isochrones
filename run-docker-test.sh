@@ -16,7 +16,8 @@ if [ "${DISPLAY}" != ":99" ]; then
 fi
 
 IMAGES=($QGIS_IMAGE_V_3_0 $QGIS_IMAGE_V_3_2
- $QGIS_IMAGE_V_3_4 $QGIS_IMAGE_V_3_8)
+        $QGIS_IMAGE_V_3_4 $QGIS_IMAGE_V_3_6
+        $QGIS_IMAGE_V_3_8)
 
 
 for IMAGE in "${IMAGES[@]}"

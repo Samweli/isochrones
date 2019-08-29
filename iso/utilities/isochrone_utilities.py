@@ -331,9 +331,9 @@ def idw_interpolation(layer, parent_dialog):
         temp_output_file = tempfile.NamedTemporaryFile()
         temp_output_file_path = temp_output_file.name + '.tif'
 
-        layer_saved = save_vector_layer(layer)
+        saved_layer = save_vector_layer(layer)
 
-        params = {'INPUT': layer_saved.dataProvider().dataSourceUri(),
+        params = {'INPUT': saved_layer.dataProvider().dataSourceUri(),
                   'Z_FIELD': 'minutes',
                   'POWER': 2,
                   'SMOOTHING': 0,
@@ -361,9 +361,7 @@ def idw_interpolation(layer, parent_dialog):
 
         QgsProject.instance().addMapLayer(raster_layer)
 
-
-
-    # TODO use stored static style instead of dynamic one??
+        # TODO use stored static style instead of dynamic one??
         #  map_style = resources_path(
         #     'styles',
         #     'qgis',
@@ -729,7 +727,8 @@ def save_vector_layer(layer):
     temp_output_file = tempfile.NamedTemporaryFile()
     temp_output_file_path = temp_output_file.name + '.shp'
 
-    error = QgsVectorFileWriter.writeAsVectorFormat(layer, temp_output_file_path,
+    error = QgsVectorFileWriter.writeAsVectorFormat(layer,
+                                                    temp_output_file_path,
                                                     "utf-8", layer.crs(),
                                                     "ESRI Shapefile")
 
