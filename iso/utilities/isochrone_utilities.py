@@ -331,7 +331,7 @@ def idw_interpolation(layer, parent_dialog):
         temp_output_file = tempfile.NamedTemporaryFile()
         temp_output_file_path = temp_output_file.name + '.tif'
 
-        saved_layer = save_vector_layer(layer)
+        saved_layer = save_layer(layer)
 
         params = {'INPUT': saved_layer.dataProvider().dataSourceUri(),
                   'Z_FIELD': 'minutes',
@@ -711,7 +711,7 @@ def create_memory_layer(layer, layer_type, layer_name):
     return memory_layer
 
 
-def save_vector_layer(layer):
+def save_layer(layer):
     """Save given layer to file system
 
        :param layer: Passed qgis layer
@@ -721,7 +721,7 @@ def save_vector_layer(layer):
        :rtype saved_layer: QgsMapLayer
        """
 
-    # TODO use the file
+    # TODO use the temporary file method and check for layer type first
     # vector_path = get_temp_path("")
 
     temp_output_file = tempfile.NamedTemporaryFile()
@@ -740,7 +740,8 @@ def save_vector_layer(layer):
 def resources_path(*args):
     """Get the path to our resources folder.
 
-    :param args List of path elements e.g. ['img', 'examples', 'isochrone.png']
+    :param args List of path elements e.g. ['img',
+    'examples', 'isochrone.png']
     :type args: list
 
     :return: Absolute path to the resources folder.

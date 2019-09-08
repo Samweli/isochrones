@@ -130,6 +130,9 @@ def create_nodes(connection, cursor, arguments, dialog):
 
     """
     try:
+
+        drop_nodes_table(connection, cursor)
+
         sql = """CREATE TABLE IF NOT EXISTS nodes AS
                SELECT row_number() OVER (ORDER BY foo.p)::integer AS id,
                foo.p AS the_geom
@@ -208,6 +211,8 @@ def update_catchment(connection, cursor, arguments, dialog):
     try:
         update_catchment_table(connection, cursor, arguments, dialog)
 
+        drop_temp_table(connection, cursor)
+
         sql = """ALTER TABLE %(catchment_table)s
                ADD COLUMN the_nearest_node integer;
 
@@ -265,6 +270,81 @@ def update_catchment_table(connection, cursor, arguments, dialog):
     sql = clean_query(sql)
 
     cursor.execute(sql)
+    connection.commit()
+
+
+def drop_temp_table(connection, cursor):
+    """Drops temp table.
+
+    :param connection: Database connection
+    :type connection:
+
+    :param cursor: Database connection cursor
+    :type cursor:
+
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+
+    """
+    sql = """ DROP TABLE IF EXISTS temp"""
+    sql = clean_query(sql)
+
+    cursor.execute(sql)
+
+    connection.commit()
+
+
+def drop_nodes_table(connection, cursor):
+    """Drops nodes table.
+
+    :param connection: Database connection
+    :type connection:
+
+    :param cursor: Database connection cursor
+    :type cursor:
+
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+
+    """
+    sql = """ DROP TABLE IF EXISTS nodes"""
+    sql = clean_query(sql)
+
+    cursor.execute(sql)
+
+    connection.commit()
+
+
+def drop_catchment_cost_table(connection, cursor):
+    """Drops catchment_with_cost table.
+
+    :param connection: Database connection
+    :type connection:
+
+    :param cursor: Database connection cursor
+    :type cursor:
+
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+
+    """
+    sql = """ DROP TABLE IF EXISTS catchment_with_cost"""
+    sql = clean_query(sql)
+
+    cursor.execute(sql)
+
     connection.commit()
 
 
@@ -347,6 +427,8 @@ def calculate_drivetimes(
 
         cursor.execute(sql)
         connection.commit()
+
+        drop_catchment_cost_table(connection, cursor)
 
         for row in rows:
             # This step is 45% of all steps so calculating
