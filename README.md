@@ -36,9 +36,6 @@ and restart your Qgis, go to Plugins -> Manage and Install Plugins search for it
 
 to activate it.
 
-Currently uploading this plugin to Qgis Plugins repository, soon you will be able to install it directly
-from there.
-
 The master branch contains latest version of this plugin.
 
 ### Requirements
