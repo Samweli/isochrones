@@ -15,9 +15,8 @@ if [ "${DISPLAY}" != ":99" ]; then
     xhost +
 fi
 
-IMAGES=($QGIS_IMAGE_V_3_0 $QGIS_IMAGE_V_3_2
-        $QGIS_IMAGE_V_3_4 $QGIS_IMAGE_V_3_6
-        $QGIS_IMAGE_V_3_8)
+IMAGES=(
+        $QGIS_IMAGE_V_3_4)
 
 
 for IMAGE in "${IMAGES[@]}"

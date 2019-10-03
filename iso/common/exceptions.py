@@ -27,6 +27,11 @@ class IsochroneError(RuntimeError):
     suggestion = 'An unspecified error occurred.'
 
 
+class IsochroneDBError(RuntimeError):
+    """Base class for all user defined exceptions"""
+    suggestion = 'Check that the input tables and their attributes are right.'
+
+
 class ReadLayerError(IsochroneError):
     """When a layer can't be read"""
     suggestion = (

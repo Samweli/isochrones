@@ -36,8 +36,8 @@ def _run_tests(test_suite, package_name, with_coverage=False):
     print('########')
     if with_coverage:
         cov = coverage.Coverage(
-            source=['iso/'],
-            omit=['*/test/*', 'iso/definitions/*'],
+            source=['./'],
+            omit=['*/test/*', './definitions/*'],
         )
         cov.start()
 

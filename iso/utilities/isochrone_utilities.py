@@ -57,6 +57,8 @@ from processing.core.Processing import Processing
 
 from iso.utilities.db import *
 
+from iso.common.exceptions import IsochroneDBError
+
 
 def isochrone(
         database_name,
@@ -169,113 +171,92 @@ def isochrone(
         arguments["database_name"] = database_name
         arguments["port_number"] = port_number
 
-        create_network_view(
-            connection,
-            curr,
-            arguments,
-            parent_dialog,
-            progress_dialog)
+        try:
 
-        create_nodes(connection, curr, arguments, parent_dialog)
+            create_network_view(
+                connection,
+                curr,
+                arguments,
+                parent_dialog,
+                progress_dialog)
 
-        # Create routable network
-        progress_percentage = 10
+            create_nodes(connection, curr, arguments, parent_dialog)
 
-        progress_dialog.setValue(progress_percentage)
-        label_text = tr("Creating a routable network table")
-        progress_dialog.setLabelText(label_text)
+            # Create routable network
+            progress_percentage = 10
 
-        if progress_dialog.wasCanceled():
-            return
+            progress_dialog.setValue(progress_percentage)
+            label_text = tr("Creating a routable network table")
+            progress_dialog.setLabelText(label_text)
 
-        create_routable_network(connection, curr, arguments, parent_dialog)
+            if progress_dialog.wasCanceled():
+                return
 
-        # Find nearest nodes from the catchments
-        progress_percentage = 30
-        progress_dialog.setValue(progress_percentage)
-        label_text = tr("Preparing the catchment table")
-        progress_dialog.setLabelText(label_text)
+            create_routable_network(connection, curr, arguments, parent_dialog)
 
-        if progress_dialog.wasCanceled():
-            return
+            # Find nearest nodes from the catchments
+            progress_percentage = 30
+            progress_dialog.setValue(progress_percentage)
+            label_text = tr("Preparing the catchment table")
+            progress_dialog.setLabelText(label_text)
 
-        update_catchment(connection, curr, arguments, parent_dialog)
+            if progress_dialog.wasCanceled():
+                return
 
-        # Calculate drivetimes for the nearest nodes
+            update_catchment(connection, curr, arguments, parent_dialog)
 
-        progress_percentage = 50
+            # Calculate drivetimes for the nearest nodes
 
-        progress_dialog.setValue(progress_percentage)
-        label_text = tr("Calculating drivetime for each catchment area")
-        progress_dialog.setLabelText(label_text)
+            progress_percentage = 50
 
-        if progress_dialog.wasCanceled():
-            return
+            progress_dialog.setValue(progress_percentage)
+            label_text = tr("Calculating drivetime for each catchment area")
+            progress_dialog.setLabelText(label_text)
 
-        progress_percentage = calculate_drivetimes(
-            connection,
-            curr,
-            arguments,
-            progress_dialog,
-            parent_dialog,
-            progress_percentage)
+            if progress_dialog.wasCanceled():
+                return
 
-        if progress_dialog.wasCanceled():
-            return
+            progress_percentage = calculate_drivetimes(
+                connection,
+                curr,
+                arguments,
+                progress_dialog,
+                parent_dialog,
+                progress_percentage)
 
-        prepare_drivetimes_table(connection, curr, arguments, parent_dialog)
+            if progress_dialog.wasCanceled():
+                return
 
-        uri = QgsDataSourceUri()
-        # set host name, port, database name, username and password
-        uri.setConnection(
-            host_name,
-            port_number,
-            database_name,
-            user_name,
-            password)
-        # set database schema, table name, geometry column and optionally
-        # subset (WHERE clause)
-        uri.setDataSource(
-            network_schema,
-            "catchment_final_no_null",
-            "the_geom")
+            prepare_drivetimes_table(connection, curr, arguments, parent_dialog)
 
-        # Export table as a shapefile
+            uri = QgsDataSourceUri()
+            # set host name, port, database name, username and password
+            uri.setConnection(
+                host_name,
+                port_number,
+                database_name,
+                user_name,
+                password)
+            # set database schema, table name, geometry column and optionally
+            # subset (WHERE clause)
+            uri.setDataSource(
+                network_schema,
+                "catchment_final_no_null",
+                "the_geom")
 
-        layer = QgsVectorLayer(uri.uri(), "isochrones", "ogr")
-        temp_layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
+            # Export table as a shapefile
 
-        QgsProject.instance().addMapLayers([temp_layer])
+            layer = QgsVectorLayer(uri.uri(), "isochrones", "ogr")
+            temp_layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
 
-        if iface:
-            iface.mapCanvas().refresh()
+            QgsProject.instance().addMapLayers([temp_layer])
 
-        layer_name = temp_layer.dataProvider().dataSourceUri()
+            if iface:
+                iface.mapCanvas().refresh()
 
-        if style_checked:
-            progress_percentage += 1
-            if progress_dialog:
-                progress_dialog.setValue(progress_percentage)
-                label_text = tr("Exporting and preparing isochrone map")
-                progress_dialog.setLabelText(label_text)
+            layer_name = temp_layer.dataProvider().dataSourceUri()
 
-                if progress_dialog.wasCanceled():
-                    return
-
-            # TODO implement style creation logic
-
-            # Run interpolation on the final file (currently using IDW)
-            raster_file = idw_interpolation(temp_layer, parent_dialog)
-
-            # Generate drivetimes contour
-            try:
-                drivetime_layer = generate_drivetimes_contour(
-                   raster_file,
-                   contour_interval,
-                   parent_dialog)
-
-                # Load all the required layers
-
+            if style_checked:
                 args = {}
                 args['network_schema'] = network_schema
                 args['network_table'] = network_table
@@ -284,29 +265,90 @@ def isochrone(
                 args['catchment_table'] = catchment_table
                 args['catchment_geom'] = catchment_geom
 
-                load_map_layers(uri, parent_dialog, drivetime_layer, args)
+                prepare_map_style(
+                        uri,
+                        progress_percentage,
+                        contour_interval,
+                        progress_dialog,
+                        temp_layer,
+                        parent_dialog,
+                        args)
 
-            except Exception as exception:
-                display_warning_message_box(
-                    parent_dialog,
-                    parent_dialog.tr(
-                        'Error'),
-                    parent_dialog.tr('Error generating drivetimes'))
-
-            progress_percentage += 4
             if progress_dialog:
-                progress_dialog.setValue(progress_percentage)
-                label_text = tr("Done, loading isochrone map")
-                progress_dialog.setLabelText(label_text)
+                progress_dialog.setValue(100)
+                progress_dialog.done(QDialog.Accepted)
 
-                if progress_dialog.wasCanceled():
-                    return
+            return layer_name
 
-        if progress_dialog:
-            progress_dialog.setValue(100)
-            progress_dialog.done(QDialog.Accepted)
+        except IsochroneDBError as exception:
+            return None
 
-        return layer_name
+
+def prepare_map_style(
+        uri,
+        progress_percentage,
+        contour_interval,
+        progress_dialog,
+        temp_layer,
+        parent_dialog,
+        args):
+    """Prepare map style if user requested for it
+
+        :param layer: Vector layer with drivetimes
+        :type layer: QgsVectorLayer
+
+        :param parent_dialog: A dialog for showing progress.
+        :type parent_dialog: QProgressDialog
+
+        :returns raster_layer: Interpolated raster layer with drivetimes
+        :rtype raster_layer: QgsRasterLayer
+
+        """
+
+    progress_percentage += 1
+    if progress_dialog:
+        progress_dialog.setValue(progress_percentage)
+    label_text = tr("Exporting and preparing isochrone map")
+    progress_dialog.setLabelText(label_text)
+
+    if progress_dialog.wasCanceled():
+        return
+
+    # TODO implement style creation logic
+
+    # Run interpolation on the final file (currently using IDW)
+    raster_file = idw_interpolation(temp_layer, parent_dialog)
+
+    # Generate drivetimes contour
+    try:
+        drivetime_layer = generate_drivetimes_contour(
+            raster_file,
+            contour_interval,
+            parent_dialog)
+
+        # Load all the required layers
+
+        load_map_layers(uri, parent_dialog, drivetime_layer, args)
+
+    except Exception as exception:
+        message = 'Error generating drivetimes \n {}'. \
+            format(str(exception))
+        display_warning_message_box(
+            parent_dialog,
+            parent_dialog.tr(
+                'Error'),
+            parent_dialog.tr(
+                message
+            ))
+
+    progress_percentage += 4
+    if progress_dialog:
+        progress_dialog.setValue(progress_percentage)
+        label_text = tr("Done, loading isochrone map")
+        progress_dialog.setLabelText(label_text)
+
+        if progress_dialog.wasCanceled():
+            return
 
 
 def idw_interpolation(layer, parent_dialog):
@@ -373,13 +415,15 @@ def idw_interpolation(layer, parent_dialog):
     except Exception as exception:  # pylint: disable=broad-except
             # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
         if parent_dialog:
-                display_warning_message_box(
-                    parent_dialog,
-                    parent_dialog.tr(
-                        'Error'),
-                    parent_dialog.tr('Error loading isochrone map,'
-                                     'please check if you have processing '
-                                     'plugin installed ', str(exception)))
+            message = 'Error loading isochrone map,'\
+                      'please check if you have processing '\
+                      'plugin installed \n'.\
+                      format(str(exception))
+            display_warning_message_box(
+                parent_dialog,
+                parent_dialog.tr(
+                    'Error'),
+                parent_dialog.tr(message))
         else:
             display_warning_message_box(
                 parent_dialog,
@@ -552,20 +596,25 @@ def generate_drivetimes_contour(raster_layer, interval, parent_dialog):
     except Exception as exception:  # pylint: disable=broad-except
             # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
         if parent_dialog:
+            message = 'Error loading isochrone map,' \
+                      'please check if you have processing ' \
+                      'plugin installed \n'. \
+                      format(str(exception))
             display_warning_message_box(
                 parent_dialog,
                 parent_dialog.tr(
                     'Error'),
-                parent_dialog.tr('Error loading isochrone map,'
-                                 'please check if you have processing '
-                                 'plugin installed '))
+                parent_dialog.tr(message))
         else:
+            message = 'Error loading isochrone map,'\
+                      'please check if you have processing '\
+                        'plugin installed \n'.\
+                        format(str(exception))
+
             display_warning_message_box(
                 parent_dialog,
                 'Error',
-                'Error loading isochrone map,'
-                'please check if you have processing '
-                'plugin installed ')
+                message)
 
     return drivetime_layer
 
