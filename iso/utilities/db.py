@@ -572,7 +572,8 @@ def prepare_drivetimes_table(connection, cursor, arguments, dialog):
         # max_hours = maximum_time + maximum_time * 0.05
         #
         # sql = """ CREATE TABLE catchment_final_mid AS
-        #                 SELECT *, coalesce(drivetime, %f) as valid_drivetime FROM catchment_final
+        #                 SELECT *, coalesce(drivetime, %f) as valid_drivetime
+        #                 FROM catchment_final
         #                 """ % max_hours
         # sql = clean_query(sql)
         # cursor.execute(sql)
