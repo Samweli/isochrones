@@ -80,10 +80,12 @@ def create_network_view(
     except Exception as exception:
         message = "Error in creating network view \n {}". \
             format(str(exception))
+
         display_warning_message_box(
             dialog, "Error",
             message
-            )
+        )
+
         raise IsochroneDBError
 
 
@@ -127,9 +129,11 @@ def create_nodes(connection, cursor, arguments, dialog):
     except Exception as exception:
         message = "Error in creating network nodes \n {}". \
                   format(str(exception))
+
         display_warning_message_box(
             dialog, "Error",
-            message)
+            message
+        )
 
         raise IsochroneDBError
 
@@ -170,9 +174,12 @@ def create_routable_network(connection, cursor, arguments, dialog):
     except Exception as exception:
         message = "Error in creating routable network \n {}". \
             format(str(exception))
+
         display_warning_message_box(
             dialog, "Error",
-            message)
+            message
+        )
+
         raise IsochroneDBError
 
 
@@ -232,9 +239,12 @@ def update_catchment(connection, cursor, arguments, dialog):
     except Exception as exception:
         message = "Error in updating catchment table \n {}". \
             format(str(exception))
+
         display_warning_message_box(
             dialog, "Error",
-            message)
+            message
+        )
+
         raise IsochroneDBError
 
 
@@ -288,9 +298,12 @@ def drop_network_cache(connection, cursor, arguments, dialog):
     except Exception as exception:
         message = "Error in clearing network view \n {}". \
             format(str(exception))
+
         display_warning_message_box(
             dialog, "Error",
-            message)
+            message
+        )
+
         raise IsochroneDBError
 
 
@@ -475,9 +488,12 @@ def calculate_drivetimes(
     except Exception as exception:
         message = "Error in calculating drivetimes \n {}". \
             format(str(exception))
+
         display_warning_message_box(
             dialog, "Error",
-            message)
+            message
+        )
+
         raise IsochroneDBError
 
     return progress_percentage
@@ -536,7 +552,7 @@ def prepare_drivetimes_table(connection, cursor, arguments, dialog):
         drop_table(connection, cursor, "catchment_final")
 
         sql = """ CREATE TABLE IF NOT EXISTS catchment_final AS
-               SELECT id, the_geom, min (cost) AS {}
+               SELECT id, the_geom, min (cost) AS %s
                FROM catchment_with_cost
                GROUP By id, the_geom
             """ % "drivetime"
@@ -566,7 +582,7 @@ def prepare_drivetimes_table(connection, cursor, arguments, dialog):
 
         sql = """ CREATE TABLE catchment_final_no_null AS
                 SELECT *, (drivetime * 60) AS minutes FROM catchment_final
-                WHERE {} IS NOT NULL
+                WHERE %s IS NOT NULL
                 """ % "drivetime"
 
         sql = clean_query(sql)
@@ -576,10 +592,13 @@ def prepare_drivetimes_table(connection, cursor, arguments, dialog):
     except Exception as exception:
         message = "Error in preparing drivetimes table \n {}". \
             format(str(exception))
+
         display_warning_message_box(
             dialog,
             "Error",
-            message)
+            message
+        )
+
         raise IsochroneDBError
 
 

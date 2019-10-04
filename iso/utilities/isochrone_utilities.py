@@ -257,6 +257,13 @@ def isochrone(
         layer_name = temp_layer.dataProvider().dataSourceUri()
 
         if style_checked:
+            args = {}
+            args['network_schema'] = network_schema
+            args['network_table'] = network_table
+            args['network_geom'] = network_geom
+            args['catchment_schema'] = catchment_schema
+            args['catchment_table'] = catchment_table
+            args['catchment_geom'] = catchment_geom
 
             prepare_map_style(
                     uri,
@@ -265,7 +272,7 @@ def isochrone(
                     progress_dialog,
                     temp_layer,
                     parent_dialog,
-                    arguments)
+                    args)
 
         if progress_dialog:
             progress_dialog.setValue(100)
@@ -340,13 +347,15 @@ def prepare_map_style(
     except Exception as exception:
         message = 'Error generating drivetimes \n {}'. \
             format(str(exception))
+
         display_warning_message_box(
             parent_dialog,
             parent_dialog.tr(
                 'Error'),
             parent_dialog.tr(
                 message
-            ))
+            )
+        )
 
         raise IsochroneMapStyleError
 
