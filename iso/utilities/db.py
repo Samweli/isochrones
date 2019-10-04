@@ -33,6 +33,7 @@ from iso.utilities.i18n import tr
 
 from iso.common.exceptions import IsochroneDBError
 
+
 def create_network_view(
         connection,
         cursor,
@@ -60,7 +61,7 @@ def create_network_view(
     """
 
     progress_dialog.setValue(0)
-    label_text = tr("Creating network nodes table")
+    label_text = tr("Creating network view table")
     progress_dialog.setLabelText(label_text)
 
     drop_network_cache(connection, cursor, arguments, dialog)
@@ -313,7 +314,7 @@ def drop_table(connection, cursor, table):
     :type dialog: Qdialog
 
     """
-    sql = """ DROP TABLE IF EXISTS {} """ % table
+    sql = """ DROP TABLE IF EXISTS {} """.format(table)
     sql = clean_query(sql)
 
     cursor.execute(sql)

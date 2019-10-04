@@ -57,7 +57,9 @@ from processing.core.Processing import Processing
 
 from iso.utilities.db import *
 
-from iso.common.exceptions import IsochroneDBError
+from iso.common.exceptions import \
+    IsochroneDBError,\
+    IsochroneMapStyleError
 
 
 def isochrone(
@@ -77,211 +79,204 @@ def isochrone(
         parent_dialog,
         progress_dialog=None):
 
-        """Contains main logic on creating isochrone map
-        :param database_name: Database name
-        :type database_name: str
+    """Contains main logic on creating isochrone map
+    :param database_name: Database name
+    :type database_name: str
 
-        :param host_name: Database host
-        :type host_name: str
+    :param host_name: Database host
+    :type host_name: str
 
-        :param port_number: Port number for the host
-        :type port_number: str
+    :param port_number: Port number for the host
+    :type port_number: str
 
-        :param user_name: Username for connection with database
-        :type user_name: str
+    :param user_name: Username for connection with database
+    :type user_name: str
 
-        :param password: Password
-        :type password: str
+    :param password: Password
+    :type password: str
 
-        :param network: Schema and Table containing the network.
-        :type network: str
+    :param network: Schema and Table containing the network.
+    :type network: str
 
-        :param network_geom: Geometry column in network.
-        :type network_geom: str
+    :param network_geom: Geometry column in network.
+    :type network_geom: str
 
-        :param network_id_column: Id column in network.
-        :type network_id_column: str
+    :param network_id_column: Id column in network.
+    :type network_id_column: str
 
-        :param catchment: Schema and Table containing catchment areas.
-        :type catchment: str
+    :param catchment: Schema and Table containing catchment areas.
+    :type catchment: str
 
-        :param catchment_geom: Geometry column in catchment.
-        :type catchment_geom: str
+    :param catchment_geom: Geometry column in catchment.
+    :type catchment_geom: str
 
-        :param catchment_id_column: Id column in catchment.
-        :type catchment_id_column: str
+    :param catchment_id_column: Id column in catchment.
+    :type catchment_id_column: str
 
-        :param style_checked: Value for either to create a map style
-        or not.
-        :type  style_checked: boolean
+    :param style_checked: Value for either to create a map style
+    or not.
+    :type  style_checked: boolean
 
-        :param contour_interval: Interval between contour, if contour
-        will be generated
-        :type  contour_interval: int
+    :param contour_interval: Interval between contour, if contour
+    will be generated
+    :type  contour_interval: int
 
-        :param parent_dialog: A dialog that called this function.
-        :type parent_dialog: QProgressDialog
+    :param parent_dialog: A dialog that called this function.
+    :type parent_dialog: QProgressDialog
 
-        :param progress_dialog: A progess dialog .
-        :type progress_dialog: QProgressDialog
+    :param progress_dialog: A progess dialog .
+    :type progress_dialog: QProgressDialog
 
-        :returns layer_name: temporary path of the isochrones map layer
-        :rtype layer_name: str
-        """
+    :returns layer_name: temporary path of the isochrones map layer
+    :rtype layer_name: str
+    """
 
-        # Import files into database, have tables
-        # connect to database
-        # add the files get the tables name
+    # Import files into database, have tables
+    # connect to database
+    # add the files get the tables name
 
-        connection = psycopg2.connect(
-            "dbname='" + str(database_name) + "' "
-            "user='" + str(user_name) + "' "
-            "host='" + str(host_name) + "' "
-            "port='" + str(port_number) + "' "
-            "password='" + str(password) + "' ")
+    connection = psycopg2.connect(
+        "dbname='" + str(database_name) + "' "
+        "user='" + str(user_name) + "' "
+        "host='" + str(host_name) + "' "
+        "port='" + str(port_number) + "' "
+        "password='" + str(password) + "' ")
 
-        curr = connection.cursor()
+    curr = connection.cursor()
 
-        # Create nodes from network
+    # Setting up progress window
+    progress_dialog = QProgressDialog('Progress', 'Cancel', 0, 100)
+    progress_dialog.forceShow()
+    progress_dialog.setWindowModality(Qt.WindowModal)
 
-        # Setting up progress window
-        progress_dialog = QProgressDialog('Progress', 'Cancel', 0, 100)
-        progress_dialog.forceShow()
-        progress_dialog.setWindowModality(Qt.WindowModal)
+    network_array = network.split('.')
+    network_table = str(network_array[1])
+    network_schema = network_array[0]
+    catchment = catchment.split('.')
+    catchment_table = catchment[1]
+    catchment_schema = catchment[0]
 
-        network_array = network.split('.')
-        network_table = str(network_array[1])
-        network_schema = network_array[0]
-        catchment = catchment.split('.')
-        catchment_table = catchment[1]
-        catchment_schema = catchment[0]
+    if not network_geom:
+        network_geom = "geom"
+    if not catchment_geom:
+        catchment_geom = "geom"
 
-        if not network_geom:
-            network_geom = "geom"
-        if not catchment_geom:
-            catchment_geom = "geom"
+    arguments = {}
+    arguments["network_table"] = network_table
+    arguments["network_geom"] = network_geom
+    arguments["network_id"] = network_id_column
+    arguments["catchment_table"] = catchment_table
+    arguments["catchment_geom"] = catchment_geom
+    arguments["catchment_id"] = catchment_id_column
+    arguments["database_name"] = database_name
+    arguments["port_number"] = port_number
 
-        arguments = {}
-        arguments["network_table"] = network_table
-        arguments["network_geom"] = network_geom
-        arguments["network_id"] = network_id_column
-        arguments["catchment_table"] = catchment_table
-        arguments["catchment_geom"] = catchment_geom
-        arguments["catchment_id"] = catchment_id_column
-        arguments["database_name"] = database_name
-        arguments["port_number"] = port_number
+    try:
 
-        try:
+        create_network_view(
+            connection,
+            curr,
+            arguments,
+            parent_dialog,
+            progress_dialog)
 
-            create_network_view(
-                connection,
-                curr,
-                arguments,
-                parent_dialog,
-                progress_dialog)
+        create_nodes(connection, curr, arguments, parent_dialog)
 
-            create_nodes(connection, curr, arguments, parent_dialog)
+        # Create routable network
+        progress_percentage = 10
 
-            # Create routable network
-            progress_percentage = 10
+        progress_dialog.setValue(progress_percentage)
+        label_text = tr("Creating a routable network table")
+        progress_dialog.setLabelText(label_text)
 
-            progress_dialog.setValue(progress_percentage)
-            label_text = tr("Creating a routable network table")
-            progress_dialog.setLabelText(label_text)
+        if progress_dialog.wasCanceled():
+            return
 
-            if progress_dialog.wasCanceled():
-                return
+        create_routable_network(connection, curr, arguments, parent_dialog)
 
-            create_routable_network(connection, curr, arguments, parent_dialog)
+        # Find nearest nodes from the catchments
+        progress_percentage = 30
+        progress_dialog.setValue(progress_percentage)
+        label_text = tr("Preparing the catchment table")
+        progress_dialog.setLabelText(label_text)
 
-            # Find nearest nodes from the catchments
-            progress_percentage = 30
-            progress_dialog.setValue(progress_percentage)
-            label_text = tr("Preparing the catchment table")
-            progress_dialog.setLabelText(label_text)
+        if progress_dialog.wasCanceled():
+            return
 
-            if progress_dialog.wasCanceled():
-                return
+        update_catchment(connection, curr, arguments, parent_dialog)
 
-            update_catchment(connection, curr, arguments, parent_dialog)
+        # Calculate drivetimes for the nearest nodes
 
-            # Calculate drivetimes for the nearest nodes
+        progress_percentage = 50
 
-            progress_percentage = 50
+        progress_dialog.setValue(progress_percentage)
+        label_text = tr("Calculating drivetime for each catchment area")
+        progress_dialog.setLabelText(label_text)
 
-            progress_dialog.setValue(progress_percentage)
-            label_text = tr("Calculating drivetime for each catchment area")
-            progress_dialog.setLabelText(label_text)
+        if progress_dialog.wasCanceled():
+            return
 
-            if progress_dialog.wasCanceled():
-                return
+        progress_percentage = calculate_drivetimes(
+            connection,
+            curr,
+            arguments,
+            progress_dialog,
+            parent_dialog,
+            progress_percentage)
 
-            progress_percentage = calculate_drivetimes(
-                connection,
-                curr,
-                arguments,
-                progress_dialog,
-                parent_dialog,
-                progress_percentage)
+        if progress_dialog.wasCanceled():
+            return
 
-            if progress_dialog.wasCanceled():
-                return
+        prepare_drivetimes_table(connection, curr, arguments, parent_dialog)
 
-            prepare_drivetimes_table(connection, curr, arguments, parent_dialog)
+        uri = QgsDataSourceUri()
+        # set host name, port, database name, username and password
+        uri.setConnection(
+            host_name,
+            port_number,
+            database_name,
+            user_name,
+            password)
+        # set database schema, table name, geometry column and optionally
+        # subset (WHERE clause)
+        uri.setDataSource(
+            network_schema,
+            "catchment_final_no_null",
+            "the_geom")
 
-            uri = QgsDataSourceUri()
-            # set host name, port, database name, username and password
-            uri.setConnection(
-                host_name,
-                port_number,
-                database_name,
-                user_name,
-                password)
-            # set database schema, table name, geometry column and optionally
-            # subset (WHERE clause)
-            uri.setDataSource(
-                network_schema,
-                "catchment_final_no_null",
-                "the_geom")
+        # Export table as a shapefile
 
-            # Export table as a shapefile
+        layer = QgsVectorLayer(uri.uri(), "isochrones", "ogr")
+        temp_layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
 
-            layer = QgsVectorLayer(uri.uri(), "isochrones", "ogr")
-            temp_layer = QgsVectorLayer(uri.uri(), "isochrones", "postgres")
+        QgsProject.instance().addMapLayers([temp_layer])
 
-            QgsProject.instance().addMapLayers([temp_layer])
+        if iface:
+            iface.mapCanvas().refresh()
 
-            if iface:
-                iface.mapCanvas().refresh()
+        layer_name = temp_layer.dataProvider().dataSourceUri()
 
-            layer_name = temp_layer.dataProvider().dataSourceUri()
+        if style_checked:
 
-            if style_checked:
-                args = {}
-                args['network_schema'] = network_schema
-                args['network_table'] = network_table
-                args['network_geom'] = network_geom
-                args['catchment_schema'] = catchment_schema
-                args['catchment_table'] = catchment_table
-                args['catchment_geom'] = catchment_geom
+            prepare_map_style(
+                    uri,
+                    progress_percentage,
+                    contour_interval,
+                    progress_dialog,
+                    temp_layer,
+                    parent_dialog,
+                    arguments)
 
-                prepare_map_style(
-                        uri,
-                        progress_percentage,
-                        contour_interval,
-                        progress_dialog,
-                        temp_layer,
-                        parent_dialog,
-                        args)
+        if progress_dialog:
+            progress_dialog.setValue(100)
+            progress_dialog.done(QDialog.Accepted)
 
-            if progress_dialog:
-                progress_dialog.setValue(100)
-                progress_dialog.done(QDialog.Accepted)
+        return layer_name
 
-            return layer_name
-
-        except IsochroneDBError as exception:
-            return None
+    except (IsochroneDBError,
+            IsochroneMapStyleError
+            ) as exception:
+        return None
 
 
 def prepare_map_style(
@@ -294,16 +289,28 @@ def prepare_map_style(
         args):
     """Prepare map style if user requested for it
 
-        :param layer: Vector layer with drivetimes
-        :type layer: QgsVectorLayer
+    :param uri: Identifier for the final layer table
+    :type uri: QgsDataSourceUri
 
-        :param parent_dialog: A dialog for showing progress.
-        :type parent_dialog: QProgressDialog
+    :param progress_percentage: Progress percentage.
+    :type progress_percentage: int
 
-        :returns raster_layer: Interpolated raster layer with drivetimes
-        :rtype raster_layer: QgsRasterLayer
+    :param contour_interval: Drivetime interval.
+    :type contour_interval: int
 
-        """
+    :param progress_dialog: Dialog for progress.
+    :type progress_dialog: QDialog
+
+    :param temp_layer: Temporary result layer.
+    :type temp_layer: QgsVectorLayer
+
+    :param parent_dialog: Isochrone parent dialog.
+    :type parent_dialog: QDialog
+
+    :param args: Database tables arguments
+    :type args: {}
+
+    """
 
     progress_percentage += 1
     if progress_dialog:
@@ -340,6 +347,8 @@ def prepare_map_style(
             parent_dialog.tr(
                 message
             ))
+
+        raise IsochroneMapStyleError
 
     progress_percentage += 4
     if progress_dialog:
@@ -431,6 +440,8 @@ def idw_interpolation(layer, parent_dialog):
                 'Error loading isochrone map,'
                 'please check if you have processing '
                 'plugin installed ')
+
+        raise IsochroneMapStyleError
 
     return raster_layer
 
@@ -615,6 +626,8 @@ def generate_drivetimes_contour(raster_layer, interval, parent_dialog):
                 parent_dialog,
                 'Error',
                 message)
+
+        raise IsochroneMapStyleError
 
     return drivetime_layer
 

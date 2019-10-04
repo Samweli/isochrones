@@ -27,9 +27,14 @@ class IsochroneError(RuntimeError):
     suggestion = 'An unspecified error occurred.'
 
 
-class IsochroneDBError(RuntimeError):
-    """Base class for all user defined exceptions"""
+class IsochroneDBError(IsochroneError):
+    """For Database errors"""
     suggestion = 'Check that the input tables and their attributes are right.'
+
+
+class IsochroneMapStyleError(IsochroneError):
+    """For Map styling exceptions"""
+    suggestion = 'Check that the processing plugin works right.'
 
 
 class ReadLayerError(IsochroneError):
