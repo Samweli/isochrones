@@ -117,6 +117,10 @@ class isochrones:
             be added to the menu. Defaults to True.
         :type add_to_menu: bool
 
+        :param add_to_database_menu: Flag indicating whether the action
+            should also be added to the database menu. Defaults to True.
+        :type add_to_database_menu: bool
+
         :param add_to_toolbar: Flag indicating whether the action should also
             be added to the toolbar. Defaults to True.
         :type add_to_toolbar: bool

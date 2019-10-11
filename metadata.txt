@@ -9,15 +9,15 @@
 [general]
 name=Isochrones
 qgisMinimumVersion=2.0
-description=This plugin create isochrones maps.
+description=Automates isochrone map creation in Qgis.
 version=0.1
 author=Samweli Mwakisambwe
-email=smwakisambwe@worldbank.org
+email=smwltwesa6@gmail.com
 
-about=This plugin generates isochrones maps from the data given, currently it is based on producing drivetime isochrone maps from a network dataset with a catchment dataset.
+about=Enables QGIS users to easily create isochrone maps from network and catchment data.
 
-tracker=https://github.com/Samweli/isochrones_plugin/issues
-repository=https://github.com/Samweli/isochrones_plugin
+tracker=https://github.com/Samweli/isochrones/issues
+repository=https://github.com/Samweli/isochrones
 # End of mandatory metadata
 
 # Recommended items:
@@ -28,11 +28,11 @@ repository=https://github.com/Samweli/isochrones_plugin
 # Tags are comma separated with spaces allowed
 tags=map, openstreetmap, routing, python
 
-homepage=https://github.com/Samweli/isochrones_plugin/issues
+homepage=https://github.com/Samweli/isochrones
 category=Database
 icon=resources/img/icons/icon.png
 # experimental flag
-experimental=True
+experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False

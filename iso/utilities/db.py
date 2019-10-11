@@ -21,6 +21,7 @@
  ***************************************************************************/
 """
 
+from builtins import str
 import os
 import psycopg2
 import re
@@ -31,8 +32,15 @@ from iso.utilities.qgis_utilities import (
 
 from iso.utilities.i18n import tr
 
+from iso.common.exceptions import IsochroneDBError
 
-def create_network_view(connection, cursor, arguments, dialog):
+
+def create_network_view(
+        connection,
+        cursor,
+        arguments,
+        dialog,
+        progress_dialog):
     """Create network view, to improve performance of queries using it
 
     :param connection: Database connection
@@ -48,8 +56,16 @@ def create_network_view(connection, cursor, arguments, dialog):
     :param dialog: Dialog attached to this method
     :type dialog: Qdialog
 
+    :param progress_dialog: Progress dialog
+    :type progress_dialog: Qdialog
+
     """
-    clear_network_cache(connection, cursor, arguments, dialog)
+
+    progress_dialog.setValue(0)
+    label_text = tr("Creating network view table")
+    progress_dialog.setLabelText(label_text)
+
+    drop_network_cache(connection, cursor, arguments, dialog)
 
     try:
         sql = """ CREATE OR REPLACE VIEW network_cache as
@@ -63,39 +79,15 @@ def create_network_view(connection, cursor, arguments, dialog):
         connection.commit()
 
     except Exception as exception:
+        message = "Error in creating network view \n {}". \
+            format(str(exception))
+
         display_warning_message_box(
-            dialog, "Error", "Error in creating network view")
+            dialog, "Error",
+            message
+        )
 
-
-def clear_network_cache(connection, cursor, arguments, dialog):
-    """Clear a network cache if exists
-
-    :param connection: Database connection
-    :type connection:
-
-    :param cursor: Database connection cursor
-    :type cursor:
-
-    :param arguments: List of required parameters in
-     querying the database
-    :type arguments: {}
-
-    :param dialog: Dialog attached to this method
-    :type dialog: Qdialog
-
-    """
-
-    try:
-        sql = """DROP VIEW IF EXISTS network_cache"""
-
-        sql = clean_query(sql)
-
-        cursor.execute(sql)
-        connection.commit()
-
-    except Exception as exception:
-        display_warning_message_box(
-            dialog, "Error", "Error in clearing network view")
+        raise IsochroneDBError
 
 
 def create_nodes(connection, cursor, arguments, dialog):
@@ -117,6 +109,9 @@ def create_nodes(connection, cursor, arguments, dialog):
 
     """
     try:
+
+        drop_table(connection, cursor, "nodes")
+
         sql = """CREATE TABLE IF NOT EXISTS nodes AS
                SELECT row_number() OVER (ORDER BY foo.p)::integer AS id,
                foo.p AS the_geom
@@ -133,8 +128,15 @@ def create_nodes(connection, cursor, arguments, dialog):
         cursor.execute(sql)
         connection.commit()
     except Exception as exception:
+        message = "Error in creating network nodes \n {}". \
+                  format(str(exception))
+
         display_warning_message_box(
-            dialog, "Error", "Error in creating network nodes")
+            dialog, "Error",
+            message
+        )
+
+        raise IsochroneDBError
 
 
 def create_routable_network(connection, cursor, arguments, dialog):
@@ -157,6 +159,8 @@ def create_routable_network(connection, cursor, arguments, dialog):
     """
 
     try:
+        drop_table(connection, cursor, "routable_network")
+
         sql = """CREATE TABLE IF NOT EXISTS routable_network AS
                SELECT a.*, b.id as start_id, c.id as end_id FROM
                network_cache
@@ -169,8 +173,15 @@ def create_routable_network(connection, cursor, arguments, dialog):
         cursor.execute(sql)
         connection.commit()
     except Exception as exception:
+        message = "Error in creating routable network \n {}". \
+            format(str(exception))
+
         display_warning_message_box(
-            dialog, "Error", "Error in creating routable network")
+            dialog, "Error",
+            message
+        )
+
+        raise IsochroneDBError
 
 
 def update_catchment(connection, cursor, arguments, dialog):
@@ -194,6 +205,8 @@ def update_catchment(connection, cursor, arguments, dialog):
 
     try:
         update_catchment_table(connection, cursor, arguments, dialog)
+
+        drop_table(connection, cursor, "temp")
 
         sql = """ALTER TABLE %(catchment_table)s
                ADD COLUMN the_nearest_node integer;
@@ -225,8 +238,15 @@ def update_catchment(connection, cursor, arguments, dialog):
         populate_catchment_table(connection, cursor, arguments, dialog)
 
     except Exception as exception:
+        message = "Error in updating catchment table \n {}". \
+            format(str(exception))
+
         display_warning_message_box(
-            dialog, "Error", "Error in updating catchment table")
+            dialog, "Error",
+            message
+        )
+
+        raise IsochroneDBError
 
 
 def update_catchment_table(connection, cursor, arguments, dialog):
@@ -252,6 +272,67 @@ def update_catchment_table(connection, cursor, arguments, dialog):
     sql = clean_query(sql)
 
     cursor.execute(sql)
+    connection.commit()
+
+
+def drop_network_cache(connection, cursor, arguments, dialog):
+    """Clear a network cache if exists
+    :param connection: Database connection
+    :type connection:
+    :param cursor: Database connection cursor
+    :type cursor:
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+    """
+
+    try:
+        sql = """DROP VIEW IF EXISTS network_cache"""
+
+        sql = clean_query(sql)
+
+        cursor.execute(sql)
+        connection.commit()
+
+    except Exception as exception:
+        message = "Error in clearing network view \n {}". \
+            format(str(exception))
+
+        display_warning_message_box(
+            dialog, "Error",
+            message
+        )
+
+        raise IsochroneDBError
+
+
+def drop_table(connection, cursor, table):
+    """Drops temp table.
+
+    :param connection: Database connection
+    :type connection:
+
+    :param cursor: Database connection cursor
+    :type cursor:
+
+    :param table: Table to be dropped
+    :type table: str
+
+    :param arguments: List of required parameters in
+     querying the database
+    :type arguments: {}
+
+    :param dialog: Dialog attached to this method
+    :type dialog: Qdialog
+
+    """
+    sql = """ DROP TABLE IF EXISTS {} """.format(table)
+    sql = clean_query(sql)
+
+    cursor.execute(sql)
+
     connection.commit()
 
 
@@ -290,6 +371,7 @@ def calculate_drivetimes(
         connection,
         cursor,
         arguments,
+        progress_dialog,
         dialog,
         progress_percentage):
 
@@ -303,6 +385,9 @@ def calculate_drivetimes(
     :param arguments: List of required parameters in
      querying the database
     :type arguments: {}
+
+    :param progress_dialog: Progress Dialog
+    :type progress_dialog: Qdialog
 
     :param dialog: Dialog attached to this method
     :type dialog: Qdialog
@@ -331,11 +416,13 @@ def calculate_drivetimes(
         cursor.execute(sql)
         connection.commit()
 
+        drop_table(connection, cursor, "catchment_with_cost")
+
         for row in rows:
             # This step is 45% of all steps so calculating
             # percentage of each increment accordingly
 
-            percentage = ((index + 1) / len(rows)) * 45
+            percentage = 45 / len(rows)
             percentage = round(percentage, 0)
             catchment_id = row[0]
             arguments["catchment_current_id"] = catchment_id
@@ -384,21 +471,31 @@ def calculate_drivetimes(
             index += 1
             connection.commit()
             progress_percentage += percentage
-            if dialog:
-                dialog.setValue(progress_percentage)
+            if progress_dialog:
+                progress_dialog.setValue(progress_percentage)
                 label_text = tr(
-                str(index) +
-                " catchment area(s) out of " +
-                str(len(rows)) +
-                " is(are) done")
-                dialog.setLabelText(label_text)
-        if dialog:
-            label_text = tr("Preparing all the catchment areas table")
-            dialog.setLabelText(label_text)
+                    str(index) +
+                    " catchment area(s) out of " +
+                    str(len(rows)) +
+                    " is(are) done")
+                progress_dialog.setLabelText(label_text)
+
+                if progress_dialog.wasCanceled():
+                    return
+        # if dialog:
+        #     label_text = tr("Preparing all the catchment areas table")
+        #     dialog.setLabelText(label_text)
 
     except Exception as exception:
+        message = "Error in calculating drivetimes \n {}". \
+            format(str(exception))
+
         display_warning_message_box(
-            dialog, "Error", "Error in calculating drivetimes")
+            dialog, "Error",
+            message
+        )
+
+        raise IsochroneDBError
 
     return progress_percentage
 
@@ -453,12 +550,7 @@ def prepare_drivetimes_table(connection, cursor, arguments, dialog):
 
     """
     try:
-        sql = """ DROP TABLE IF EXISTS catchment_final"""
-        sql = clean_query(sql)
-
-        cursor.execute(sql)
-
-        connection.commit()
+        drop_table(connection, cursor, "catchment_final")
 
         sql = """ CREATE TABLE IF NOT EXISTS catchment_final AS
                SELECT id, the_geom, min (cost) AS %s
@@ -467,33 +559,70 @@ def prepare_drivetimes_table(connection, cursor, arguments, dialog):
             """ % "drivetime"
 
         sql = clean_query(sql)
-
         cursor.execute(sql)
-
         connection.commit()
 
-        sql = """DROP TABLE IF EXISTS catchment_final_no_null"""
+        # drop_table(connection, cursor, "catchment_final_mid")
 
-        sql = clean_query(sql)
+        # TODO find best approach of getting max_hours
+        # use these hours incase catchment is unreachable
+        # maximum_time = max_drivetime(
+        #     connection,
+        #     cursor)
+        #
+        # max_hours = maximum_time + maximum_time * 0.05
+        #
+        # sql = """ CREATE TABLE catchment_final_mid AS
+        #                 SELECT *, coalesce(drivetime, %f) as valid_drivetime
+        #                 FROM catchment_final
+        #                 """ % max_hours
+        # sql = clean_query(sql)
+        # cursor.execute(sql)
+        # connection.commit()
 
-        cursor.execute(sql)
-
-        connection.commit()
+        drop_table(connection, cursor, "catchment_final_no_null")
 
         sql = """ CREATE TABLE catchment_final_no_null AS
                 SELECT *, (drivetime * 60) AS minutes FROM catchment_final
                 WHERE %s IS NOT NULL """ % "drivetime"
 
         sql = clean_query(sql)
-
         cursor.execute(sql)
-
         connection.commit()
+
     except Exception as exception:
+        message = "Error in preparing drivetimes table \n {}". \
+            format(str(exception))
+
         display_warning_message_box(
             dialog,
             "Error",
-            "Error in preparing drivetimes table")
+            message
+        )
+
+        raise IsochroneDBError
+
+
+def max_drivetime(connection, cursor):
+    """ Return maximum drivetime
+
+    :param connection: Database connection
+    :type connection:
+
+    :param cursor: Database connection cursor
+    :type cursor:
+
+    """
+
+    sql = """SELECT coalesce(max(drivetime), 0) from
+        catchment_final """
+
+    sql = clean_query(sql)
+
+    cursor.execute(sql)
+    rows = cursor.fetchone()
+
+    return rows[0]
 
 
 def clean_query(query):
