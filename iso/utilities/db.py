@@ -8,7 +8,7 @@
         begin                : 2016-07-02
         git sha              : $Format:%H$
         copyright            : (C) 2016 by Samweli Mwakisambwe
-        email                : smwakisambwe@worldbank.org
+        email                : smwltwesa6@gmail.com
  ***************************************************************************/
 
 /***************************************************************************
@@ -21,7 +21,6 @@
  ***************************************************************************/
 """
 
-from builtins import str
 import os
 import psycopg2
 import re
@@ -110,7 +109,7 @@ def create_nodes(connection, cursor, arguments, dialog):
     """
     try:
 
-        drop_table(connection, cursor, "nodes")
+        # drop_table(connection, cursor, "nodes")
 
         sql = """CREATE TABLE IF NOT EXISTS nodes AS
                SELECT row_number() OVER (ORDER BY foo.p)::integer AS id,
@@ -159,7 +158,7 @@ def create_routable_network(connection, cursor, arguments, dialog):
     """
 
     try:
-        drop_table(connection, cursor, "routable_network")
+        # drop_table(connection, cursor, "routable_network")
 
         sql = """CREATE TABLE IF NOT EXISTS routable_network AS
                SELECT a.*, b.id as start_id, c.id as end_id FROM
@@ -309,7 +308,7 @@ def drop_network_cache(connection, cursor, arguments, dialog):
 
 
 def drop_table(connection, cursor, table):
-    """Drops temp table.
+    """Drops given table.
 
     :param connection: Database connection
     :type connection:

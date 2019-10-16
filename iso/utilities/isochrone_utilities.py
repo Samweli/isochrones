@@ -8,7 +8,7 @@
         begin                : 2016-07-02
         git sha              : $Format:%H$
         copyright            : (C) 2016 by Samweli Mwakisambwe
-        email                : smwakisambwe@worldbank.org
+        email                : smwltwesa6@gmail.com
  ***************************************************************************/
 
 /***************************************************************************
@@ -35,7 +35,8 @@ from qgis.core import (
     QgsColorRampShader,
     QgsRasterShader,
     QgsSingleBandPseudoColorRenderer,
-    QgsRasterBandStats)
+    QgsRasterBandStats,
+    QgsVectorFileWriter)
 
 from qgis.utils import iface
 
@@ -46,7 +47,9 @@ from PyQt4.QtGui import (
     QColor
     )
 from PyQt4.QtCore import (
-    QFileInfo)
+    QFileInfo,
+    Qt
+    )
 
 from iso.utilities.qgis_utilities import (
     display_warning_message_box)
@@ -401,16 +404,15 @@ def idw_interpolation(layer, parent_dialog):
         # retrieving the raster output , styling it and load it in Qgis
 
         raster_layer = QgsRasterLayer(output_file, base_name)
-	
-	raster_layer = style_raster_layer(raster_layer, parent_dialog)
-	
-	# Zoom to the map
+        raster_layer = style_raster_layer(raster_layer, parent_dialog)
+
+        # Zoom to the map
         iface.setActiveLayer(raster_layer)
         iface.zoomToActiveLayer()
 
     except Exception as exception:  # pylint: disable=broad-except
             # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
-	message = 'Error loading isochrone map,'\
+        message = 'Error loading isochrone map,'\
                       'please check if you have processing '\
                       'plugin installed \n'.\
                       format(str(exception))
@@ -582,10 +584,11 @@ def generate_drivetimes_contour(raster_layer, interval, parent_dialog):
 
     except Exception as exception:  # pylint: disable=broad-except
             # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
-	message = 'Error loading isochrone map,'\
-		'please check if you have processing '\
-	        'plugin installed \n'.\
-	        format(str(exception))
+
+        message = 'Error loading isochrone map,'\
+                  'please check if you have processing '\
+                  'plugin installed \n'.\
+            format(str(exception))
         if parent_dialog:
             display_warning_message_box(
                 parent_dialog,
