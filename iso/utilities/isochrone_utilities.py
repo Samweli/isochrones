@@ -185,7 +185,7 @@ def isochrone(
         # Create routable network
         progress_percentage = 10
 
-        progress_dialog.setValue(progress_percentage)
+        progress_dialog.setValue(int(progress_percentage))
         label_text = tr("Creating a routable network table")
         progress_dialog.setLabelText(label_text)
 
@@ -321,7 +321,7 @@ def prepare_map_style(
 
     progress_percentage += 1
     if progress_dialog:
-        progress_dialog.setValue(progress_percentage)
+        progress_dialog.setValue(int(progress_percentage))
     label_text = tr("Exporting and preparing isochrone map")
     progress_dialog.setLabelText(label_text)
 
@@ -361,7 +361,7 @@ def prepare_map_style(
 
     progress_percentage += 4
     if progress_dialog:
-        progress_dialog.setValue(progress_percentage)
+        progress_dialog.setValue(int(progress_percentage))
         label_text = tr("Done, loading isochrone map")
         progress_dialog.setLabelText(label_text)
 

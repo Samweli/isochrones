@@ -68,8 +68,8 @@ def create_network_view(
 
     try:
         sql = """ CREATE OR REPLACE VIEW network_cache as
-            SELECT *, pgr_startpoint(%(network_geom)s),
-            pgr_endpoint(%(network_geom)s) FROM %(network_table)s
+            SELECT *, _pgr_startpoint(%(network_geom)s),
+            _pgr_endpoint(%(network_geom)s) FROM %(network_table)s
             """ % arguments
 
         sql = clean_query(sql)
@@ -115,10 +115,10 @@ def create_nodes(connection, cursor, arguments, dialog):
                SELECT row_number() OVER (ORDER BY foo.p)::integer AS id,
                foo.p AS the_geom
                FROM (
-               SELECT DISTINCT network_cache.pgr_startpoint AS p
+               SELECT DISTINCT network_cache._pgr_startpoint AS p
                 FROM network_cache
                UNION
-               SELECT DISTINCT network_cache.pgr_endpoint AS p
+               SELECT DISTINCT network_cache._pgr_endpoint AS p
                FROM network_cache
                ) foo
                GROUP BY foo.p"""
@@ -164,9 +164,9 @@ def create_routable_network(connection, cursor, arguments, dialog):
                SELECT a.*, b.id as start_id, c.id as end_id FROM
                network_cache
                AS a
-               JOIN nodes AS b ON a.pgr_startpoint = b.the_geom JOIN
+               JOIN nodes AS b ON a._pgr_startpoint = b.the_geom JOIN
                nodes AS c
-               ON  a.pgr_endpoint = c.the_geom """
+               ON  a._pgr_endpoint = c.the_geom """
         sql = clean_query(sql)
 
         cursor.execute(sql)
@@ -424,7 +424,11 @@ def calculate_drivetimes(
             percentage = 45 / len(rows)
             percentage = round(percentage, 0)
             catchment_id = row[0]
-            arguments["catchment_current_id"] = catchment_id
+            arguments["catchment_current_id"] = catchment_id[0] \
+                if isinstance(catchment_id, tuple) else catchment_id
+            arguments["last_row_id"] = rows[len(rows) - 1][0] \
+                if isinstance(rows[len(rows) - 1], tuple) else rows[len(rows) - 1]
+
             if index == 0:
                 sql = """ CREATE TABLE
                         IF NOT EXISTS catchment_with_cost AS
@@ -439,8 +443,7 @@ def calculate_drivetimes(
                           cost::float8 AS cost
                        FROM routable_network',
                        %(catchment_current_id)s,
-                       id,
-                       false,
+                       %(last_row_id)s,
                        false)) AS foo ) AS cost
                     FROM nodes;""" % arguments
                 sql = clean_query(sql)
@@ -458,8 +461,7 @@ def calculate_drivetimes(
                               cost::float8 AS cost
                            FROM routable_network',
                            %(catchment_current_id)s,
-                           id,
-                           false,
+                           %(last_row_id)s,
                            false)) AS foo ) AS cost
                     FROM nodes);""" % arguments
 
@@ -471,7 +473,7 @@ def calculate_drivetimes(
             connection.commit()
             progress_percentage += percentage
             if progress_dialog:
-                progress_dialog.setValue(progress_percentage)
+                progress_dialog.setValue(int(progress_percentage))
                 label_text = tr(
                     str(index) +
                     " catchment area(s) out of " +
