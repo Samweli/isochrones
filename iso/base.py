@@ -20,14 +20,12 @@
  *                                                                         *
  ***************************************************************************/
 """
-from builtins import str
 from builtins import range
-import os
 import psycopg2
-import re
 import processing
 import tempfile
 
+from processing.core.Processing import Processing
 
 from qgis.core import (
     QgsDataSourceUri,
@@ -42,24 +40,16 @@ from qgis.core import (
 
 from qgis.utils import *
 
-from qgis.PyQt.QtWidgets import QDialog, QFileDialog, QProgressDialog
+from qgis.PyQt.QtWidgets import QDialog, QProgressDialog
 from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtCore import (
-    QFileInfo)
 
+from qgis.PyQt.QtCore import Qt
 
-from PyQt5.QtCore import Qt
-
-from iso.utilities.qgis_utilities import (
-    display_warning_message_box)
-
-from processing.core.Processing import Processing
-
-from iso.utilities.db import *
-
-from iso.common.exceptions import \
-    IsochroneDBError,\
+from common.exceptions import \
     IsochroneMapStyleError
+
+from .db_functions import *
+from .utils import display_warning_message_box, resources_path
 
 
 def isochrone(
@@ -185,7 +175,7 @@ def isochrone(
         # Create routable network
         progress_percentage = 10
 
-        progress_dialog.setValue(progress_percentage)
+        progress_dialog.setValue(int(progress_percentage))
         label_text = tr("Creating a routable network table")
         progress_dialog.setLabelText(label_text)
 
@@ -194,7 +184,7 @@ def isochrone(
 
         create_routable_network(connection, curr, arguments, parent_dialog)
 
-        # Find nearest nodes from the catchments
+        # Find the nearest nodes from the catchments
         progress_percentage = 30
         progress_dialog.setValue(progress_percentage)
         label_text = tr("Preparing the catchment table")
@@ -321,7 +311,7 @@ def prepare_map_style(
 
     progress_percentage += 1
     if progress_dialog:
-        progress_dialog.setValue(progress_percentage)
+        progress_dialog.setValue(int(progress_percentage))
     label_text = tr("Exporting and preparing isochrone map")
     progress_dialog.setLabelText(label_text)
 
@@ -361,7 +351,7 @@ def prepare_map_style(
 
     progress_percentage += 4
     if progress_dialog:
-        progress_dialog.setValue(progress_percentage)
+        progress_dialog.setValue(int(progress_percentage))
         label_text = tr("Done, loading isochrone map")
         progress_dialog.setLabelText(label_text)
 
@@ -807,24 +797,6 @@ def save_layer(layer):
 
     return saved_layer
 
-
-def resources_path(*args):
-    """Get the path to our resources folder.
-
-    :param args List of path elements e.g. ['img',
-    'examples', 'isochrone.png']
-    :type args: list
-
-    :return: Absolute path to the resources folder.
-    :rtype: str
-    """
-    path = os.path.dirname(__file__)
-    path = os.path.abspath(
-        os.path.join(path, os.path.pardir, os.path.pardir, 'resources'))
-    for item in args:
-        path = os.path.abspath(os.path.join(path, item))
-
-    return path
 
 # def unique_filename(**kwargs):
 #     """Create new filename guaranteed not to exist previously

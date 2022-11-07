@@ -1,49 +1,108 @@
-# -*- coding: utf-8 -*-
-"""
-/***************************************************************************
- exception classes
-                                 A QGIS plugin
- This plugin create isochrones maps.
-                             -------------------
-        begin                : 2016-07-02
-        git sha              : $Format:%H$
-        copyright            : (C) 2016 by Samweli Mwakisambwe
-        email                : smwakisambwe@worldbank.org
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-"""
-
-from qgis.PyQt.QtWidgets import QMessageBox, QPushButton
-
+#
+# Utility functions that are specific to the plugin logic.
 import os
-import re
+
+from qgis.core import Qgis, QgsMessageLog
+import qgis  # pylint: disable=unused-import
+from qgis.PyQt import QtCore, uic
+
+from builtins import str
+from qgis.PyQt.QtCore import QCoreApplication
+
+from qgis.PyQt.QtWidgets import QMessageBox
+
 import sys
-import hashlib
-import logging
-import platform
-import glob
-import shutil
-
-
-from qgis.core import (
-    QgsVectorLayer,
-    QgsRasterLayer,
-    QgsRectangle,
-    QgsCoordinateReferenceSystem,
-    QgsProject)
 
 QGIS_APP = None
 CANVAS = None
 PARENT = None
 IFACE = None
+
+
+def tr(text):
+    """
+    :param text: String to be translated
+    :type text: str, unicode
+
+    :returns: Translated version of the given string if available, otherwise
+        the original string.
+    :rtype: str, unicode
+    """
+    # Ensure it's in unicode
+    text = get_unicode(text)
+    # noinspection PyCallByClass,PyTypeChecker,PyArgumentList
+    return QCoreApplication.translate('@default', text)
+
+
+def __if_not_basestring(text_object):
+    converted_str = text_object
+    if not isinstance(text_object, str):
+        converted_str = str(text_object)
+    return converted_str
+
+
+def get_unicode(input_text, encoding='utf-8'):
+    """Get the unicode representation of an object.
+
+    :param input_text: The input text.
+    :type input_text: unicode, str, float, int
+
+    :param encoding: The encoding used to do the conversion, default to utf-8.
+    :type encoding: str
+
+    :returns: Unicode representation of the input.
+    :rtype: unicode
+    """
+    input_text = __if_not_basestring(input_text)
+    if isinstance(input_text, str):
+        return input_text
+    return str(input_text, encoding, errors='ignore')
+
+
+def resources_path(*args):
+    """Get the path to our resources folder.
+
+    :param args List of path elements e.g. ['img',
+    'examples', 'isochrone.png']
+    :type args: list
+
+    :return: Absolute path to the resources folder.
+    :rtype: str
+    """
+    path = os.path.dirname(__file__)
+    path = os.path.abspath(
+        os.path.join(path, os.path.pardir, 'resources'))
+    for item in args:
+        path = os.path.abspath(os.path.join(path, item))
+
+    return path
+
+def log(
+        message: str,
+        name: str = "qgis_isochrones",
+        info: bool = True,
+        notify: bool = True,
+):
+    """ Logs the message into QGIS logs using qgis_stac as the default
+    log instance.
+    If notify_user is True, user will be notified about the log.
+    :param message: The log message
+    :type message: str
+    :param name: Name of te log instance, qgis_stac is the default
+    :type message: str
+    :param info: Whether the message is about info or a
+    warning
+    :type info: bool
+    :param notify: Whether to notify user about the log
+    :type notify: bool
+     """
+    level = Qgis.Info if info else Qgis.Warning
+    QgsMessageLog.logMessage(
+        message,
+        name,
+        level=level,
+        notifyUser=notify,
+    )
 
 
 def display_information_message_box(

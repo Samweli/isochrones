@@ -10,7 +10,6 @@
         email                : smwakisambwe@worldbank.org
         git sha              : $Format:%H$
  ***************************************************************************/
-
 /***************************************************************************
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -30,18 +29,12 @@ sys.path.append(os.path.dirname(__file__))
 sys.path.extend([os.path.abspath(os.path.join(
     os.path.dirname(__file__), os.path.pardir))])
 
-UTILITY_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), 'iso', 'utilities'))
-if UTILITY_DIR not in sys.path:
-    sys.path.append(UTILITY_DIR)
-
 
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name
     """Load isochrones class from file isochrones.
-
     :param iface: A QGIS interface instance.
     :type iface: QgsInterface
     """
-    from .iso.main.isochrone import isochrones
-    return isochrones(iface)
+    from .main import QgisIsochrones
+    return QgisIsochrones(iface)

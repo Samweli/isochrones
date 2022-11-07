@@ -27,13 +27,12 @@ from qgis.PyQt.QtWidgets import QAction
 from qgis.PyQt.QtGui import QIcon
 # Initialize Qt resources from file resources.py
 # Import the code for the dialog
-from iso.gui.tools.isochrone_dialog import isochronesDialog
-from iso.utilities.isochrone_utilities import (
-    resources_path)
+from gui.qgis_isochrone_dialog import QgisIsochronesDialog
+from .iso.utils import resources_path
 import os.path
 
 
-class isochrones(object):
+class QgisIsochrones(object):
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -63,7 +62,7 @@ class isochrones(object):
                 QCoreApplication.installTranslator(self.translator)
 
         # Create the dialog (after translation) and keep reference
-        self.dlg = isochronesDialog(self.iface.mainWindow(), self.iface)
+        self.dlg = QgisIsochronesDialog(self.iface.mainWindow(), self.iface)
 
         # Declare instance attributes
         self.actions = []

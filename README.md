@@ -1,20 +1,10 @@
 Isochrones Qgis Plugin
 =======
 
-| QGIS 3.0          | QGIS 3.2          | QGIS 3.4 (LTR)    | QGIS 3.6          | QGIS 3.8          |
-|-------------------|-------------------|-------------------|-------------------|-------------------|
-| [![Build1][1]][7] | [![Build2][2]][7] | [![Build3][3]][7] | [![Build4][4]][7] | [![Build5][5]][7] |
-
-[1]: https://travis-matrix-badges.herokuapp.com/repos/Samweli/isochrones/branches/master/1
-[2]: https://travis-matrix-badges.herokuapp.com/repos/Samweli/isochrones/branches/master/2
-[3]: https://travis-matrix-badges.herokuapp.com/repos/Samweli/isochrones/branches/master/3
-[4]: https://travis-matrix-badges.herokuapp.com/repos/Samweli/isochrones/branches/master/4
-[5]: https://travis-matrix-badges.herokuapp.com/repos/Samweli/isochrones/branches/master/5
-[6]: https://travis-matrix-badges.herokuapp.com/repos/Samweli/isochrones/branches/master/6
-[7]: https://travis-ci.org/Samweli/isochrones
+![Tests](https://github.com/samweli/isochrones/actions/workflows/test.yml/badge.svg)
 
 
-Simple Plugin that creates isochrones map from the given data and parameters.
+QGIS plugin that creates isochrones map from the given data and parameters.
 
 <img src="https://raw.githubusercontent.com/Samweli/isochrones_plugin/master/resources/img/examples/isochrone.png" width="600" height="500" alt="Isochrone example" />
 

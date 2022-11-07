@@ -15,7 +15,7 @@ __copyright__ = 'Copyright 2016, Samweli Mwakisambwe'
 
 import unittest
 
-from iso.gui.tools.isochrone_dialog import isochronesDialog
+from gui.qgis_isochrone_dialog import QgisIsochronesDialog
 from .utilities import get_qgis_app
 QGIS_APP = get_qgis_app()
 
@@ -27,7 +27,7 @@ class IsochronesDialogTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.dialog = isochronesDialog(None)
+        self.dialog = QgisIsochronesDialog(None)
 
     def tearDown(self):
         """Runs after each test."""

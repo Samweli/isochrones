@@ -4,17 +4,15 @@
 import unittest
 import os
 
-from iso.test.utilities import get_qgis_app
+from utilities import get_qgis_app
 
 from qgis.core import *
 
 QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 
-from iso.utilities.isochrone_utilities import\
-    isochrone, \
+from iso.base import \
     idw_interpolation, \
-    generate_drivetimes_contour, \
-    load_map_layers
+    generate_drivetimes_contour
 
 
 class UtilitiesTest(unittest.TestCase):

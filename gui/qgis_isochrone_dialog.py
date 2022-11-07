@@ -23,8 +23,6 @@
 
 import os
 
-from qgis.PyQt import uic
-
 from qgis.core import Qgis
 
 # noinspection PyPackageRequirements
@@ -32,21 +30,22 @@ from qgis.PyQt import QtWidgets
 # noinspection PyPackageRequirements
 from qgis.PyQt.QtCore import QSettings, QFileInfo
 # noinspection PyPackageRequirements
-from qgis.PyQt.QtWidgets import QDialog, QFileDialog, QProgressDialog
-from iso.common.exceptions import (
+from qgis.PyQt.QtWidgets import QDialog
+from qgis.PyQt.uic import loadUiType
+
+from common.exceptions import (
     ImportDialogError,
     FileMissingError)
 
-from iso.utilities.qgis_utilities import (
-    display_warning_message_box)
-from iso.utilities.resources import (
-    get_ui_class)
-from iso.utilities.isochrone_utilities import isochrone
+from iso.utils import display_warning_message_box
+from iso.base import isochrone
 
-FORM_CLASS = get_ui_class('isochrone_dialog_base.ui')
+FORM_CLASS, _ = loadUiType(
+    os.path.join(os.path.dirname(__file__), '../ui/isochrone_dialog_base.ui')
+)
 
 
-class isochronesDialog(QtWidgets.QDialog, FORM_CLASS):
+class QgisIsochronesDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def __init__(self, parent=None, iface=None):
         """Constructor."""
@@ -229,7 +228,7 @@ class isochronesDialog(QtWidgets.QDialog, FORM_CLASS):
     def reject(self):
         """Redefinition of the reject() method
         """
-        super(isochronesDialog, self).reject()
+        super(QgisIsochronesDialog, self).reject()
 
     def load_isochrone_map(self, base_path):
         """Load the isochrone map in the qgis
@@ -245,11 +244,11 @@ class isochronesDialog(QtWidgets.QDialog, FORM_CLASS):
             for layer in os.listdir(base_path):
                 layer_name = QFileInfo(layer).baseName
 
-                if file.endswith(".asc"):
-                    self.iface.addRasterLayer(file, layer_name)
+                if layer.endswith(".asc"):
+                    self.iface.addRasterLayer(layer, layer_name)
                     continue
-                elif file.endswith(".shp"):
-                    self.iface.addVectorLayer(file, layer_name, 'ogr')
+                elif layer.endswith(".shp"):
+                    self.iface.addVectorLayer(layer, layer_name, 'ogr')
                     continue
                 else:
                     continue
