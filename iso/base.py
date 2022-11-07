@@ -24,6 +24,7 @@ from builtins import range
 import processing
 import tempfile
 
+from processing.core.Processing import Processing
 
 from qgis.core import (
     QgsDataSourceUri,
@@ -43,14 +44,12 @@ from qgis.PyQt.QtGui import QColor
 
 from qgis.PyQt.QtCore import Qt
 
-from db_functions import *
-from ..utils import display_warning_message_box
-
-from processing.core.Processing import Processing
-
 from common.exceptions import \
     IsochroneDBError,\
     IsochroneMapStyleError
+
+from .db_functions import *
+from ..utils import display_warning_message_box
 
 
 def isochrone(

@@ -24,9 +24,7 @@
 from builtins import str
 import re
 
-from utils import display_warning_message_box
-
-from i18n import tr
+from ..utils import display_warning_message_box, tr
 
 from common.exceptions import IsochroneDBError
 
