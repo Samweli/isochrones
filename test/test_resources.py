@@ -17,7 +17,7 @@ import unittest
 from qgis.PyQt.QtGui import QIcon
 
 
-class isochronesResourcesTest(unittest.TestCase):
+class IsochronesResourcesTest(unittest.TestCase):
     """Test rerources work."""
 
     def setUp(self):

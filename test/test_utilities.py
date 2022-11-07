@@ -4,13 +4,13 @@
 import unittest
 import os
 
-from iso.test.utilities import get_qgis_app
+from utilities import get_qgis_app
 
 from qgis.core import *
 
 QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 
-from utilities import \
+from iso.base import \
     idw_interpolation, \
     generate_drivetimes_contour
 
