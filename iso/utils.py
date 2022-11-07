@@ -58,22 +58,24 @@ def get_unicode(input_text, encoding='utf-8'):
         return input_text
     return str(input_text, encoding, errors='ignore')
 
-def get_ui_class(ui_file):
-    """Get UI Python class from .ui file.
 
-    :param ui_file: The file of the ui in isochrones.gui.ui
-    :type ui_file: str
+def resources_path(*args):
+    """Get the path to our resources folder.
+
+    :param args List of path elements e.g. ['img',
+    'examples', 'isochrone.png']
+    :type args: list
+
+    :return: Absolute path to the resources folder.
+    :rtype: str
     """
-    ui_file_path = os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__),
-            os.pardir,
-            'ui',
-            ui_file
-        )
-    )
-    return uic.loadUiType(ui_file_path)[0]
+    path = os.path.dirname(__file__)
+    path = os.path.abspath(
+        os.path.join(path, os.path.pardir, 'resources'))
+    for item in args:
+        path = os.path.abspath(os.path.join(path, item))
 
+    return path
 
 def log(
         message: str,
@@ -101,6 +103,7 @@ def log(
         level=level,
         notifyUser=notify,
     )
+
 
 def display_information_message_box(
         parent=None, title=None, message=None):

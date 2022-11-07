@@ -31,15 +31,18 @@ from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import QSettings, QFileInfo
 # noinspection PyPackageRequirements
 from qgis.PyQt.QtWidgets import QDialog
+from qgis.PyQt.uic import loadUiType
+
 from common.exceptions import (
     ImportDialogError,
     FileMissingError)
 
-from utils import display_warning_message_box
-from utils import get_ui_class
+from iso.utils import display_warning_message_box
 from iso.base import isochrone
 
-FORM_CLASS = get_ui_class('isochrone_dialog_base.ui')
+FORM_CLASS, _ = loadUiType(
+    os.path.join(os.path.dirname(__file__), '../ui/isochrone_dialog_base.ui')
+)
 
 
 class QgisIsochronesDialog(QtWidgets.QDialog, FORM_CLASS):

@@ -28,8 +28,7 @@ from qgis.PyQt.QtGui import QIcon
 # Initialize Qt resources from file resources.py
 # Import the code for the dialog
 from gui.qgis_isochrone_dialog import QgisIsochronesDialog
-from iso.base import (
-    resources_path)
+from .iso.utils import resources_path
 import os.path
 
 

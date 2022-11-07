@@ -21,6 +21,7 @@
  ***************************************************************************/
 """
 from builtins import range
+import psycopg2
 import processing
 import tempfile
 
@@ -45,11 +46,10 @@ from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import Qt
 
 from common.exceptions import \
-    IsochroneDBError,\
     IsochroneMapStyleError
 
 from .db_functions import *
-from ..utils import display_warning_message_box
+from .utils import display_warning_message_box, resources_path
 
 
 def isochrone(
@@ -797,24 +797,6 @@ def save_layer(layer):
 
     return saved_layer
 
-
-def resources_path(*args):
-    """Get the path to our resources folder.
-
-    :param args List of path elements e.g. ['img',
-    'examples', 'isochrone.png']
-    :type args: list
-
-    :return: Absolute path to the resources folder.
-    :rtype: str
-    """
-    path = os.path.dirname(__file__)
-    path = os.path.abspath(
-        os.path.join(path, os.path.pardir, os.path.pardir, 'resources'))
-    for item in args:
-        path = os.path.abspath(os.path.join(path, item))
-
-    return path
 
 # def unique_filename(**kwargs):
 #     """Create new filename guaranteed not to exist previously
