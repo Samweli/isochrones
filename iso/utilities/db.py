@@ -30,6 +30,7 @@ from iso.utilities.qgis_utilities import (
     display_warning_message_box)
 
 from iso.utilities.i18n import tr
+from iso.utilities.utils import log
 
 from iso.common.exceptions import IsochroneDBError
 
@@ -424,6 +425,8 @@ def calculate_drivetimes(
             percentage = 45 / len(rows)
             percentage = round(percentage, 0)
             catchment_id = row[0]
+
+
             arguments["catchment_current_id"] = catchment_id[0] \
                 if isinstance(catchment_id, tuple) else catchment_id
             arguments["last_row_id"] = rows[len(rows) - 1][0] \
@@ -443,7 +446,7 @@ def calculate_drivetimes(
                           cost::float8 AS cost
                        FROM routable_network',
                        %(catchment_current_id)s,
-                       %(last_row_id)s,
+                       id,
                        false)) AS foo ) AS cost
                     FROM nodes;""" % arguments
                 sql = clean_query(sql)
@@ -461,7 +464,7 @@ def calculate_drivetimes(
                               cost::float8 AS cost
                            FROM routable_network',
                            %(catchment_current_id)s,
-                           %(last_row_id)s,
+                           id,
                            false)) AS foo ) AS cost
                     FROM nodes);""" % arguments
 

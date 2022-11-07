@@ -194,7 +194,7 @@ def isochrone(
 
         create_routable_network(connection, curr, arguments, parent_dialog)
 
-        # Find nearest nodes from the catchments
+        # Find the nearest nodes from the catchments
         progress_percentage = 30
         progress_dialog.setValue(progress_percentage)
         label_text = tr("Preparing the catchment table")
