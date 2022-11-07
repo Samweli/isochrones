@@ -20,11 +20,7 @@
  *                                                                         *
  ***************************************************************************/
 """
-from builtins import str
 from builtins import range
-import os
-import psycopg2
-import re
 import processing
 import tempfile
 
@@ -42,22 +38,14 @@ from qgis.core import (
 
 from qgis.utils import *
 
-from qgis.PyQt.QtWidgets import QDialog, QFileDialog, QProgressDialog
+from qgis.PyQt.QtWidgets import QDialog, QProgressDialog
 from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtCore import (
-    QFileInfo)
-
 
 from PyQt5.QtCore import Qt
 
-from iso.utilities.qgis_utilities import (
-    display_warning_message_box)
-
 from processing.core.Processing import Processing
 
-from iso.utilities.db import *
-
-from iso.common.exceptions import \
+from common.exceptions import \
     IsochroneDBError,\
     IsochroneMapStyleError
 

@@ -22,17 +22,13 @@
 """
 
 from builtins import str
-import os
-import psycopg2
 import re
 
-from iso.utilities.qgis_utilities import (
-    display_warning_message_box)
+from utils import display_warning_message_box
 
-from iso.utilities.i18n import tr
-from iso.utilities.utils import log
+from i18n import tr
 
-from iso.common.exceptions import IsochroneDBError
+from common.exceptions import IsochroneDBError
 
 
 def create_network_view(

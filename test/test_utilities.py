@@ -10,11 +10,9 @@ from qgis.core import *
 
 QGIS_APP, CANVAS, IFACE, PARENT = get_qgis_app()
 
-from iso.utilities.isochrone_utilities import\
-    isochrone, \
+from utilities import \
     idw_interpolation, \
-    generate_drivetimes_contour, \
-    load_map_layers
+    generate_drivetimes_contour
 
 
 class UtilitiesTest(unittest.TestCase):

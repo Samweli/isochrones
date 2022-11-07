@@ -1,50 +1,65 @@
-# -*- coding: utf-8 -*-
-"""
-/***************************************************************************
- exception classes
-                                 A QGIS plugin
- This plugin create isochrones maps.
-                             -------------------
-        begin                : 2016-07-02
-        git sha              : $Format:%H$
-        copyright            : (C) 2016 by Samweli Mwakisambwe
-        email                : smwakisambwe@worldbank.org
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-"""
-
-from qgis.PyQt.QtWidgets import QMessageBox, QPushButton
-
+#
+# Utility functions that are specific to the plugin logic.
 import os
-import re
+
+from qgis.core import Qgis, QgsMessageLog
+import qgis  # pylint: disable=unused-import
+from qgis.PyQt import QtCore, uic
+
+
+from qgis.PyQt.QtWidgets import QMessageBox
+
 import sys
-import hashlib
-import logging
-import platform
-import glob
-import shutil
-
-
-from qgis.core import (
-    QgsVectorLayer,
-    QgsRasterLayer,
-    QgsRectangle,
-    QgsCoordinateReferenceSystem,
-    QgsProject)
 
 QGIS_APP = None
 CANVAS = None
 PARENT = None
 IFACE = None
 
+
+def get_ui_class(ui_file):
+    """Get UI Python class from .ui file.
+
+    :param ui_file: The file of the ui in isochrones.gui.ui
+    :type ui_file: str
+    """
+    ui_file_path = os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            os.pardir,
+            'ui',
+            ui_file
+        )
+    )
+    return uic.loadUiType(ui_file_path)[0]
+
+
+def log(
+        message: str,
+        name: str = "qgis_isochrones",
+        info: bool = True,
+        notify: bool = True,
+):
+    """ Logs the message into QGIS logs using qgis_stac as the default
+    log instance.
+    If notify_user is True, user will be notified about the log.
+    :param message: The log message
+    :type message: str
+    :param name: Name of te log instance, qgis_stac is the default
+    :type message: str
+    :param info: Whether the message is about info or a
+    warning
+    :type info: bool
+    :param notify: Whether to notify user about the log
+    :type notify: bool
+     """
+    level = Qgis.Info if info else Qgis.Warning
+    QgsMessageLog.logMessage(
+        message,
+        name,
+        level=level,
+        notifyUser=notify,
+    )
 
 def display_information_message_box(
         parent=None, title=None, message=None):
