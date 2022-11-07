@@ -41,7 +41,10 @@ from qgis.utils import *
 from qgis.PyQt.QtWidgets import QDialog, QProgressDialog
 from qgis.PyQt.QtGui import QColor
 
-from PyQt5.QtCore import Qt
+from qgis.PyQt.QtCore import Qt
+
+from db_functions import *
+from ..utils import display_warning_message_box
 
 from processing.core.Processing import Processing
 
