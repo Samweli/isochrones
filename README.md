@@ -6,7 +6,7 @@ Isochrones Qgis Plugin
 
 QGIS plugin that creates isochrones map from the given data and parameters.
 
-<img src="resources/img/examples/isochrone.png" width="600" height="500" alt="Isochrone example" />
+<img src="resources/img/examples/isochrone.png" width="900" height="800" alt="Isochrone example" />
 
 ## Installation
 
