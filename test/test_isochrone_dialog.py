@@ -33,7 +33,7 @@ class IsochronesDialogTest(unittest.TestCase):
         """Runs after each test."""
         self.dialog = None
 
-    # TODO find out why the test below hangs and doesn't exit
+    # TODO find out why the test below hangs and doesn't exit.
     # def test_dialog_ok(self):
     #     """Test we can click OK."""
     #

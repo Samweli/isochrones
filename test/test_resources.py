@@ -18,7 +18,7 @@ from qgis.PyQt.QtGui import QIcon
 
 
 class IsochronesResourcesTest(unittest.TestCase):
-    """Test rerources work."""
+    """Test resources work."""
 
     def setUp(self):
         """Runs before each test."""
