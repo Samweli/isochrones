@@ -29,7 +29,7 @@ After a successful install the plugin will be added to your plugins menu and dat
 - From the `Install from ZIP` page in the QGIS plugin manager, 
   select the downloaded ZIP file and click the `Install Plugin` button to install it.
 
-![Install from zip option](resources/img/examples/install_from_zip.png)
+    ![Install from zip option](resources/img/examples/install_from_zip.png)
 
 ### Install from source code
 
