@@ -2,7 +2,7 @@
 name=Isochrones
 qgisMinimumVersion=3.0
 
-description=Automate isochrone map creation in Qgis.
+description=Automates isochrone map creation in Qgis.
 about=Enable users to easily create isochrone maps from network and catchment data.
 
 version=0.1.1

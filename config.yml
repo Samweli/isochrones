@@ -1,0 +1,12 @@
+{
+  "general": {
+    "name" : "QGIS Isochrones",
+    "qgisMinimumVersion": 3.0,
+    "qgisMaximumVersion": 3.99,
+    "icon": "icon.png",
+    "experimental": false,
+    "deprecated": false,
+    "version": "0.1.2",
+    "changelog": ""
+  }
+}
