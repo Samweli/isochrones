@@ -62,7 +62,7 @@ class QgisIsochronesDialog(QtWidgets.QDialog, FORM_CLASS):
 
         self.restore_state()
 
-        self.canvas = iface.mapCanvas()
+        self.canvas = iface.mapCanvas() if iface else None
 
     def accept(self):
         """Create an isochrone map and display it in QGIS."""
