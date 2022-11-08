@@ -61,5 +61,7 @@ jobs:
           sleep 10
       - name: Run test suite
         run: |
-          docker-compose exec -T qgis-testing-environment sh -c "pip3 install flask"
+          docker-compose exec -T qgis-testing-environment sh -c "qgis_setup.sh isochrones"
+          docker-compose exec -T qgis-testing-environment sh -c "rm -f  /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/isochrones"
+          docker-compose exec -T qgis-testing-environment sh -c "ln -s /tests_directory/ /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/isochrones"
           docker-compose exec -T qgis-testing-environment qgis_testrunner.sh test_suite.test_package
