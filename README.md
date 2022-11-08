@@ -23,6 +23,14 @@ different OS is available here [https://www.qgis.org/en/site/forusers/download.h
 
 After a successful install the plugin will be added to your plugins menu and database menu.
 
+### Install from a ZIP file
+- Get the plugin ZIP file from https://github.com/samweli/isochrones/releases, 
+  select the required release ZIP file and download it. 
+- From the `Install from ZIP` page in the QGIS plugin manager, 
+  select the downloaded ZIP file and click the `Install Plugin` button to install it.
+
+![Install from zip option](resources/img/examples/install_from_zip.png)
+
 ### Install from source code
 
 - Download or clone this repository and add the plugin folder into the QGIS plugin directory.
