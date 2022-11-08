@@ -11,7 +11,7 @@ on:
       - reopened
       - synchronize
     branches:
-      - main
+      - master
 
 env:
   # Global environment variable
@@ -21,7 +21,7 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     name: Running tests on QGIS ${{ matrix.qgis_version_tag }}
 
     strategy:
@@ -29,7 +29,6 @@ jobs:
       matrix:
         qgis_version_tag:
           - release-3_10
-          - release-3_22
           - release-3_24
           - release-3_26
           - release-3_28
@@ -61,7 +60,4 @@ jobs:
           sleep 10
       - name: Run test suite
         run: |
-          docker-compose exec -T qgis-testing-environment sh -c "qgis_setup.sh isochrones"
-          docker-compose exec -T qgis-testing-environment sh -c "rm -f  /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/isochrones"
-          docker-compose exec -T qgis-testing-environment sh -c "ln -s /tests_directory/ /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/isochrones"
           docker-compose exec -T qgis-testing-environment qgis_testrunner.sh test_suite.test_package

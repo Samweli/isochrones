@@ -1,5 +1,3 @@
-
-
 #!/usr/bin/env bash
 
 # Docker entrypoint file intended for docker-compose recipe for running unittests
