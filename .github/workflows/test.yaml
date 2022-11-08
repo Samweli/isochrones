@@ -11,7 +11,7 @@ on:
       - reopened
       - synchronize
     branches:
-      - main
+      - master
 
 env:
   # Global environment variable
