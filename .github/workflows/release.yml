@@ -16,18 +16,13 @@ jobs:
       - name: Fix Python command
         run: apt-get install python-is-python3
 
-      - name: Install python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
       - name: Install plugin dependencies
-        run: pip install -r requirements-dev.txt
+        run: pip3 install -r requirements-dev.txt
 
       - name: Get experimental info
         id: get-experimental
         run: |
-          echo "::set-output name=IS_EXPERIMENTAL::$(python -c "import json; data=json.load('config.json'); print(data['general']['experimental'].lower())")"
+          echo "::set-output name=IS_EXPERIMENTAL::$(python -c "import json; f = open('config.json'); data=json.load(f); print(str(data['general']['experimental']).lower())")"
       - name: Create release from tag
         id: create-release
         uses: actions/create-release@v1

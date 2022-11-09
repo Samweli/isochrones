@@ -71,7 +71,7 @@ extensions installed.
 - The network data is required to have a column with a name `cost` and a number type, this will be used 
   for the path calculations during isochrones creation.
 - Open the plugin (it will be on the Database Menu and the QGIS toolbar) and fill the connection details followed by tables details. 
-- Checking the "Create isochrones map style" twill generate tin and contour with a default plugin style.
+- Checking the "Create isochrones map style" will generate tin and contour with a default plugin style.
 
 
 You can watch the demo video here [https://www.youtube.com/watch?v=thBKETlQbqY](https://www.youtube.com/watch?v=thBKETlQbqY)
