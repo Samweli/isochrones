@@ -560,7 +560,7 @@ def style_raster_layer(raster_layer, parent_dialog):
 
 
 def generate_drivetimes_contour(raster_layer, interval, parent_dialog):
-    """Create drive times contour
+    """Creates drivetimes contour
 
     :param raster_layer: Interpolated raster layer with drivetimes
     :type raster_layer: QgsRasterLayer
