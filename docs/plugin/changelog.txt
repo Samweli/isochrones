@@ -1,0 +1,7 @@
+Version 0.1.1
+- Updated plugin from QGIS API version 2 to 3 and from PyQt4 to PyQt5
+
+Version 0.1
+- Generation of isochrone data
+- Add default style for isochrone map
+- Fix unit tests bugs

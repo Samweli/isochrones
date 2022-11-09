@@ -17,7 +17,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import httpx
-import toml
+import json
 import typer
 
 LOCAL_ROOT_DIR = Path(__file__).parent.resolve()

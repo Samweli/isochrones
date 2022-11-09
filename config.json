@@ -1,0 +1,22 @@
+{
+  "general": {
+    "name" : "QGIS Isochrones",
+    "qgisMinimumVersion": 3.0,
+    "qgisMaximumVersion": 3.99,
+    "icon": "resources/img/icons/icon.png",
+    "experimental": false,
+    "deprecated": false,
+    "version": "0.1.2",
+    "changelog": "",
+    "homepage": "https://github.com/Samweli/isochrones",
+    "tracker": "https://github.com/Samweli/isochrones/issues",
+    "repository": "https://github.com/Samweli/isochrones",
+    "tags": [ "map", "database", "routing", "accessibility", "time", "urban planning" ],
+    "category": [ "plugins" ],
+    "hasProcessingProvider": "no",
+    "about": "Enables users to easily create isochrone maps from network and catchment data",
+    "author": "Samweli Mwakisambwe",
+    "email": "smwltwesa6@gmail.com",
+    "description": "Automates isochrone map creation in Qgis"
+  }
+}
