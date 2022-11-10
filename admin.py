@@ -21,7 +21,7 @@ import json
 import typer
 
 LOCAL_ROOT_DIR = Path(__file__).parent.resolve()
-SRC_NAME = "qgis-templates-symbology"
+SRC_NAME = "isochrones"
 PACKAGE_NAME = SRC_NAME.replace("_", "")
 TEST_FILES = [
     "test",
@@ -29,6 +29,25 @@ TEST_FILES = [
     "docker-compose.yml",
     "scripts"
 ]
+
+BUILD_SKIP_FILES = [
+    'test',
+    'test_suite.py',
+    'docker',
+    'admin.py',
+    'run-docker-test.sh',
+    'config.json',
+    'docker-compose.yml',
+    'requirements-dev.txt',
+    'build',
+    'dist',
+    'docs',
+    '.github',
+    '.idea',
+    '.gitignore',
+    '__pycache__'
+]
+
 app = typer.Typer()
 
 
@@ -79,7 +98,7 @@ def install(
     _log("Building...", context=context)
 
     built_directory = build(context, clean=True) \
-        if build_src else LOCAL_ROOT_DIR / "build" / SRC_NAME
+        if build_src else LOCAL_ROOT_DIR
 
     root_directory = Path.home() / \
                      f".local/share/QGIS/QGIS3/profiles/" \
@@ -186,8 +205,34 @@ def build(
 
 
 @app.command()
+def copy_source_files(
+        output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "temp",
+        tests: bool = False
+):
+    """ Copies the plugin source files to the specified output
+            directory.
+    :param output_directory: Output directory where the icon will be saved.
+    :type output_directory: Path
+    :param tests: Flag to indicate whether to include test related files.
+    :type tests: bool
+    """
+    output_directory.mkdir(parents=True, exist_ok=True)
+    for child in LOCAL_ROOT_DIR.iterdir():
+        if child.name not in BUILD_SKIP_FILES:
+            target_path = output_directory / child.name
+            handler = shutil.copytree if child.is_dir() else shutil.copy
+            handler(str(child.resolve()), str(target_path))
+    if tests:
+        for child in LOCAL_ROOT_DIR.iterdir():
+            if child.name in TEST_FILES:
+                target_path = output_directory / child.name
+                handler = shutil.copytree if child.is_dir() else shutil.copy
+                handler(str(child.resolve()), str(target_path))
+
+
+@app.command()
 def copy_icon(
-        output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "build/temp",
+        output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "temp",
 ) -> Path:
     """ Copies the plugin intended icon to the specified output
         directory.
@@ -210,35 +255,9 @@ def copy_icon(
 
 
 @app.command()
-def copy_source_files(
-        output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "build/temp",
-        tests: bool = False
-):
-    """ Copies the plugin source files to the specified output
-            directory.
-    :param output_directory: Output directory where the icon will be saved.
-    :type output_directory: Path
-    :param tests: Flag to indicate whether to include test related files.
-    :type tests: bool
-    """
-    output_directory.mkdir(parents=True, exist_ok=True)
-    for child in (LOCAL_ROOT_DIR / "src" / SRC_NAME).iterdir():
-        if child.name != "__pycache__":
-            target_path = output_directory / child.name
-            handler = shutil.copytree if child.is_dir() else shutil.copy
-            handler(str(child.resolve()), str(target_path))
-    if tests:
-        for child in LOCAL_ROOT_DIR.iterdir():
-            if child.name in TEST_FILES:
-                target_path = output_directory / child.name
-                handler = shutil.copytree if child.is_dir() else shutil.copy
-                handler(str(child.resolve()), str(target_path))
-
-
-@app.command()
 def compile_resources(
         context: typer.Context,
-        output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "build/temp",
+        output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "temp",
 ):
     """ Compiles plugin resources using the pyrcc package
     :param context: Application context
@@ -256,7 +275,7 @@ def compile_resources(
 @app.command()
 def generate_metadata(
         context: typer.Context,
-        output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "build/temp",
+        output_directory: typing.Optional[Path] = LOCAL_ROOT_DIR / "temp",
 ):
     """ Generates plugin metadata file using settings defined in the
         project configuration file 'pyproject.toml'

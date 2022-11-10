@@ -9,6 +9,8 @@ pydevd/
 build
 .coverage
 coverage.xml
+build
+dist
 docs/build
 docs/_build
 docs/output
