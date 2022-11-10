@@ -56,5 +56,9 @@ jobs:
       - name: Generate plugin repo XML
         run: python admin.py --verbose generate-plugin-repo-xml
 
+      - name: Mark plugin repository as safe
+        run: |
+            git config --global --add safe.directory /__w/isochrones/isochrones
+
       - name: Update release repository
         run: mkdocs gh-deploy --force
