@@ -12,8 +12,8 @@ nav:
 
 plugins:
   - search
-  - git-revision-date-localized
-  - mkdocs-video
+  - git-revision-date-localized:
+      fallback_to_build_date: true
 
 markdown_extensions:
   - pymdownx.snippets:
