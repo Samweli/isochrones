@@ -1,0 +1,44 @@
+site_name: QGIS Isochrones Plugin
+
+repo_url: https://github.com/samweli/isochrones
+repo_name: GitHub
+
+site_description: QGIS Isochrones Plugin
+
+site_author: Samweli Mwakisambwe
+
+nav:
+  - Home: 'index.md'
+
+plugins:
+  - search
+  - git-revision-date-localized
+  - mkdocs-video
+
+markdown_extensions:
+  - pymdownx.snippets:
+      base_path: .
+  - meta:
+
+extra_css:
+  - stylesheets/extra.css
+
+theme:
+  name: material
+  custom_dir: docs
+  palette:
+  - scheme: stac
+    toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+  - scheme: slate
+    toggle:
+          icon: material/toggle-switch
+          name: Switch to light mode
+    accent: amber
+  logo: assets/logo.png
+  favicon: assets/favicon.ico
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
