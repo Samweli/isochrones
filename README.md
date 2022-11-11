@@ -4,7 +4,7 @@ Isochrones Qgis Plugin
 ![Tests](https://github.com/samweli/isochrones/actions/workflows/test.yaml/badge.svg)
 
 
-QGIS plugin that creates isochrones map from the given data and parameters.
+QGIS plugin that creates isochrones map from network data.
 
 <img src="resources/img/examples/isochrone.png" width="800" height="600" alt="Isochrone example" />
 

@@ -315,6 +315,7 @@ def generate_plugin_repo_xml(
                 <about><![CDATA[{about}]]></about>
                 <version>{version}</version>
                 <qgis_minimum_version>{qgis_minimum_version}</qgis_minimum_version>
+                <qgis_maximum_version>{qgis_maximum_version}</qgis_maximum_version>
                 <homepage><![CDATA[{homepage}]]></homepage>
                 <file_name>{filename}</file_name>
                 <icon>{icon}</icon>
@@ -341,6 +342,7 @@ def generate_plugin_repo_xml(
             description=metadata.get("description"),
             about=metadata.get("about"),
             qgis_minimum_version=metadata.get("qgisMinimumVersion"),
+            qgis_maximum_version=metadata.get("qgisMaximumVersion"),
             homepage=metadata.get("homepage"),
             filename=release.url.rpartition("/")[-1],
             icon=metadata.get("icon", ""),
