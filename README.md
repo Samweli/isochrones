@@ -6,30 +6,59 @@ Isochrones Qgis Plugin
 
 QGIS plugin that creates isochrones map from the given data and parameters.
 
-<img src="resources/img/examples/isochrone.png" width="900" height="800" alt="Isochrone example" />
+<img src="resources/img/examples/isochrone.png" width="800" height="600" alt="Isochrone example" />
+
+Site - https://samweli.github.io/isochrones (still on development)
 
 ## Installation
 
-Install QGIS. Download it from this link (http://download.qgis.org/). Instructions on installing QGIS for 
-different OS is available here [https://www.qgis.org/en/site/forusers/download.html#tab1](https://www.qgis.org/en/site/forusers/download.html#tab1)
+Install QGIS. Download it from http://download.qgis.org/. Instructions on installing QGIS for 
+different Operating Sytstems is available here 
+[https://www.qgis.org/en/site/forusers/download.html#tab1](https://www.qgis.org/en/site/forusers/download.html#tab1)
 
 ### Install from QGIS plugin repository
 
 - Launch QGIS application and open plugin manager.
-- Search for `Isochrones` in the All page of the plugin manager.
+- Search for `Isochrones` in the `All` page of the plugin manager.
 - From the found results, click on the `Isochrones` result item and a page with plugin information will show up.
      ![Isochrones result item](resources/img/examples/isochrones_plugin_result.png)
 - Click the `Install Plugin` button at the bottom of the dialog to install the plugin.
 
-After a successful install the plugin will be added to your plugins menu and database menu.
+After a successful install the plugin will be added to the QGIS plugins menu and database menu.
 
 ### Install from a ZIP file
-- Get the plugin ZIP file from https://github.com/samweli/isochrones/releases, 
+- Get the plugin ZIP file from [https://github.com/samweli/isochrones/releases](https://github.com/samweli/isochrones/releases), 
   select the required release ZIP file and download it. 
 - From the `Install from ZIP` page in the QGIS plugin manager, 
   select the downloaded ZIP file and click the `Install Plugin` button to install it.
 
     ![Install from zip option](resources/img/examples/install_from_zip.png)
+
+### Install from a plugin custom repository
+
+The plugin is available on a custom QGIS plugin repository that host the plugin most recent versions. 
+
+The plugin from the custom repository can be used to get the latest features that haven't landed on the official released plugin version that 
+are published in the QGIS official plugin repository.
+
+The plugin versions available through the custom repository will be flagged experimental. 
+This is because the custom repository might contain plugin versions that have not been approved yet for official use.
+
+When updating the plugin manager users should, in order to make sure the plugin manager fetches the experimental plugins 
+from the custom repository.
+
+Following the below steps to add the custom repository and install the plugin from it.
+
+- From the plugin manager enable download of experimental plugins.
+
+  ![Enable experimental plugins](resources/img/examples/enable_experimental_plugins.png)
+- Select the `Settings` page from the QGIS plugin manager.
+- Click `Add` button on the Plugin Repositories group box and use the plugin custom repository found
+  here [https://samweli.github.io/isochrones/repository/plugins.xml](https://samweli.github.io/isochrones/repository/plugins.xml) 
+  to create a new plugin repository entry.
+  
+  ![Add custom plugin repository](resources/img/examples/add_custom_repository.png)
+- Disable the QGIS official plugin repository and go back to the `All` page, search for `Isochrones` and install it from there.
 
 ### Install from source code
 
@@ -60,7 +89,7 @@ extensions installed.
 - Setup two postgresql tables one for the network and other for the catchments areas.
 
 - Use test data is found here
-  [https://github.com/Samweli/isochrones_plugin/tree/master/iso/test/data](https://github.com/Samweli/isochrones_plugin/tree/master/iso/test/data)
+  [https://github.com/Samweli/isochrones/tree/master/test/data](https://github.com/Samweli/isochrones/tree/master/test/data)
   these are shapefiles that you will need to import in your postgresql database as tables.
 
 
@@ -75,7 +104,6 @@ extensions installed.
 
 
 You can watch the demo video here [https://www.youtube.com/watch?v=thBKETlQbqY](https://www.youtube.com/watch?v=thBKETlQbqY)
-
 
 #### Data
 
