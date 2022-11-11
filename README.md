@@ -2,6 +2,7 @@ Isochrones Qgis Plugin
 =======
 
 ![Tests](https://github.com/samweli/isochrones/actions/workflows/test.yaml/badge.svg)
+![Latest release](https://img.shields.io/github/v/release/samweli/isochrones)
 
 
 QGIS plugin that creates isochrones map from network data.
