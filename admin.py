@@ -42,6 +42,7 @@ BUILD_SKIP_FILES = [
     'build',
     'dist',
     'docs',
+    '.git',
     '.github',
     '.idea',
     '.gitignore',

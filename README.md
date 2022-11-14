@@ -7,7 +7,7 @@ Isochrones Qgis Plugin
 
 QGIS plugin that creates isochrones map from network data.
 
-<img src="resources/img/examples/isochrone.png" width="800" height="600" alt="Isochrone example" />
+<img src="docs/assets/img/examples/isochrone.png" width="800" height="600" alt="Isochrone example" />
 
 Site - https://samweli.github.io/isochrones (still on development)
 
@@ -22,7 +22,7 @@ different Operating Sytstems is available here
 - Launch QGIS application and open plugin manager.
 - Search for `Isochrones` in the `All` page of the plugin manager.
 - From the found results, click on the `Isochrones` result item and a page with plugin information will show up.
-     ![Isochrones result item](resources/img/examples/isochrones_plugin_result.png)
+     ![Isochrones result item](docs/assets/img/examples/isochrones_plugin_result.png)
 - Click the `Install Plugin` button at the bottom of the dialog to install the plugin.
 
 After a successful install the plugin will be added to the QGIS plugins menu and database menu.
@@ -33,7 +33,7 @@ After a successful install the plugin will be added to the QGIS plugins menu and
 - From the `Install from ZIP` page in the QGIS plugin manager, 
   select the downloaded ZIP file and click the `Install Plugin` button to install it.
 
-    ![Install from zip option](resources/img/examples/install_from_zip.png)
+    ![Install from zip option](docs/assets/img/examples/install_from_zip.png)
 
 ### Install from a plugin custom repository
 
@@ -52,13 +52,13 @@ Following the below steps to add the custom repository and install the plugin fr
 
 - From the plugin manager enable download of experimental plugins.
 
-  ![Enable experimental plugins](resources/img/examples/enable_experimental_plugins.png)
+  ![Enable experimental plugins](docs/assets/img/examples/enable_experimental_plugins.png)
 - Select the `Settings` page from the QGIS plugin manager.
 - Click `Add` button on the Plugin Repositories group box and use the plugin custom repository found
   here [https://samweli.github.io/isochrones/repository/plugins.xml](https://samweli.github.io/isochrones/repository/plugins.xml) 
   to create a new plugin repository entry.
   
-  ![Add custom plugin repository](resources/img/examples/add_custom_repository.png)
+  ![Add custom plugin repository](docs/assets/img/examples/add_custom_repository.png)
 - Disable the QGIS official plugin repository and go back to the `All` page, search for `Isochrones` and install it from there.
 
 ### Install from source code
@@ -68,7 +68,7 @@ The plugin directory is found on the QGIS profile folder under `profile_name/plu
  eg. `default/plugins`.
  
   QGIS active profile folder can be found by going to **User Profiles > Open Active Profile Folder**
-    ![Active Profile folder](resources/img/examples/active_user_folder.png)
+    ![Active Profile folder](docs/assets/img/examples/active_user_folder.png)
 
 - Restart your Qgis, go to **Plugins -> Manage and Install Plugins** search for `Isochrones` 
 - Search results will show a result item with `Isochrones` title, toggle the checkbox beside the title to 
