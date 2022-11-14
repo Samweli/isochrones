@@ -3,7 +3,7 @@ Version 0.1.2
 - UI component update
 - Fix for bugs in
 - Updates to plugin documentation
-- Added QGIS 3.2x versions support
+- Added support for QGIS 3.2x versions
 - New plugin modules structure
 
 Version 0.1.1
