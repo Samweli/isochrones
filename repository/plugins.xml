@@ -1,0 +1,22 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<plugins>
+<pyqgis_plugin name="QGIS Isochrones" version="0.1.2">
+                <description><![CDATA[Automates isochrone map creation in Qgis]]></description>
+                <about><![CDATA[Enables users to easily create isochrone maps from network and catchment data]]></about>
+                <version>0.1.2</version>
+                <qgis_minimum_version>3.0</qgis_minimum_version>
+                <qgis_maximum_version>3.99</qgis_maximum_version>
+                <homepage><![CDATA[https://github.com/Samweli/isochrones]]></homepage>
+                <file_name>isochrones.0.1.2.zip</file_name>
+                <icon>resources/img/icons/icon.png</icon>
+                <author_name><![CDATA[Samweli Mwakisambwe]]></author_name>
+                <download_url>https://github.com/Samweli/isochrones/releases/download/v0.1.2/isochrones.0.1.2.zip</download_url>
+                <update_date>2022-11-14 07:20:34</update_date>
+                <experimental>False</experimental>
+                <deprecated>False</deprecated>
+                <tracker><![CDATA[https://github.com/Samweli/isochrones/issues]]></tracker>
+                <repository><![CDATA[https://github.com/Samweli/isochrones]]></repository>
+                <tags><![CDATA[map, database, routing, accessibility, time, urban planning]]></tags>
+                <server>False</server>
+            </pyqgis_plugin>
+</plugins>

@@ -1,0 +1,15 @@
+Version 0.1.2
+- Support for Postgresql version 15, PostGIS 3.1 and pgRouting 3.1.3
+- Main UI components update
+- Fix for bugs in the plugin database queries
+- Updates to plugin documentation
+- Added support for QGIS 3.2x versions
+- New plugin modules structure
+
+Version 0.1.1
+- Updated plugin from QGIS API version 2 to 3 and from PyQt4 to PyQt5
+
+Version 0.1
+- Generation of isochrones data
+- Add default style for isochrone map
+- Fix unit tests bugs
