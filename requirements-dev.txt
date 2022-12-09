@@ -4,7 +4,7 @@
 
 anyio == 3.5.0
 babel == 2.9.1
-certifi == 2021.10.8
+certifi == 2022.12.7
 charset-normalizer == 2.0.10
 click == 8.0.3
 colorama == 0.4.4
