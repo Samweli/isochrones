@@ -43,5 +43,5 @@ sniffio == 1.2.0
 toml == 0.10.2
 typer == 0.4.0
 watchdog == 2.1.6
-werkzeug == 2.0.2
+werkzeug == 2.2.3
 zipp == 3.7.0
